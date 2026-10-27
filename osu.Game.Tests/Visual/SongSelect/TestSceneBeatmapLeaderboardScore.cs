@@ -144,6 +144,60 @@ namespace osu.Game.Tests.Visual.SongSelect
         }
 
         [Test]
+        public void TestLongScoreFitsItsColumn()
+        {
+            BeatmapLeaderboardScore score = null!;
+
+            AddStep("create content", () =>
+            {
+                Child = new PopoverContainer
+                {
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y,
+                    Child = fillFlow = new FillFlowContainer
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                    },
+                };
+
+                // osu!stable scores on long maps run to billions.
+                var scoreInfo = new ScoreInfo
+                {
+                    Position = 2,
+                    Rank = ScoreRank.S,
+                    Accuracy = 0.9977,
+                    MaxCombo = 9288,
+                    TotalScore = 1_451_611_268,
+                    MaximumStatistics = { { HitResult.Great, 9288 } },
+                    Ruleset = new OsuRuleset().RulesetInfo,
+                    User = new APIUser
+                    {
+                        Id = 6602580,
+                        Username = @"waaiiru",
+                        CountryCode = CountryCode.ES,
+                    },
+                    Date = DateTimeOffset.Now.AddYears(-2),
+                };
+
+                fillFlow.Add(score = new BeatmapLeaderboardScore(scoreInfo, sheared: false) { Rank = scoreInfo.Position });
+                score.Show();
+            });
+
+            AddUntilStep("score shrunk inside its column", () =>
+            {
+                var text = score.ChildrenOfType<OsuSpriteText>().SingleOrDefault(t => t.Text.ToString() == @"1,451,611,268");
+                var column = text?.Parent?.Parent;
+
+                return text != null && column != null
+                                    && text.Scale.X < 1
+                                    && text.ScreenSpaceDrawQuad.TopLeft.X >= column.ScreenSpaceDrawQuad.TopLeft.X;
+            });
+        }
+
+        [Test]
         public void TestUseTheseModsDoesNotCopySystemMods()
         {
             BeatmapLeaderboardScore score = null!;
