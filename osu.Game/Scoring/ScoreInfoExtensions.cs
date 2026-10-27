@@ -21,12 +21,21 @@ namespace osu.Game.Scoring
         public static string GetDisplayTitle(this IScoreInfo scoreInfo) => $"{scoreInfo.User.Username} playing {scoreInfo.Beatmap?.GetDisplayTitle() ?? "unknown"}";
 
         /// <summary>
+        /// The total score leaderboards show and rank <paramref name="score"/> by. On servers that rank plays by osu!stable score
+        /// (see <see cref="osu.Game.Online.EndpointConfiguration.RanksByStableScore"/>), that is the stable score when the play has one:
+        /// local plays keep lazer's own score in <see cref="ScoreInfo.TotalScore"/>, which orders them differently.
+        /// </summary>
+        public static long GetLeaderboardTotalScore(this ScoreInfo score, bool ranksByStableScore)
+            => ranksByStableScore && score.LegacyTotalScore is long stableScore ? stableScore : score.TotalScore;
+
+        /// <summary>
         /// Orders an array of <see cref="ScoreInfo"/>s by total score.
         /// </summary>
         /// <param name="scores">The array of <see cref="ScoreInfo"/>s to reorder.</param>
+        /// <param name="ranksByStableScore">Whether the server ranks plays by osu!stable score (see <see cref="GetLeaderboardTotalScore"/>).</param>
         /// <returns>The given <paramref name="scores"/> ordered by decreasing total score.</returns>
-        public static IEnumerable<ScoreInfo> OrderByTotalScore(this IEnumerable<ScoreInfo> scores)
-            => scores.OrderByDescending(s => s.TotalScore)
+        public static IEnumerable<ScoreInfo> OrderByTotalScore(this IEnumerable<ScoreInfo> scores, bool ranksByStableScore = false)
+            => scores.OrderByDescending(s => s.GetLeaderboardTotalScore(ranksByStableScore))
                      .ThenBy(s => s.OnlineID)
                      // Local scores may not have an online ID. Fall back to date in these cases.
                      .ThenBy(s => s.Date);
@@ -36,22 +45,25 @@ namespace osu.Game.Scoring
         /// </summary>
         /// <param name="scores">The array of <see cref="ScoreInfo"/>s to reorder.</param>
         /// <param name="leaderboardSortMode">The attribute to sort the scores by.</param>
+        /// <param name="ranksByStableScore">Whether the server ranks plays by osu!stable score (see <see cref="GetLeaderboardTotalScore"/>).</param>
         /// <returns>The given <paramref name="scores"/> ordered by the selected mode.</returns>
-        public static IEnumerable<ScoreInfo> OrderByCriteria(this IEnumerable<ScoreInfo> scores, LeaderboardSortMode leaderboardSortMode)
+        public static IEnumerable<ScoreInfo> OrderByCriteria(this IEnumerable<ScoreInfo> scores, LeaderboardSortMode leaderboardSortMode, bool ranksByStableScore = false)
         {
+            long totalScore(ScoreInfo s) => s.GetLeaderboardTotalScore(ranksByStableScore);
+
             switch (leaderboardSortMode)
             {
                 case LeaderboardSortMode.Score:
-                    return scores.OrderByDescending(s => s.TotalScore);
+                    return scores.OrderByDescending(totalScore);
 
                 case LeaderboardSortMode.Accuracy:
-                    return scores.OrderByDescending(s => s.Accuracy).ThenByDescending(s => s.TotalScore);
+                    return scores.OrderByDescending(s => s.Accuracy).ThenByDescending(totalScore);
 
                 case LeaderboardSortMode.MaxCombo:
-                    return scores.OrderByDescending(s => s.MaxCombo).ThenByDescending(s => s.TotalScore);
+                    return scores.OrderByDescending(s => s.MaxCombo).ThenByDescending(totalScore);
 
                 case LeaderboardSortMode.Misses:
-                    return scores.OrderBy(s => s.Statistics.GetValueOrDefault(HitResult.Miss, 0)).ThenByDescending(s => s.TotalScore);
+                    return scores.OrderBy(s => s.Statistics.GetValueOrDefault(HitResult.Miss, 0)).ThenByDescending(totalScore);
 
                 case LeaderboardSortMode.Date:
                     return scores.OrderByDescending(s => s.Date);

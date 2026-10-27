@@ -25,6 +25,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
 using osu.Game.Localisation;
@@ -112,6 +113,7 @@ namespace osu.Game.Screens.Menu
         // scosu: osu!supporter can't be bought on scosu, so its prompt is disabled.
         // private SupporterDisplay supporterDisplay;
         private ScoreSummaryDisplay scoreSummaryDisplay;
+        private OnlinePlayersDisplay onlinePlayersDisplay;
 
         private Sample reappearSampleSwoosh;
 
@@ -218,12 +220,29 @@ namespace osu.Game.Screens.Menu
                 //     Anchor = Anchor.TopLeft,
                 //     Origin = Anchor.TopLeft,
                 // },
-                // scosu: in its place, the ranked score gained today and this week.
-                scoreSummaryDisplay = new ScoreSummaryDisplay
+                // scosu: in its place, the ranked score gained today and this week, then the other players online
+                // (whose rows have a right-click menu, hence the menu container).
+                new OsuContextMenuContainer
                 {
-                    Margin = new MarginPadding(10),
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
+                    RelativeSizeAxes = Axes.Both,
+                    Child = new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Vertical,
+                        Anchor = Anchor.TopLeft,
+                        Origin = Anchor.TopLeft,
+                        Children = new Drawable[]
+                        {
+                            scoreSummaryDisplay = new ScoreSummaryDisplay
+                            {
+                                Margin = new MarginPadding(10),
+                            },
+                            onlinePlayersDisplay = new OnlinePlayersDisplay
+                            {
+                                Margin = new MarginPadding { Horizontal = 10 },
+                            },
+                        },
+                    },
                 },
                 holdToExitGameOverlay?.CreateProxy() ?? Empty()
             });
@@ -239,12 +258,14 @@ namespace osu.Game.Screens.Menu
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Hidden;
                         scoreSummaryDisplay.Hide();
+                        onlinePlayersDisplay.Hide();
                         break;
 
                     default:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Visible;
                         scoreSummaryDisplay.Show();
+                        onlinePlayersDisplay.Show();
                         break;
                 }
             };
@@ -389,6 +410,7 @@ namespace osu.Game.Screens.Menu
             //     .FadeOut(500, Easing.OutQuint);
 
             scoreSummaryDisplay.Hide();
+            onlinePlayersDisplay.Hide();
 
             samplePlaybackDisabled.Value = true;
         }
@@ -415,6 +437,7 @@ namespace osu.Game.Screens.Menu
             // After a play, the score gained has likely changed.
             scoreSummaryDisplay.Refresh();
             scoreSummaryDisplay.Show();
+            onlinePlayersDisplay.Show();
 
             samplePlaybackDisabled.Value = false;
         }
@@ -468,6 +491,7 @@ namespace osu.Game.Screens.Menu
             //     .FadeOut(500, Easing.OutQuint);
 
             scoreSummaryDisplay.Hide();
+            onlinePlayersDisplay.Hide();
 
             return base.OnExiting(e);
         }

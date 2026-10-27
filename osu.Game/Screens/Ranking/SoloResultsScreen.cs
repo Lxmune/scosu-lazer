@@ -104,7 +104,8 @@ namespace osu.Game.Screens.Ranking
                 {
                     bool isOnlineLeaderboard = criteria.Scope != BeatmapLeaderboardScope.Local;
                     bool presentingLocalUserScore = Score.UserID == api.LocalUser.Value.OnlineID;
-                    bool presentedLocalUserScoreIsBetter = presentingLocalUserScore && clonedScore.UserID == api.LocalUser.Value.OnlineID && clonedScore.TotalScore < Score.TotalScore;
+                    bool presentedLocalUserScoreIsBetter = presentingLocalUserScore && clonedScore.UserID == api.LocalUser.Value.OnlineID
+                                                          && clonedScore.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore) < Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore);
 
                     if (isOnlineLeaderboard && presentedLocalUserScoreIsBetter)
                         continue;
@@ -118,7 +119,7 @@ namespace osu.Game.Screens.Ranking
             if (!sortedScores.Contains(Score))
                 sortedScores.Add(Score);
 
-            sortedScores = sortedScores.OrderByTotalScore().ToList();
+            sortedScores = sortedScores.OrderByTotalScore(api.Endpoints.RanksByStableScore).ToList();
 
             int delta = 0;
             bool isPartialLeaderboard = result.IsPartial;

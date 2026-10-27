@@ -193,7 +193,7 @@ namespace osu.Game.Online.Leaderboards
                 }
             }
 
-            newScores = newScores.Detach().OrderByCriteria(CurrentCriteria.Sorting);
+            newScores = newScores.Detach().OrderByCriteria(CurrentCriteria.Sorting, api.Endpoints.RanksByStableScore);
 
             var newScoresArray = newScores.ToArray();
             scores.Value = LeaderboardScores.Success(newScoresArray, scoresRequested: newScoresArray.Length, totalScores: newScoresArray.Length, null);
