@@ -113,6 +113,8 @@ namespace osu.Game.Screens.Select
         private Box totalScoreBackground = null!;
 
         private FillFlowContainer statisticsContainer = null!;
+        private Container totalScoreArea = null!;
+        private OsuSpriteText totalScoreText = null!;
         private Container highlightGradient = null!;
         private Container rankLabelStandalone = null!;
         private Container rankLabelOverlay = null!;
@@ -406,7 +408,7 @@ namespace osu.Game.Screens.Select
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
                                     Padding = new MarginPadding { Right = grade_width },
-                                    Child = new Container
+                                    Child = totalScoreArea = new Container
                                     {
                                         RelativeSizeAxes = Axes.Both,
                                         Masking = true,
@@ -433,7 +435,7 @@ namespace osu.Game.Screens.Select
                                                 Spacing = new Vector2(0f, -2f),
                                                 Children = new Drawable[]
                                                 {
-                                                    new OsuSpriteText
+                                                    totalScoreText = new OsuSpriteText
                                                     {
                                                         Anchor = Anchor.TopRight,
                                                         Origin = Anchor.TopRight,
@@ -565,6 +567,10 @@ namespace osu.Game.Screens.Select
                 Left = rankLabelStandalone.DrawWidth,
                 Right = rightContent.DrawWidth,
             };
+
+            // osu!stable scores run to billions, longer than the column fits: shrink them rather than let them run under the statistics.
+            float availableWidth = totalScoreArea.DrawWidth - corner_radius * 2;
+            totalScoreText.Scale = new Vector2(totalScoreText.DrawWidth > availableWidth ? Math.Max(0, availableWidth / totalScoreText.DrawWidth) : 1);
         }
 
         private void updateDisplayMode(DisplayMode mode)
