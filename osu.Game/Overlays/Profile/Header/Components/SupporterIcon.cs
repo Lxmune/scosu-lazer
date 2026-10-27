@@ -89,7 +89,8 @@ namespace osu.Game.Overlays.Profile.Header.Components
             background.Colour = colours.Pink;
 
             // Easy to accidentally click so let's always show the open URL popup.
-            Action = () => game?.OpenUrlExternally(@"/home/support", LinkWarnMode.AlwaysWarn);
+            // scosu: osu!supporter can't be bought on scosu, so the icon doesn't open its page.
+            // Action = () => game?.OpenUrlExternally(@"/home/support", LinkWarnMode.AlwaysWarn);
         }
 
         protected override bool OnHover(HoverEvent e)

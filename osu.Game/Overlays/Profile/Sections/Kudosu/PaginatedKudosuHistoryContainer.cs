@@ -7,14 +7,13 @@ using osu.Framework.Bindables;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.API;
 using System.Collections.Generic;
-using osu.Game.Resources.Localisation.Web;
 
 namespace osu.Game.Overlays.Profile.Sections.Kudosu
 {
     public partial class PaginatedKudosuHistoryContainer : PaginatedProfileSubsection<APIKudosuHistory>
     {
         public PaginatedKudosuHistoryContainer(Bindable<UserProfileData?> user)
-            : base(user, missingText: UsersStrings.ShowExtraKudosuEntryEmpty)
+            : base(user)
         {
         }
 

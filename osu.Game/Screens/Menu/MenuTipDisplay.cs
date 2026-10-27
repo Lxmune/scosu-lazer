@@ -1,7 +1,9 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -17,6 +19,8 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
+using osu.Game.Online.API;
+using osu.Game.Online.API.Requests;
 using osuTK;
 using osu.Game.Localisation;
 
@@ -36,6 +40,14 @@ namespace osu.Game.Screens.Menu
 
         [Resolved]
         private RealmKeyBindingStore keyBindingStore { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        /// <summary>
+        /// The tips of the server this game plays on, shown alongside the built-in ones.
+        /// </summary>
+        private string[] serverTips = Array.Empty<string>();
 
         [BackgroundDependencyLoader]
         private void load()
@@ -77,6 +89,27 @@ namespace osu.Game.Screens.Menu
 
             showMenuTips = config.GetBindable<bool>(OsuSetting.MenuTips);
             showMenuTips.BindValueChanged(_ => ShowNextTip(), true);
+
+            fetchServerTips();
+        }
+
+        private void fetchServerTips()
+        {
+            var request = new GetMenuTipsRequest(api.Endpoints.APIUrl);
+            Task.Run(request.Perform)
+                .ContinueWith(r =>
+                {
+                    if (r.IsCompletedSuccessfully)
+                    {
+                        string[] tips = request.ResponseObject?.Tips?.Where(t => !string.IsNullOrWhiteSpace(t)).ToArray() ?? Array.Empty<string>();
+                        Schedule(() => serverTips = tips);
+                    }
+
+                    // if the request failed, "observe" the exception.
+                    // the server may not have any tips, and the built-in ones remain.
+                    if (r.IsFaulted)
+                        _ = r.Exception;
+                });
         }
 
         public void ShowNextTip()
@@ -122,6 +155,11 @@ namespace osu.Game.Screens.Menu
 
         private LocalisableString getRandomTip()
         {
+            // Half of the tips shown are the server's when it has any,
+            // so that a few of them aren't lost among the many built-in ones.
+            if (serverTips.Length > 0 && RNG.NextBool())
+                return serverTips[RNG.Next(0, serverTips.Length)];
+
             int tipIndex = RNG.Next(0, available_tips);
 
             switch (tipIndex)

@@ -19,6 +19,9 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
     {
         private readonly ScoreType type;
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
         public PaginatedScoreContainer(ScoreType type, Bindable<UserProfileData?> user, LocalisableString headerText)
             : base(user, headerText)
         {
@@ -72,7 +75,8 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                 default:
                     return new DrawableProfileScore(model);
 
-                case ScoreType.Best:
+                // The weights are those of performance points, which servers ranking by osu!stable score don't show.
+                case ScoreType.Best when !api.Endpoints.RanksByStableScore:
                     return new DrawableProfileWeightedScore(model, Math.Pow(0.95, drawableItemIndex++));
             }
         }

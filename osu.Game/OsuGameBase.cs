@@ -78,9 +78,9 @@ namespace osu.Game
     public partial class OsuGameBase : Framework.Game, ICanAcceptFiles, IBeatSyncProvider
     {
 #if DEBUG
-        public const string GAME_NAME = "osu! (development)";
+        public const string GAME_NAME = "scosu (development)";
 #else
-        public const string GAME_NAME = "osu!";
+        public const string GAME_NAME = "scosu";
 #endif
 
         public const string OSU_PROTOCOL = "osu://";
@@ -106,10 +106,9 @@ namespace osu.Game
 
         public virtual bool UseDevelopmentServer => DebugUtils.IsDebugBuild;
 
-        public virtual EndpointConfiguration CreateEndpoints() =>
-            UseDevelopmentServer ? new DevelopmentEndpointConfiguration() : new ProductionEndpointConfiguration();
+        public virtual EndpointConfiguration CreateEndpoints() => new ProductionEndpointConfiguration(LocalConfig?.Get<string>(OsuSetting.CustomServerUrl));
 
-        protected override OnlineStore CreateOnlineStore() => new TrustedDomainOnlineStore();
+        protected override OnlineStore CreateOnlineStore() => new TrustedDomainOnlineStore(CreateEndpoints().WebsiteUrl);
 
         public virtual Version AssemblyVersion => Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
 
@@ -293,7 +292,7 @@ namespace osu.Game
             largeStore.AddTextureSource(Host.CreateTextureLoaderStore(CreateOnlineStore()));
             dependencies.Cache(largeStore);
 
-            dependencies.Cache(onlineAssetStore = new OnlineAssetCachingStore(Host, realm));
+            dependencies.Cache(onlineAssetStore = new OnlineAssetCachingStore(Host, realm, CreateOnlineStore()));
 
             dependencies.CacheAs(LocalConfig);
             dependencies.CacheAs<IGameplaySettings>(LocalConfig);
@@ -353,6 +352,10 @@ namespace osu.Game
 
             dependencies.Cache(beatmapCache = new BeatmapLookupCache());
             base.Content.Add(beatmapCache);
+
+            var stableScoreAttributesCache = new StableScoreAttributesCache();
+            dependencies.Cache(stableScoreAttributesCache);
+            base.Content.Add(stableScoreAttributesCache);
 
             dependencies.CacheAs<IRulesetConfigCache>(rulesetConfigCache = new RulesetConfigCache(realm, RulesetStore));
 

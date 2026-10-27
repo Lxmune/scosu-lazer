@@ -443,6 +443,26 @@ namespace osu.Game.Tests.Mods
             public override bool ValidForMultiplayerAsFreeMod => false;
         }
 
+        [Test]
+        public void TestUnrankedModsFollowTheServer()
+        {
+            var osu = new OsuRuleset().RulesetInfo;
+            var approachRate = new Mod[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } } };
+            var mirror = new Mod[] { new OsuModMirror() };
+            var wiggle = new Mod[] { new OsuModWiggle() };
+
+            // lazer's rules.
+            Assert.That(ModUtils.HasUnrankedMods(approachRate, osu, false, false), Is.True);
+            Assert.That(ModUtils.HasUnrankedMods(mirror, osu, false, false), Is.True);
+            Assert.That(ModUtils.HasUnrankedMods(new Mod[] { new OsuModClassic() }, osu, true, false), Is.False);
+
+            // Servers that rank plays by osu!stable score.
+            Assert.That(ModUtils.HasUnrankedMods(approachRate, osu, false, true), Is.False);
+            Assert.That(ModUtils.HasUnrankedMods(mirror, osu, false, true), Is.False);
+            Assert.That(ModUtils.HasUnrankedMods(wiggle, osu, false, true), Is.True);
+            Assert.That(ModUtils.HasUnrankedMods(new Mod[] { new OsuModDifficultyAdjust { ExtendedLimits = { Value = true }, ApproachRate = { Value = -5 } } }, osu, false, true), Is.True);
+        }
+
         public class InvalidFreestyleRequiredMod : Mod
         {
             public override string Name => string.Empty;

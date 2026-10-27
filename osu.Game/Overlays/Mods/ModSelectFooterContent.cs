@@ -9,10 +9,13 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Scoring;
 using osuTK;
 
 namespace osu.Game.Overlays.Mods
@@ -41,6 +44,9 @@ namespace osu.Game.Overlays.Mods
         /// Whether the ranking information and beatmap attributes displays are stacked vertically due to small space.
         /// </summary>
         public bool DisplaysStackedVertically { get; private set; }
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         public ModSelectFooterContent(ModSelectOverlay overlay)
         {
@@ -127,11 +133,22 @@ namespace osu.Game.Overlays.Mods
 
             if (rankingInformationDisplay != null && workingBeatmap != null)
             {
-                var scoreMultiplierCalculator = Ruleset.Value?.CreateInstance().CreateScoreMultiplierCalculator(new ScoreMultiplierContext(workingBeatmap.BeatmapInfo.Difficulty));
-                double multiplier = scoreMultiplierCalculator?.CalculateFor(ActiveMods.Value) ?? 1;
+                var ruleset = Ruleset.Value?.CreateInstance();
 
-                rankingInformationDisplay.ModMultiplier.Value = multiplier;
-                rankingInformationDisplay.Ranked.Value = ActiveMods.Value.All(m => m.Ranked);
+                // Servers that rank plays by osu!stable score have their own multipliers and ranked mods.
+                if (ruleset != null && api.Endpoints.RanksByStableScore && ruleset.RulesetInfo.IsLegacyRuleset())
+                {
+                    (rankingInformationDisplay.ModMultiplier.Value, rankingInformationDisplay.Ranked.Value) =
+                        StableScoreCalculator.GetModEffects(ruleset, workingBeatmap.BeatmapInfo, ActiveMods.Value);
+                }
+                else
+                {
+                    var scoreMultiplierCalculator = ruleset?.CreateScoreMultiplierCalculator(new ScoreMultiplierContext(workingBeatmap.BeatmapInfo.Difficulty));
+                    double multiplier = scoreMultiplierCalculator?.CalculateFor(ActiveMods.Value) ?? 1;
+
+                    rankingInformationDisplay.ModMultiplier.Value = multiplier;
+                    rankingInformationDisplay.Ranked.Value = ActiveMods.Value.All(m => m.Ranked);
+                }
             }
 
             beatmapAttributesDisplay?.Mods.Value = ActiveMods.Value;

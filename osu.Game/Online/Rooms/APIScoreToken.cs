@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Newtonsoft.Json;
+using osu.Game.Scoring;
 
 namespace osu.Game.Online.Rooms
 {
@@ -9,5 +10,12 @@ namespace osu.Game.Online.Rooms
     {
         [JsonProperty("id")]
         public long ID { get; set; }
+
+        /// <summary>
+        /// Sent by servers that rank plays by osu!stable score (see <see cref="EndpointConfiguration.RanksByStableScore"/>),
+        /// to show the play's stable score while it happens.
+        /// </summary>
+        [JsonProperty("stable_score_attributes")]
+        public StableScoreAttributes? StableScoreAttributes { get; set; }
     }
 }

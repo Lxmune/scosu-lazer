@@ -87,7 +87,7 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
                 var scores = value.Scores.Select(s => s.ToScoreInfo(rulesets, beatmapInfo)).OrderByTotalScore().ToArray();
                 var topScore = scores.First();
 
-                scoreTable.DisplayScores(scores, apiBeatmap.Status.GrantsPerformancePoints());
+                scoreTable.DisplayScores(scores, apiBeatmap.Status.GrantsPerformancePoints() && !api.Endpoints.RanksByStableScore);
                 scoreTable.Show();
 
                 var userScore = value.UserScore;

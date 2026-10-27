@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Localisation;
+using osu.Game.Extensions;
 using osu.Game.Online.API;
 using osu.Game.Online.Rooms;
 using osu.Game.Rulesets;
@@ -263,6 +264,25 @@ namespace osu.Game.Utils
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Whether a play in <paramref name="ruleset"/> with <paramref name="mods"/> is unranked (it gives no pp nor ranked score).
+        /// Servers that rank plays by osu!stable score have their own ranked mods (see <see cref="StableScoreCalculator.IsRankedMod"/>).
+        /// </summary>
+        /// <param name="mods">The mods of the play.</param>
+        /// <param name="ruleset">The ruleset of the play.</param>
+        /// <param name="isLegacyScore">Whether the play was set on osu!stable, whose plays all have <see cref="ModClassic"/>.</param>
+        /// <param name="ranksByStableScore">Whether the server ranks plays by osu!stable score.</param>
+        public static bool HasUnrankedMods(IEnumerable<Mod> mods, IRulesetInfo ruleset, bool isLegacyScore, bool ranksByStableScore)
+        {
+            if (isLegacyScore)
+                mods = mods.Where(m => m is not ModClassic);
+
+            if (ranksByStableScore && ruleset.IsLegacyRuleset())
+                return mods.Any(m => !StableScoreCalculator.IsRankedMod(ruleset.OnlineID, new APIMod(m)));
+
+            return mods.Any(m => !m.Ranked);
         }
 
         /// <summary>

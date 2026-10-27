@@ -109,7 +109,9 @@ namespace osu.Game.Screens.Menu
         private OnlineMenuBanner onlineMenuBanner;
         private MenuTipDisplay menuTipDisplay;
         private FillFlowContainer bottomElementsFlow;
-        private SupporterDisplay supporterDisplay;
+        // scosu: osu!supporter can't be bought on scosu, so its prompt is disabled.
+        // private SupporterDisplay supporterDisplay;
+        private ScoreSummaryDisplay scoreSummaryDisplay;
 
         private Sample reappearSampleSwoosh;
 
@@ -209,9 +211,17 @@ namespace osu.Game.Screens.Menu
                         }
                     }
                 },
-                supporterDisplay = new SupporterDisplay
+                // scosu: osu!supporter can't be bought on scosu, so its prompt is disabled.
+                // supporterDisplay = new SupporterDisplay
+                // {
+                //     Margin = new MarginPadding(5),
+                //     Anchor = Anchor.TopLeft,
+                //     Origin = Anchor.TopLeft,
+                // },
+                // scosu: in its place, the ranked score gained today and this week.
+                scoreSummaryDisplay = new ScoreSummaryDisplay
                 {
-                    Margin = new MarginPadding(5),
+                    Margin = new MarginPadding(10),
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft,
                 },
@@ -228,11 +238,13 @@ namespace osu.Game.Screens.Menu
                     case ButtonSystemState.Exit:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Hidden;
+                        scoreSummaryDisplay.Hide();
                         break;
 
                     default:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Visible;
+                        scoreSummaryDisplay.Show();
                         break;
                 }
             };
@@ -373,8 +385,10 @@ namespace osu.Game.Screens.Menu
                 .ScaleTo(0.9f, 1000, Easing.OutQuint)
                 .FadeOut(500, Easing.OutQuint);
 
-            supporterDisplay
-                .FadeOut(500, Easing.OutQuint);
+            // supporterDisplay
+            //     .FadeOut(500, Easing.OutQuint);
+
+            scoreSummaryDisplay.Hide();
 
             samplePlaybackDisabled.Value = true;
         }
@@ -397,6 +411,10 @@ namespace osu.Game.Screens.Menu
             bottomElementsFlow
                 .ScaleTo(1, 1000, Easing.OutQuint)
                 .FadeIn(1000, Easing.OutQuint);
+
+            // After a play, the score gained has likely changed.
+            scoreSummaryDisplay.Refresh();
+            scoreSummaryDisplay.Show();
 
             samplePlaybackDisabled.Value = false;
         }
@@ -446,8 +464,10 @@ namespace osu.Game.Screens.Menu
             bottomElementsFlow
                 .FadeOut(500, Easing.OutQuint);
 
-            supporterDisplay
-                .FadeOut(500, Easing.OutQuint);
+            // supporterDisplay
+            //     .FadeOut(500, Easing.OutQuint);
+
+            scoreSummaryDisplay.Hide();
 
             return base.OnExiting(e);
         }

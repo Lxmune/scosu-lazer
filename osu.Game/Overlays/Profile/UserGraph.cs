@@ -15,6 +15,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Profile
 {
@@ -45,8 +46,13 @@ namespace osu.Game.Overlays.Profile
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            graph.LineColour = colours.Yellow;
+            graph.LineColour = graph.AccentColour = GetAccentColour(colours);
         }
+
+        /// <summary>
+        /// The colour of the line and of the hover marker.
+        /// </summary>
+        protected virtual Color4 GetAccentColour(OsuColour colours) => colours.Yellow;
 
         private float lastHoverPosition;
 
@@ -173,11 +179,15 @@ namespace osu.Game.Overlays.Profile
                 });
             }
 
+            public Color4 AccentColour
+            {
+                set => movingBall.BorderColour = line.Colour = value;
+            }
+
             [BackgroundDependencyLoader]
-            private void load(OverlayColourProvider colourProvider, OsuColour colours)
+            private void load(OverlayColourProvider colourProvider)
             {
                 ballBg.Colour = colourProvider.Background5;
-                movingBall.BorderColour = line.Colour = colours.Yellow;
             }
 
             public void UpdateBallPosition(float mouseXPosition)

@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using ManagedBass.Fx;
 using osu.Framework.Allocation;
@@ -15,6 +16,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Transforms;
 using osu.Framework.Input;
+using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Framework.Threading;
@@ -23,6 +25,7 @@ using osu.Game.Audio;
 using osu.Game.Audio.Effects;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Input;
@@ -34,6 +37,9 @@ using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.Volume;
 using osu.Game.Performance;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
+using osu.Game.Scoring;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.Play.HUD;
@@ -193,6 +199,12 @@ namespace osu.Game.Screens.Play
         [Resolved]
         private LeaderboardManager? leaderboardManager { get; set; }
 
+        /// <summary>
+        /// Whether the plays this loads can add to the local user's ranked score, so that the player is told before playing when one won't
+        /// (on servers that rank plays by osu!stable score).
+        /// </summary>
+        public bool CountsTowardsRankedScore { get; init; }
+
         public PlayerLoader(Func<Player> createPlayer)
         {
             this.createPlayer = createPlayer;
@@ -312,6 +324,9 @@ namespace osu.Game.Screens.Play
                 disclaimers.Add(epilepsyWarning = new PlayerLoaderDisclaimer(PlayerLoaderStrings.EpilepsyWarningTitle, PlayerLoaderStrings.EpilepsyWarningContent));
             }
 
+            if (CountsTowardsRankedScore && whyNoRankedScore(api) is LocalisableString noRankedScoreReason)
+                disclaimers.Add(new PlayerLoaderDisclaimer(StableScoreStrings.NoRankedScoreTitle, noRankedScoreReason));
+
             if (!string.IsNullOrEmpty(api.ScoreProcessingNoticeUrl))
             {
                 disclaimers.Add(new PlayerLoaderDisclaimer(
@@ -358,7 +373,7 @@ namespace osu.Game.Screens.Play
         {
             leaderboardManager?.FetchWithCriteria(new LeaderboardCriteria(
                 Beatmap.Value.BeatmapInfo,
-                Ruleset.Value,
+                Ruleset.Value.GetLeaderboardRuleset(Mods.Value.Select(m => m.Acronym)),
                 leaderboardManager?.CurrentCriteria?.Scope ?? BeatmapLeaderboardScope.Global,
                 leaderboardManager?.CurrentCriteria?.ExactMods), force);
         }
@@ -768,6 +783,27 @@ namespace osu.Game.Screens.Play
         #endregion
 
         #region Mute warning
+
+        /// <summary>
+        /// Why the play won't give ranked score, on servers that rank plays by osu!stable score, or <see langword="null"/> if it will.
+        /// </summary>
+        private LocalisableString? whyNoRankedScore(IAPIProvider api)
+        {
+            if (!api.Endpoints.RanksByStableScore || !api.IsLoggedIn || !Ruleset.Value.IsLegacyRuleset() || Mods.Value.Any(m => m is ModAutoplay))
+                return null;
+
+            var beatmap = Beatmap.Value.BeatmapInfo;
+
+            if (beatmap.OnlineID <= 0 || !StableScoreCalculator.GivesRankedScore(beatmap.Status))
+                return StableScoreStrings.NoRankedScoreForBeatmap;
+
+            string[] unrankedMods = Mods.Value.Where(m => !StableScoreCalculator.IsRankedMod(Ruleset.Value.OnlineID, new APIMod(m))).Select(m => m.Acronym).ToArray();
+
+            if (unrankedMods.Length == 0)
+                return null;
+
+            return StableScoreStrings.NoRankedScoreForMods(string.Join(@", ", unrankedMods));
+        }
 
         private Bindable<bool> muteWarningShownOnce = null!;
 

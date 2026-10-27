@@ -15,6 +15,41 @@ namespace osu.Game.Localisation
         public static LocalisableString OnlineSectionHeader => new TranslatableString(getKey(@"online_section_header"), @"Online");
 
         /// <summary>
+        /// "Server"
+        /// </summary>
+        public static LocalisableString ServerHeader => new TranslatableString(getKey(@"server_header"), @"Server");
+
+        /// <summary>
+        /// "Server address"
+        /// </summary>
+        public static LocalisableString ServerAddress => new TranslatableString(getKey(@"server_address"), @"Server address");
+
+        /// <summary>
+        /// "Leave empty to play on {0}. Any HTTPS address of another server works too."
+        /// </summary>
+        public static LocalisableString ServerAddressHint(string defaultServer) => new TranslatableString(getKey(@"server_address_hint"), @"Leave empty to play on {0}. Any HTTPS address of another server works too.", defaultServer);
+
+        /// <summary>
+        /// "The server address must be an HTTPS address without a path, such as https://example.com."
+        /// </summary>
+        public static LocalisableString InvalidServerAddress => new TranslatableString(getKey(@"invalid_server_address"), @"The server address must be an HTTPS address without a path, such as https://example.com.");
+
+        /// <summary>
+        /// "Changing the server signs you out and restarts the game. Continue?"
+        /// </summary>
+        public static LocalisableString ChangeServerConfirmation => new TranslatableString(getKey(@"change_server_confirmation"), @"Changing the server signs you out and restarts the game. Continue?");
+
+        /// <summary>
+        /// "Restart the game to connect to the new server."
+        /// </summary>
+        public static LocalisableString RestartToChangeServer => new TranslatableString(getKey(@"restart_to_change_server"), @"Restart the game to connect to the new server.");
+
+        /// <summary>
+        /// "Changing the server is at your own risk: this is a modified osu!lazer client."
+        /// </summary>
+        public static LocalisableString ChangeServerRisk => new TranslatableString(getKey(@"change_server_risk"), @"Changing the server is at your own ris, as this is a modified osu!lazer client. We will not be responsible in case of any misuse or bans that will occur on the custom server you are connecting to.");
+
+        /// <summary>
         /// "Alerts and Privacy"
         /// </summary>
         public static LocalisableString AlertsAndPrivacyHeader => new TranslatableString(getKey(@"alerts_and_privacy_header"), @"Alerts and Privacy");

@@ -26,9 +26,9 @@ namespace osu.Game.Localisation
         public static LocalisableString FirstRunSetupTitle => new TranslatableString(getKey(@"first_run_setup_title"), @"First-run setup");
 
         /// <summary>
-        /// "Set up osu! to suit you"
+        /// "Set up scosu to suit you"
         /// </summary>
-        public static LocalisableString FirstRunSetupDescription => new TranslatableString(getKey(@"first_run_setup_description"), @"Set up osu! to suit you");
+        public static LocalisableString FirstRunSetupDescription => new TranslatableString(getKey(@"scosu_first_run_setup_description"), @"Set up scosu to suit you");
 
         /// <summary>
         /// "Welcome"
@@ -36,13 +36,32 @@ namespace osu.Game.Localisation
         public static LocalisableString WelcomeTitle => new TranslatableString(getKey(@"welcome_title"), @"Welcome");
 
         /// <summary>
-        /// "Welcome to the first-run setup guide!
+        /// "Welcome to scosu!
         ///
-        /// osu! is a very configurable game, and diving straight into the settings can sometimes be overwhelming. This guide will help you get the important choices out of the way to ensure a great first experience!"
+        /// scosu is a score-only server: rankings and leaderboards go by score, not pp. Leaderboards use the classic (osu!stable) score, and Relax and Autopilot plays have leaderboards of their own. pp only shows on the results of your plays.
+        ///
+        /// This guide will help you get the important choices out of the way before your first play."
         /// </summary>
-        public static LocalisableString WelcomeDescription => new TranslatableString(getKey(@"welcome_description"), @"Welcome to the first-run setup guide!
+        public static LocalisableString WelcomeDescription => new TranslatableString(getKey(@"scosu_welcome_description"), @"Welcome to scosu!
 
-osu! is a very configurable game, and diving straight into the settings can sometimes be overwhelming. This guide will help you get the important choices out of the way to ensure a great first experience!");
+scosu is a score-only server: rankings and leaderboards go by score, not pp. Leaderboards use the classic (osu!stable) score, and Relax and Autopilot plays have leaderboards of their own. pp only shows on the results of your plays.
+
+This guide will help you get the important choices out of the way before your first play.");
+
+        /// <summary>
+        /// "Heads up"
+        /// </summary>
+        public static LocalisableString HeadsUpTitle => new TranslatableString(getKey(@"scosu_heads_up_title"), @"Heads up");
+
+        /// <summary>
+        /// "scosu is an unofficial server, not affiliated with ppy or osu!. Your osu! account doesn't work here: sign in with (or register) a scosu account, and use a password you don't use on osu!. Your scores on scosu don't count on osu!, and the other way round.
+        ///
+        /// scosu plays on its own server by default. You can point it to another one in the online settings."
+        /// </summary>
+        public static LocalisableString HeadsUpDescription => new TranslatableString(getKey(@"scosu_heads_up_description"),
+            @"scosu is an unofficial server, not affiliated with ppy or osu!. Your osu! account doesn't work here: sign in with (or register) a scosu account, and use a password you don't use on osu!. Your scores on scosu don't count on osu!, and the other way round.
+
+scosu plays on its own server by default. You can point it to another one in the online settings.");
 
         /// <summary>
         /// "The size of the osu! user interface can be adjusted to your liking."

@@ -35,7 +35,10 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty("versions")]
         public VersionNavigation Versions { get; set; }
 
-        public string Url => $"https://osu.ppy.sh/home/changelog/{UpdateStream.Name}/{Version}";
+        /// <summary>
+        /// The build's page, relative to the website of the server it came from.
+        /// </summary>
+        public string Url => $"/home/changelog/{UpdateStream.Name}/{Version}";
 
         public class VersionNavigation
         {

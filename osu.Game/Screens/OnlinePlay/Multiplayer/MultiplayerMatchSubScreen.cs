@@ -605,7 +605,11 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
 
                 default:
                     if (!client.IsReferee)
-                        targetScreen.Push(new MultiplayerPlayerLoader(() => new MultiplayerPlayer(room, new PlaylistItem(client.Room.CurrentPlaylistItem), users)));
+                        targetScreen.Push(new MultiplayerPlayerLoader(() => new MultiplayerPlayer(room, new PlaylistItem(client.Room.CurrentPlaylistItem), users))
+                        {
+                            // scosu servers count room plays towards ranked score.
+                            CountsTowardsRankedScore = true,
+                        });
                     break;
             }
         }

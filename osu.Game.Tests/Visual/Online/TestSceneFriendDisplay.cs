@@ -13,6 +13,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Testing;
 using osu.Game.Online.API;
+using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Metadata;
 using osu.Game.Overlays;
@@ -215,6 +216,46 @@ namespace osu.Game.Tests.Visual.Online
 
             waitForLoad();
             assertVisiblePanelCount<UserPanel>(3);
+        }
+
+        [Test]
+        public void TestFriendScoresOnScosuServers()
+        {
+            // Only cards show scores, and an earlier test may have left another style selected.
+            AddStep("show cards", () => this.ChildrenOfType<UserListToolbar>().Single().DisplayStyle.Value = OverlayPanelDisplayStyle.Card);
+            AddStep("rank by stable score", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = true);
+            AddStep("answer friend scores", () => ((DummyAPIAccess)API).HandleRequest = request =>
+            {
+                if (request is not GetFriendScoresRequest scoresRequest)
+                    return false;
+
+                scoresRequest.TriggerSuccess(new APIFriendScores
+                {
+                    Friends =
+                    {
+                        new APIFriendScores.Entry { UserId = 3103765, GlobalRank = 21, RankedScore = 123_456_789, TodayRankedScore = 6_653 },
+                        new APIFriendScores.Entry { UserId = 2, GlobalRank = 3, RankedScore = 987_654_321 },
+                    }
+                });
+                return true;
+            });
+            AddStep("set friends", () =>
+            {
+                DummyAPIAccess api = (DummyAPIAccess)API;
+                api.LocalUserState.Friends.Clear();
+                api.LocalUserState.Friends.AddRange(getUsers().Select(u => new APIRelation
+                {
+                    RelationType = RelationType.Friend,
+                    TargetID = u.OnlineID,
+                    TargetUser = u
+                }));
+            });
+
+            AddUntilStep("two cards show scores", () => this.ChildrenOfType<FriendScoreLine>().Count(), () => Is.EqualTo(2));
+            AddStep("sort by rank", () => this.ChildrenOfType<UserSortTabControl>().Single().Current.Value = UserSortCriteria.Rank);
+            AddUntilStep("best ranked first", () => this.ChildrenOfType<FriendsList.FilterableUserPanel>().OrderBy(p => p.ScreenSpaceDrawQuad.TopLeft.Y).ThenBy(p => p.ScreenSpaceDrawQuad.TopLeft.X).First().User.Username,
+                () => Is.EqualTo("peppy"));
+            AddStep("reset server kind", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = false);
         }
 
         private void waitForLoad()

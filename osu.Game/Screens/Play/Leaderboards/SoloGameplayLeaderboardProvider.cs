@@ -7,6 +7,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Caching;
 using osu.Framework.Graphics;
+using osu.Game.Online.API;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Scoring;
 
@@ -22,6 +23,9 @@ namespace osu.Game.Screens.Play.Leaderboards
 
         [Resolved]
         private GameplayState? gameplayState { get; set; }
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         private readonly Cached sorting = new Cached();
         private bool isPartial;
@@ -40,7 +44,12 @@ namespace osu.Game.Screens.Play.Leaderboards
             {
                 foreach (var topScore in globalScores.AllScores.OrderByTotalScore())
                 {
-                    newScores.Add(new GameplayLeaderboardScore(topScore, false, GameplayLeaderboardScore.ComboDisplayMode.Highest));
+                    var score = new GameplayLeaderboardScore(topScore, false, GameplayLeaderboardScore.ComboDisplayMode.Highest);
+
+                    if (api.Endpoints.RanksByStableScore && topScore.LegacyTotalScore is long stableScore)
+                        score.ShowStableScore(stableScore);
+
+                    newScores.Add(score);
                 }
             }
 

@@ -51,7 +51,7 @@ namespace osu.Game.Overlays
         {
             base.LoadComplete();
 
-            config.BindWith(OsuSetting.ShowFirstRunSetup, showFirstRunSetup);
+            config.BindWith(OsuSetting.ShowScosuFirstRunSetup, showFirstRunSetup);
 
             if (showFirstRunSetup.Value) Show();
         }

@@ -16,6 +16,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Judgements;
@@ -49,8 +50,15 @@ namespace osu.Game.Screens.Play.HUD
         private Mod[] clonedMods;
 
         [BackgroundDependencyLoader]
-        private void load(BeatmapDifficultyCache difficultyCache)
+        private void load(BeatmapDifficultyCache difficultyCache, [CanBeNull] IAPIProvider api)
         {
+            // Servers ranking by osu!stable score only show performance points on the results screen.
+            if (api?.Endpoints.RanksByStableScore == true)
+            {
+                Alpha = 0;
+                return;
+            }
+
             if (gameplayState != null)
             {
                 performanceCalculator = gameplayState.Ruleset.CreatePerformanceCalculator();

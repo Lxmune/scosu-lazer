@@ -48,6 +48,22 @@ namespace osu.Game.Tests.Visual.Online
             Add(chatManager);
         }
 
+        private string originalWebsiteRootUrl = null!;
+
+        // The links below are on the development website.
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            originalWebsiteRootUrl = MessageFormatter.WebsiteRootUrl;
+            MessageFormatter.WebsiteRootUrl = "dev.ppy.sh";
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            MessageFormatter.WebsiteRootUrl = originalWebsiteRootUrl;
+        }
+
         [SetUp]
         public void Setup() => Schedule(() =>
         {

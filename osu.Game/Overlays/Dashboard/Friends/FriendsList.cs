@@ -28,13 +28,18 @@ namespace osu.Game.Overlays.Dashboard.Friends
         private readonly IBindableDictionary<int, UserPresence> friendPresences = new BindableDictionary<int, UserPresence>();
         private readonly OverlayPanelDisplayStyle style;
         private readonly APIUser[] friends;
+        private readonly IReadOnlyDictionary<int, APIFriendScores.Entry> scores;
 
         private FriendsSearchContainer searchContainer = null!;
 
-        public FriendsList(OverlayPanelDisplayStyle style, APIUser[] friends)
+        /// <param name="style">How the friends are shown.</param>
+        /// <param name="friends">The friends.</param>
+        /// <param name="scores">The friends' scores in the current ruleset, by user ID, if the server has them (see <see cref="Online.API.Requests.GetFriendScoresRequest"/>).</param>
+        public FriendsList(OverlayPanelDisplayStyle style, APIUser[] friends, IReadOnlyDictionary<int, APIFriendScores.Entry>? scores = null)
         {
             this.style = style;
             this.friends = friends;
+            this.scores = scores ?? new Dictionary<int, APIFriendScores.Entry>();
 
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
@@ -109,6 +114,7 @@ namespace osu.Game.Overlays.Dashboard.Friends
         private FilterableUserPanel createUserPanel(APIUser user)
         {
             UserPanel panel;
+            scores.TryGetValue(user.OnlineID, out var score);
 
             switch (style)
             {
@@ -129,7 +135,17 @@ namespace osu.Game.Overlays.Dashboard.Friends
                     break;
             }
 
-            return new FilterableUserPanel(panel);
+            // Only cards have room for the score: in their top right corner, beside the flags and above the name.
+            Drawable? scoreLine = score != null && style == OverlayPanelDisplayStyle.Card
+                ? new FriendScoreLine(score)
+                {
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    Margin = new MarginPadding(10),
+                }
+                : null;
+
+            return new FilterableUserPanel(panel, score, scoreLine);
         }
 
         private partial class FriendsSearchContainer : SearchContainer<FilterableUserPanel>
@@ -157,7 +173,8 @@ namespace osu.Game.Overlays.Dashboard.Friends
 
                         case UserSortCriteria.Rank:
                             // Todo: Statistics are not currently updated according to realtime user statistics, but it's also not currently displayed in the panels.
-                            return panels.OrderByDescending(panel => panel.User.Statistics.GlobalRank.HasValue).ThenBy(panel => panel.User.Statistics.GlobalRank ?? 0);
+                            // The server's scores, when it has them, are fresh and for the current ruleset.
+                            return panels.OrderByDescending(panel => panel.GlobalRank.HasValue).ThenBy(panel => panel.GlobalRank ?? 0);
 
                         case UserSortCriteria.Username:
                             return panels.OrderBy(panel => panel.User.Username);
@@ -172,11 +189,18 @@ namespace osu.Game.Overlays.Dashboard.Friends
 
             public APIUser User => panel.User;
 
-            private readonly UserPanel panel;
+            /// <summary>
+            /// The user's global rank: from the server's friend scores if there are any, otherwise from the user's statistics.
+            /// </summary>
+            public int? GlobalRank => score != null ? score.GlobalRank : User.Statistics.GlobalRank;
 
-            public FilterableUserPanel(UserPanel panel)
+            private readonly UserPanel panel;
+            private readonly APIFriendScores.Entry? score;
+
+            public FilterableUserPanel(UserPanel panel, APIFriendScores.Entry? score = null, Drawable? overlay = null)
             {
                 this.panel = panel;
+                this.score = score;
 
                 Anchor = panel.Anchor;
                 Origin = panel.Origin;
@@ -190,6 +214,9 @@ namespace osu.Game.Overlays.Dashboard.Friends
                     Height = panel.Height;
 
                 InternalChild = panel;
+
+                if (overlay != null)
+                    AddInternal(overlay);
             }
 
             IBindable<bool> IConditionalFilterable.CanBeShown => CanBeShown;

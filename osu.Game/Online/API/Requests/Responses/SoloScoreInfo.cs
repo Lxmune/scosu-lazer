@@ -82,13 +82,20 @@ namespace osu.Game.Online.API.Requests.Responses
         /// Used to preserve the total score for legacy scores.
         /// </summary>
         [JsonProperty("legacy_total_score")]
-        public int? LegacyTotalScore { get; set; }
+        public long? LegacyTotalScore { get; set; }
 
         [JsonProperty("legacy_score_id")]
         public ulong? LegacyScoreId { get; set; }
 
         [JsonProperty("pauses")]
         public int[] Pauses { get; set; } = [];
+
+        /// <summary>
+        /// For servers that rank plays by osu!stable score: the order of the play's judgements that change the combo,
+        /// which stable's combo bonus depends on (see <see cref="StableScoreCalculator.EncodeJudgement"/>).
+        /// </summary>
+        [JsonProperty("judgement_order", NullValueHandling = NullValueHandling.Ignore)]
+        public string? JudgementOrder { get; set; }
 
         #region osu-web API additions (not stored to database).
 

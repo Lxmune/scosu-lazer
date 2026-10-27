@@ -8,6 +8,7 @@ using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Online.API;
 using osu.Game.Online.Spectator;
 using osu.Game.Rulesets.Replays;
 using osu.Game.Rulesets.Replays.Types;
@@ -22,7 +23,15 @@ namespace osu.Game.Screens.Play
         [Resolved]
         protected SpectatorClient SpectatorClient { get; private set; } = null!;
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
         private readonly Score score;
+
+        /// <summary>
+        /// On servers that rank plays by osu!stable score: the stable score the watched player's client sends.
+        /// </summary>
+        private SpectatorScoreProcessor? spectatedStableScore;
 
         public bool ShowSettingsOverlay { get; init; } = true;
 
@@ -35,6 +44,12 @@ namespace osu.Game.Screens.Play
         [BackgroundDependencyLoader]
         private void load()
         {
+            if (api.Endpoints.RanksByStableScore && GameplayState != null && GameplayClockContainer != null)
+            {
+                AddInternal(spectatedStableScore = new SpectatorScoreProcessor(score.ScoreInfo.User.OnlineID) { ReferenceClock = GameplayClockContainer });
+                GameplayState.StableScore.FollowSpectatedPlayer(spectatedStableScore.TotalScore);
+            }
+
             if (ShowSettingsOverlay && GameplayClockContainer != null)
             {
                 var replayOverlay = new ReplayOverlay();
@@ -70,6 +85,12 @@ namespace osu.Game.Screens.Play
                         master.UserPlaybackRate.Value = 1;
                 }
             }, true);
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            spectatedStableScore?.UpdateScore();
         }
 
         protected override void StartGameplay()

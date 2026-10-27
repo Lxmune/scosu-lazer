@@ -48,11 +48,11 @@ namespace osu.Game.Screens.Play.Leaderboards
                 {
                     var score = response.Scores[i];
                     score.Position = i + 1;
-                    scoresToShow.Add(new GameplayLeaderboardScore(score, tracked: false, GameplayLeaderboardScore.ComboDisplayMode.Highest));
+                    scoresToShow.Add(createScore(score));
                 }
 
                 if (response.UserScore != null && response.Scores.All(s => s.ID != response.UserScore.ID))
-                    scoresToShow.Add(new GameplayLeaderboardScore(response.UserScore, tracked: false, GameplayLeaderboardScore.ComboDisplayMode.Highest));
+                    scoresToShow.Add(createScore(response.UserScore));
             }
 
             if (gameplayState != null)
@@ -60,6 +60,17 @@ namespace osu.Game.Screens.Play.Leaderboards
                 var localScore = new GameplayLeaderboardScore(gameplayState, tracked: true, GameplayLeaderboardScore.ComboDisplayMode.Highest);
                 localScore.TotalScore.BindValueChanged(_ => sorting.Invalidate());
                 scoresToShow.Add(localScore);
+            }
+
+            GameplayLeaderboardScore createScore(MultiplayerScore score)
+            {
+                var leaderboardScore = new GameplayLeaderboardScore(score, tracked: false, GameplayLeaderboardScore.ComboDisplayMode.Highest);
+
+                // Servers that rank plays by osu!stable score send it as the total.
+                if (api.Endpoints.RanksByStableScore)
+                    leaderboardScore.ShowStableScore(score.TotalScore);
+
+                return leaderboardScore;
             }
 
             // touching the public bindable must happen on the update thread for general thread safety,

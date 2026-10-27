@@ -61,5 +61,12 @@ namespace osu.Game.Online
         /// </list>
         /// </remarks>
         public string? LivenessProbeUrl { get; set; }
+
+        /// <summary>
+        /// Whether the server ranks players by osu!stable score rather than performance points.
+        /// When set, finished scores show their osu!stable score as the main number, and performance points
+        /// are only shown on the results screen of a play.
+        /// </summary>
+        public bool RanksByStableScore { get; set; }
     }
 }

@@ -20,10 +20,12 @@ using osu.Framework.Localisation;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
+using osu.Game.Online.API;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Overlays;
 using osu.Game.Resources.Localisation.Web;
@@ -106,6 +108,9 @@ namespace osu.Game.Screens.Select
                 [Resolved]
                 private OverlayColourProvider colourProvider { get; set; } = null!;
 
+                [Resolved]
+                private IAPIProvider api { get; set; } = null!;
+
                 private ScoreInfo score = null!;
 
                 public ScoreInfo Score
@@ -122,17 +127,23 @@ namespace osu.Game.Screens.Select
                             new StatisticRow(s.DisplayName.ToUpper(), s.Count.ToLocalisableString("N0"), colours.ForHitResult(s.Result)));
 
                         var ruleset = value.Ruleset.CreateInstance();
-                        var scoreMultiplierCalculator = ruleset.CreateScoreMultiplierCalculator(new ScoreMultiplierContext(score.BeatmapInfo!.Difficulty));
-                        double multiplier = scoreMultiplierCalculator.CalculateFor(value.Mods);
+                        // Servers ranking by osu!stable score have their own multipliers.
+                        double multiplier = api.Endpoints.RanksByStableScore && value.Ruleset.IsLegacyRuleset()
+                            ? StableScoreCalculator.GetModEffects(ruleset, score.BeatmapInfo!, value.Mods).Multiplier
+                            : ruleset.CreateScoreMultiplierCalculator(new ScoreMultiplierContext(score.BeatmapInfo!.Difficulty)).CalculateFor(value.Mods);
 
-                        var generalStatistics = new[]
+                        var generalStatistics = new List<Drawable>
                         {
                             new StatisticRow(BeatmapsetsStrings.ShowScoreboardHeadersCombo, value.MaxCombo.ToLocalisableString(@"0\x")),
                             new StatisticRow(BeatmapsetsStrings.ShowScoreboardHeadersAccuracy, value.Accuracy.FormatAccuracy()),
-                            new PerformanceStatisticRow(BeatmapsetsStrings.ShowScoreboardHeaderspp.ToUpper(), score),
-                            Empty().With(d => d.Height = 20),
-                            new StatisticRow(ModSelectOverlayStrings.ScoreMultiplier, ModUtils.FormatScoreMultiplier(multiplier)),
                         };
+
+                        // Servers ranking by osu!stable score only show performance points on the results screen.
+                        if (!api.Endpoints.RanksByStableScore)
+                            generalStatistics.Add(new PerformanceStatisticRow(BeatmapsetsStrings.ShowScoreboardHeaderspp.ToUpper(), score));
+
+                        generalStatistics.Add(Empty().With(d => d.Height = 20));
+                        generalStatistics.Add(new StatisticRow(ModSelectOverlayStrings.ScoreMultiplier, ModUtils.FormatScoreMultiplier(multiplier)));
 
                         statistics.ChildrenEnumerable = judgementsStatistics
                                                         .Append(Empty().With(d => d.Height = 20))
@@ -274,6 +285,9 @@ namespace osu.Game.Screens.Select
             {
                 private readonly ScoreInfo score;
 
+                [Resolved]
+                private IAPIProvider api { get; set; } = null!;
+
                 public PerformanceStatisticRow(LocalisableString label, ScoreInfo score)
                     : base(label, @"0pp")
                 {
@@ -315,15 +329,7 @@ namespace osu.Game.Screens.Select
                         Alpha = 1f;
                 }
 
-                private static bool hasUnrankedMods(ScoreInfo scoreInfo)
-                {
-                    IEnumerable<Mod> modsToCheck = scoreInfo.Mods;
-
-                    if (scoreInfo.IsLegacyScore)
-                        modsToCheck = modsToCheck.Where(m => m is not ModClassic);
-
-                    return modsToCheck.Any(m => !m.Ranked);
-                }
+                private bool hasUnrankedMods(ScoreInfo scoreInfo) => ModUtils.HasUnrankedMods(scoreInfo.Mods, scoreInfo.Ruleset, scoreInfo.IsLegacyScore, api.Endpoints.RanksByStableScore);
             }
 
             private partial class ModsPanel : CompositeDrawable

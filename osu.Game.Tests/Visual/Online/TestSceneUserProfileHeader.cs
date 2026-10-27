@@ -40,6 +40,8 @@ namespace osu.Game.Tests.Visual.Online
         [SetUpSteps]
         public void SetUpSteps()
         {
+            AddStep("reset server kind", () => dummyAPI.Endpoints.RanksByStableScore = false);
+
             AddStep("set processing message", () =>
             {
                 dummyAPI.ScoreProcessingNoticeUrl = "https://osu.ppy.sh/home/news/2026-07-03-performance-points-star-rating-updates";
@@ -134,6 +136,67 @@ namespace osu.Game.Tests.Visual.Online
                 }
             }, new OsuRuleset().RulesetInfo));
         }
+
+        [Test]
+        public void TestRankedScoreGraphOnStableScoreServers()
+        {
+            AddStep("rank by stable score", () => dummyAPI.Endpoints.RanksByStableScore = true);
+            AddStep("recreate header", () =>
+            {
+                Child = new OsuScrollContainer(Direction.Vertical)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Child = header = new ProfileHeader()
+                };
+            });
+
+            AddStep("Show user with ranked score history", () => header.User.Value = new UserProfileData(new APIUser
+            {
+                Id = 2003,
+                Username = "ScoreFarmer",
+                Statistics = new UserStatistics
+                {
+                    IsRanked = true,
+                    GlobalRank = 42,
+                    RankedScore = 3_225_000_000,
+                    RankHistory = new APIRankHistory
+                    {
+                        Mode = @"osu",
+                        Data = Enumerable.Range(42, 90).Reverse().ToArray()
+                    },
+                },
+                RankedScoreHistory = new APIRankedScoreHistory
+                {
+                    Mode = @"osu",
+                    Data = Enumerable.Range(0, 90).Select(day => 1_000_000_000L + day * 25_000_000L).ToArray()
+                },
+            }, new OsuRuleset().RulesetInfo));
+
+            AddUntilStep("ranked score graph shown", () => rankedScorePanel.Alpha, () => Is.EqualTo(1));
+            AddAssert("graphs side by side", () => rankedScorePanel.DrawWidth, () => Is.EqualTo(rankPanel.DrawWidth).Within(1));
+
+            AddStep("Show user who never had ranked score", () => header.User.Value = new UserProfileData(new APIUser
+            {
+                Id = 2004,
+                Username = "Newcomer",
+                RankedScoreHistory = new APIRankedScoreHistory { Mode = @"osu", Data = new long[90] },
+            }, new OsuRuleset().RulesetInfo));
+            AddAssert("ranked score graph hidden", () => rankedScorePanel.IsPresent, () => Is.False);
+            AddUntilStep("rank graph takes the whole row", () => rankPanel.DrawWidth, () => Is.EqualTo(rankPanel.Parent!.Parent!.DrawWidth).Within(1));
+
+            AddStep("reset server kind", () => dummyAPI.Endpoints.RanksByStableScore = false);
+        }
+
+        [Test]
+        public void TestNoRankedScoreGraphOnOtherServers()
+        {
+            AddStep("Show example user", () => header.User.Value = new UserProfileData(TestSceneUserProfileOverlay.TEST_USER, new OsuRuleset().RulesetInfo));
+            AddAssert("ranked score graph hidden", () => rankedScorePanel.Alpha, () => Is.Zero);
+        }
+
+        private ProfileGraphPanel rankPanel => header.ChildrenOfType<ProfileGraphPanel>().Single(panel => panel.ChildrenOfType<RankGraph>().Any());
+
+        private ProfileGraphPanel rankedScorePanel => header.ChildrenOfType<ProfileGraphPanel>().Single(panel => panel.ChildrenOfType<RankedScoreGraph>().Any());
 
         [Test]
         public void TestPreviousUsernames()

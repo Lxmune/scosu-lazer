@@ -9,11 +9,14 @@ using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Testing;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Profile;
+using osu.Game.Overlays.Profile.Sections;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Tests.Resources;
 using osu.Game.Users;
@@ -87,6 +90,50 @@ namespace osu.Game.Tests.Visual.Online
                 dummyAPI.AuthenticateSecondFactor("abcdefgh");
             });
         }
+
+        [Test]
+        public void TestEmptySectionsHidden()
+        {
+            AddStep("set up request handling", () =>
+            {
+                dummyAPI.HandleRequest = req =>
+                {
+                    switch (req)
+                    {
+                        case GetUserRequest getUserRequest:
+                            getUserRequest.TriggerSuccess(TEST_USER);
+                            return true;
+
+                        // No beatmaps of any kind.
+                        case GetUserBeatmapsRequest getUserBeatmapsRequest:
+                            getUserBeatmapsRequest.TriggerSuccess(new List<APIBeatmapSet>());
+                            return true;
+
+                        // No scores of any kind.
+                        case GetUserScoresRequest getUserScoresRequest:
+                            getUserScoresRequest.TriggerSuccess(new List<SoloScoreInfo>());
+                            return true;
+                    }
+
+                    return false;
+                };
+            });
+            AddStep("show user", () => profile.ShowUser(new APIUser { Id = 1 }));
+
+            AddUntilStep("beatmaps section hidden", () => section<BeatmapsSection>()?.IsPresent, () => Is.False);
+            AddUntilStep("no beatmaps tab", () => hasTab<BeatmapsSection>(), () => Is.False);
+
+            AddUntilStep("scores section hidden", () => section<RanksSection>()?.IsPresent, () => Is.False);
+            AddUntilStep("no scores tab", () => hasTab<RanksSection>(), () => Is.False);
+
+            // Recent activity never arrives here: still loading, so still shown.
+            AddAssert("recent activity shown", () => section<RecentSection>()!.IsPresent, () => Is.True);
+            AddAssert("recent activity tab shown", () => hasTab<RecentSection>(), () => Is.True);
+        }
+
+        private T? section<T>() where T : ProfileSection => profile.ChildrenOfType<T>().SingleOrDefault();
+
+        private bool hasTab<T>() where T : ProfileSection => profile.ChildrenOfType<TabItem<ProfileSection>>().Any(t => t.Value is T);
 
         [Test]
         public void TestLoading()

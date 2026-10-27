@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -11,6 +12,7 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays.Profile.Sections;
 using osuTK;
 
 namespace osu.Game.Overlays.Profile
@@ -28,6 +30,13 @@ namespace osu.Game.Overlays.Profile
         protected override Container<Drawable> Content => content;
 
         public readonly Bindable<UserProfileData?> User = new Bindable<UserProfileData?>();
+
+        /// <summary>
+        /// Whether any part of the section has something to show. Empty sections (and their tabs) are hidden.
+        /// </summary>
+        public IBindable<bool> HasContent => hasContent;
+
+        private readonly BindableBool hasContent = new BindableBool(true);
 
         private const float outer_gutter_width = 10;
 
@@ -112,5 +121,19 @@ namespace osu.Game.Overlays.Profile
             background.Colour = colourProvider.Background4;
             underscore.Colour = colourProvider.Highlight1;
         }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            foreach (var subsection in content.OfType<ProfileSubsection>())
+                subsection.HasContent.BindValueChanged(_ => updateHasContent());
+
+            hasContent.BindValueChanged(e => Alpha = e.NewValue ? 1 : 0);
+            updateHasContent();
+        }
+
+        // Parts that aren't subsections (like the kudosu totals) always have something to show.
+        private void updateHasContent() => hasContent.Value = content.Any(child => child is not ProfileSubsection subsection || subsection.HasContent.Value);
     }
 }

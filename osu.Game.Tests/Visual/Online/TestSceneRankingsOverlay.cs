@@ -47,10 +47,11 @@ namespace osu.Game.Tests.Visual.Online
         [Test]
         public void TestFlagScopeDependency()
         {
-            AddStep("Set scope to Score", () => scope.Value = RankingsScope.Score);
+            // The default server (scosu) ranks players by score, and has no performance ranking.
+            AddStep("Set scope to Country", () => scope.Value = RankingsScope.Country);
             AddAssert("Check country is default", () => countryBindable.IsDefault);
             AddStep("Set country", () => countryBindable.Value = CountryCode.US);
-            AddAssert("Check scope is Performance", () => scope.Value == RankingsScope.Performance);
+            AddAssert("Check scope is Score", () => scope.Value == RankingsScope.Score);
         }
 
         [Test]

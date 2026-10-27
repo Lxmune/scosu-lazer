@@ -5,6 +5,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
+using osu.Game.Online.API;
 
 namespace osu.Game.Overlays.News
 {
@@ -19,9 +20,9 @@ namespace osu.Game.Overlays.News
         }
 
         [BackgroundDependencyLoader]
-        private void load(LargeTextureStore store)
+        private void load(LargeTextureStore store, IAPIProvider api)
         {
-            Texture = store.Get(createUrl(sourceUrl));
+            Texture = store.Get(createUrl(sourceUrl, api.Endpoints.WebsiteUrl));
         }
 
         protected override void LoadComplete()
@@ -30,13 +31,14 @@ namespace osu.Game.Overlays.News
             this.FadeInFromZero(500, Easing.OutQuint);
         }
 
-        private string createUrl(string source)
+        private static string createUrl(string source, string websiteUrl)
         {
             if (string.IsNullOrEmpty(source))
                 return "Headers/news";
 
+            // Relative to the website of the server the post came from.
             if (source.StartsWith('/'))
-                return "https://osu.ppy.sh" + source;
+                return websiteUrl + source;
 
             return source;
         }

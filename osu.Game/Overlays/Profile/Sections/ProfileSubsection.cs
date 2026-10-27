@@ -13,6 +13,11 @@ namespace osu.Game.Overlays.Profile.Sections
     {
         protected readonly Bindable<UserProfileData?> User = new Bindable<UserProfileData?>();
 
+        /// <summary>
+        /// Whether there is anything to show. Empty subsections are hidden, so profiles have no empty lists.
+        /// </summary>
+        public readonly BindableBool HasContent = new BindableBool(true);
+
         private readonly LocalisableString headerText;
         private readonly CounterVisibilityState counterVisibilityState;
 
@@ -40,6 +45,12 @@ namespace osu.Game.Overlays.Profile.Sections
                 },
                 CreateContent()
             };
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+            HasContent.BindValueChanged(hasContent => Alpha = hasContent.NewValue ? 1 : 0, true);
         }
 
         protected abstract Drawable CreateContent();

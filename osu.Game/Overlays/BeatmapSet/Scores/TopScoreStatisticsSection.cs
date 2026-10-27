@@ -17,6 +17,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
@@ -44,6 +45,15 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
 
         [Resolved]
         private ScoreManager scoreManager { get; set; }
+
+        [Resolved]
+        private IAPIProvider api { get; set; }
+
+        /// <summary>
+        /// Servers ranking by osu!stable score only show performance points on the results screen.
+        /// The score may be set before dependencies are resolved, so <see cref="load"/> checks again.
+        /// </summary>
+        private bool ranksByStableScore => api?.Endpoints.RanksByStableScore == true;
 
         public TopScoreStatisticsSection()
         {
@@ -97,6 +107,9 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
+            if (ranksByStableScore)
+                ppColumn.Hide();
+
             if (score != null)
             {
                 totalScoreColumn.Current = scoreManager.GetBindableTotalScoreString(score);
@@ -128,7 +141,7 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
                 accuracyColumn.Text = value.DisplayAccuracy;
                 maxComboColumn.Text = value.MaxCombo.ToLocalisableString(@"0\x");
 
-                ppColumn.Alpha = value.BeatmapInfo!.Status.GrantsPerformancePoints() ? 1 : 0;
+                ppColumn.Alpha = value.BeatmapInfo!.Status.GrantsPerformancePoints() && !ranksByStableScore ? 1 : 0;
 
                 if (!value.Ranked)
                 {

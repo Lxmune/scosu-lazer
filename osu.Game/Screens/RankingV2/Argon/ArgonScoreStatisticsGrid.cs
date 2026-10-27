@@ -22,6 +22,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Localisation.SkinComponents;
+using osu.Game.Online.API;
 using osu.Game.Overlays;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets.Mods;
@@ -52,6 +53,9 @@ namespace osu.Game.Screens.RankingV2.Argon
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -200,7 +204,7 @@ namespace osu.Game.Screens.RankingV2.Argon
                     ppCell.Alpha = 0.5f;
                     ppCell.TooltipText = ResultsScreenStrings.NoPPForUnrankedBeatmaps;
                 }
-                else if (hasUnrankedMods(mods, newScore.IsLegacyScore))
+                else if (ModUtils.HasUnrankedMods(mods, newScore.Ruleset, newScore.IsLegacyScore, api.Endpoints.RanksByStableScore))
                 {
                     ppCell.Alpha = 0.5f;
                     ppCell.TooltipText = ResultsScreenStrings.NoPPForUnrankedMods;
@@ -221,14 +225,6 @@ namespace osu.Game.Screens.RankingV2.Argon
                 ppCell.Value = "-";
                 ppCell.Alpha = 0.5f;
             }
-        }
-
-        private static bool hasUnrankedMods(IEnumerable<Mod> modsToCheck, bool isLegacyScore)
-        {
-            if (isLegacyScore)
-                modsToCheck = modsToCheck.Where(m => m is not ModClassic);
-
-            return modsToCheck.Any(m => !m.Ranked);
         }
 
         #region ISerialisableDrawable

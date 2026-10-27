@@ -5,6 +5,9 @@ using osu.Game.Overlays.Profile.Sections.Ranks;
 using osu.Game.Online.API.Requests;
 using osu.Framework.Localisation;
 using osu.Game.Resources.Localisation.Web;
+using osu.Framework.Allocation;
+using osu.Game.Localisation;
+using osu.Game.Online.API;
 
 namespace osu.Game.Overlays.Profile.Sections
 {
@@ -14,12 +17,13 @@ namespace osu.Game.Overlays.Profile.Sections
 
         public override string Identifier => @"top_ranks";
 
-        public RanksSection()
+        [BackgroundDependencyLoader]
+        private void load(IAPIProvider api)
         {
             Children = new[]
             {
                 new PaginatedScoreContainer(ScoreType.Pinned, User, UsersStrings.ShowExtraTopRanksPinnedTitle),
-                new PaginatedScoreContainer(ScoreType.Best, User, UsersStrings.ShowExtraTopRanksBestTitle),
+                new PaginatedScoreContainer(ScoreType.Best, User, api.Endpoints.RanksByStableScore ? StableScoreStrings.BestScoresTitle : UsersStrings.ShowExtraTopRanksBestTitle),
                 new PaginatedScoreContainer(ScoreType.Firsts, User, UsersStrings.ShowExtraTopRanksFirstTitle)
             };
         }

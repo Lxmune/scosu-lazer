@@ -25,10 +25,12 @@ using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Legacy;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Osu.Mods;
+using osu.Game.Scoring;
 using osu.Game.Screens.Select;
 using osu.Game.Skinning;
 
@@ -279,6 +281,78 @@ namespace osu.Game.Tests.Visual.SongSelect
         private void setRuleset(RulesetInfo rulesetInfo)
         {
             AddStep("set ruleset", () => Ruleset.Value = rulesetInfo);
+        }
+
+        [Test]
+        public void TestMaximumScoreOnStableScoreServers()
+        {
+            var attributes = new StableScoreAttributes { AccuracyScore = 61_350, ComboScore = 2_345_678, BonusScore = 4_000, MaxCombo = 650 };
+            long? best = 2_000_000;
+            string? bestLeaderboard = null;
+
+            AddStep("rank by stable score", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = true);
+            AddStep("set up requests", () =>
+            {
+                ((DummyAPIAccess)API).HandleRequest = request =>
+                {
+                    switch (request)
+                    {
+                        case GetStableScoreAttributesRequest attributesRequest:
+                            attributesRequest.TriggerSuccess(attributes);
+                            return true;
+
+                        case GetUserBestStableScoreRequest bestRequest:
+                            bestLeaderboard = bestRequest.LeaderboardRuleset.ShortName;
+                            bestRequest.TriggerSuccess(new APIScoresCollection
+                            {
+                                UserScore = best == null ? null : new APIScoreWithPosition { Position = 3, Score = new SoloScoreInfo { LegacyTotalScore = best } },
+                            });
+                            return true;
+
+                        default:
+                            return false;
+                    }
+                };
+            });
+
+            AddStep("select ranked beatmap", () =>
+            {
+                var (working, lookupResult) = createTestBeatmap();
+                working.BeatmapInfo.Status = BeatmapOnlineStatus.Ranked;
+                (Beatmap.Value, onlineLookupResult.Value) = (working, lookupResult);
+            });
+            checkMaximumScore("Best 2,000,000 / Max 2,411,028 (−411,028)");
+
+            AddStep("select Hidden", () => SelectedMods.Value = new[] { new OsuModHidden() });
+            checkMaximumScore("Best 2,000,000 / Max 2,551,769 (−551,769)");
+
+            AddStep("select Relax", () => SelectedMods.Value = new[] { new OsuModRelax() });
+            AddUntilStep("best looked up on the Relax leaderboard", () => bestLeaderboard, () => Is.EqualTo("osurx"));
+
+            AddStep("no best", () => best = null);
+            AddStep("select nothing", () => SelectedMods.Value = Array.Empty<Mod>());
+            checkMaximumScore("Max 2,411,028");
+
+            AddStep("best above the maximum", () => best = 2_500_000);
+            AddStep("refresh", () => titleWedge.Refresh());
+            checkMaximumScore("Best 2,500,000 / Max 2,411,028");
+
+            AddStep("select qualified beatmap", () =>
+            {
+                var (working, lookupResult) = createTestBeatmap();
+                working.BeatmapInfo.Status = BeatmapOnlineStatus.Qualified;
+                (Beatmap.Value, onlineLookupResult.Value) = (working, lookupResult);
+            });
+            AddUntilStep("maximum score hidden", () => maximumScore.Alpha, () => Is.Zero);
+
+            AddStep("reset server kind", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = false);
+        }
+
+        private BeatmapTitleWedge.StatisticMaximumScore maximumScore => titleWedge.ChildrenOfType<BeatmapTitleWedge.StatisticMaximumScore>().Single();
+
+        private void checkMaximumScore(string expected)
+        {
+            AddUntilStep($"maximum score is \"{expected}\"", () => maximumScore.Alpha == 1 ? maximumScore.Text?.ToString() : null, () => Is.EqualTo(expected));
         }
 
         private void selectBeatmap(IBeatmap? b)

@@ -26,7 +26,7 @@ namespace osu.Game.Overlays.FirstRunSetup
     public partial class ScreenWelcome : WizardScreen
     {
         [BackgroundDependencyLoader]
-        private void load(FrameworkConfigManager frameworkConfig)
+        private void load(FrameworkConfigManager frameworkConfig, OsuColour colours)
         {
             Content.Children = new Drawable[]
             {
@@ -51,6 +51,19 @@ namespace osu.Game.Overlays.FirstRunSetup
                             },
                         },
                     }
+                },
+                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE, weight: FontWeight.Bold))
+                {
+                    Text = FirstRunSetupOverlayStrings.HeadsUpTitle,
+                    Colour = colours.Yellow,
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y
+                },
+                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
+                {
+                    Text = FirstRunSetupOverlayStrings.HeadsUpDescription,
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y
                 },
                 new SettingsCheckbox
                 {

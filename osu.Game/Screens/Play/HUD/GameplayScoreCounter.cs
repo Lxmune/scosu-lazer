@@ -23,9 +23,12 @@ namespace osu.Game.Screens.Play.HUD
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config, ScoreProcessor scoreProcessor)
+        private void load(OsuConfigManager config, ScoreProcessor scoreProcessor, GameplayState? gameplayState)
         {
-            totalScoreBindable = scoreProcessor.TotalScore.GetBoundCopy();
+            // On servers that rank plays by osu!stable score, the play's stable score.
+            var stableScore = gameplayState?.ScoreProcessor == scoreProcessor ? gameplayState.StableScore : null;
+
+            totalScoreBindable = (stableScore?.TotalScore ?? scoreProcessor.TotalScore).GetBoundCopy();
             totalScoreBindable.BindValueChanged(_ => updateDisplayScore());
 
             scoreDisplayMode = config.GetBindable<ScoringMode>(OsuSetting.ScoreDisplayMode);
@@ -48,7 +51,7 @@ namespace osu.Game.Screens.Play.HUD
                 updateDisplayScore();
             }, true);
 
-            void updateDisplayScore() => Current.Value = scoreProcessor.GetDisplayScore(scoreDisplayMode.Value);
+            void updateDisplayScore() => Current.Value = stableScore?.GetDisplayScore(scoreDisplayMode.Value) ?? scoreProcessor.GetDisplayScore(scoreDisplayMode.Value);
         }
     }
 }

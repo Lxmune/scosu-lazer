@@ -125,7 +125,7 @@ namespace osu.Game.Screens.Select
 
             sampleConfirmSelection?.Play();
 
-            this.Push(playerLoader = new PlayerLoader(createPlayer));
+            this.Push(playerLoader = new PlayerLoader(createPlayer) { CountsTowardsRankedScore = true });
 
             Player createPlayer()
             {

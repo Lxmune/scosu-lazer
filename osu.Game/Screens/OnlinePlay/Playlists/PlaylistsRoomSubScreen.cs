@@ -684,7 +684,11 @@ namespace osu.Game.Screens.OnlinePlay.Playlists
             targetScreen.Push(new PlayerLoader(() => new PlaylistsPlayer(room, gameplayItem)
             {
                 Exited = () => leaderboard.RefetchScores()
-            }));
+            })
+            {
+                // scosu servers count room plays towards ranked score.
+                CountsTowardsRankedScore = true,
+            });
         }
 
         /// <summary>

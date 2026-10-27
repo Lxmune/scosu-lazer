@@ -68,7 +68,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                                    .Callback((Notification n) => lastNotification = n);
             });
 
-            AddStep("reset first run", () => LocalConfig.SetValue(OsuSetting.ShowFirstRunSetup, true));
+            AddStep("reset first run", () => LocalConfig.SetValue(OsuSetting.ShowScosuFirstRunSetup, true));
 
             createScreen();
         }
@@ -83,7 +83,7 @@ namespace osu.Game.Tests.Visual.UserInterface
         [Test]
         public void TestDoesntOpenOnSecondRun()
         {
-            AddStep("set first run", () => LocalConfig.SetValue(OsuSetting.ShowFirstRunSetup, true));
+            AddStep("set first run", () => LocalConfig.SetValue(OsuSetting.ShowScosuFirstRunSetup, true));
 
             AddUntilStep("step through", () =>
             {
@@ -91,7 +91,7 @@ namespace osu.Game.Tests.Visual.UserInterface
                 return overlay.State.Value == Visibility.Hidden;
             });
 
-            AddAssert("first run false", () => !LocalConfig.Get<bool>(OsuSetting.ShowFirstRunSetup));
+            AddAssert("first run false", () => !LocalConfig.Get<bool>(OsuSetting.ShowScosuFirstRunSetup));
 
             AddStep("exit screen", () => Stack.Exit());
             createScreen();

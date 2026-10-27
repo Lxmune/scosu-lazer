@@ -44,6 +44,11 @@ namespace osu.Game.Screens.Play
         public readonly HealthProcessor HealthProcessor;
 
         /// <summary>
+        /// The osu!stable score of the play, on servers that rank plays by it.
+        /// </summary>
+        public readonly GameplayStableScore StableScore;
+
+        /// <summary>
         /// The storyboard associated with the beatmap.
         /// </summary>
         public readonly Storyboard Storyboard;
@@ -102,6 +107,7 @@ namespace osu.Game.Screens.Play
             };
             Mods = mods ?? Array.Empty<Mod>();
             ScoreProcessor = scoreProcessor ?? ruleset.CreateScoreProcessor();
+            StableScore = new GameplayStableScore(ScoreProcessor, ruleset, Mods);
             HealthProcessor = healthProcessor ?? ruleset.CreateHealthProcessor(beatmap.HitObjects[0].StartTime);
             Storyboard = storyboard ?? new Storyboard();
 

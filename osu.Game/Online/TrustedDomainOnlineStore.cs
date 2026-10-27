@@ -9,9 +9,18 @@ namespace osu.Game.Online
 {
     public sealed class TrustedDomainOnlineStore : OnlineStore
     {
+        private readonly string serverHost;
+
+        /// <param name="serverUrl">The website of the connected server, whose resources (avatars, covers, ...) are trusted along with osu!'s.</param>
+        public TrustedDomainOnlineStore(string serverUrl)
+        {
+            serverHost = new Uri(serverUrl).Host;
+        }
+
         protected override string GetLookupUrl(string url)
         {
-            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) || !uri.Host.EndsWith(@".ppy.sh", StringComparison.OrdinalIgnoreCase))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri)
+                || !(uri.Host.EndsWith(@".ppy.sh", StringComparison.OrdinalIgnoreCase) || uri.Host.Equals(serverHost, StringComparison.OrdinalIgnoreCase)))
             {
                 Logger.Log($@"Blocking resource lookup from external website: {url}", LoggingTarget.Network, LogLevel.Important);
                 return string.Empty;

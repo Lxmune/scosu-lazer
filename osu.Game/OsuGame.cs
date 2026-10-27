@@ -63,6 +63,7 @@ using osu.Game.Overlays.OSD;
 using osu.Game.Overlays.SkinEditor;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Overlays.Volume;
+using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -100,9 +101,9 @@ namespace osu.Game
     {
 #if DEBUG
         // Different port allows running release and debug builds alongside each other.
-        public const string IPC_PIPE_NAME = "osu-lazer-debug";
+        public const string IPC_PIPE_NAME = "scosu-debug";
 #else
-        public const string IPC_PIPE_NAME = "osu-lazer";
+        public const string IPC_PIPE_NAME = "scosu";
 #endif
 
         /// <summary>
@@ -899,13 +900,14 @@ namespace osu.Game
                 var currentLeaderboard = LeaderboardManager.CurrentCriteria;
 
                 bool leaderboardBeatmapMatches = currentLeaderboard != null && databasedBeatmap.Equals(currentLeaderboard.Beatmap);
-                bool leaderboardRulesetMatches = currentLeaderboard != null && databasedScore.ScoreInfo.Ruleset.Equals(currentLeaderboard.Ruleset);
+                var scoreLeaderboardRuleset = databasedScore.ScoreInfo.GetLeaderboardRuleset();
+                bool leaderboardRulesetMatches = currentLeaderboard != null && scoreLeaderboardRuleset.Equals(currentLeaderboard.Ruleset);
 
                 if (!leaderboardBeatmapMatches || !leaderboardRulesetMatches)
                 {
                     var newLeaderboard = currentLeaderboard != null
-                        ? currentLeaderboard with { Beatmap = databasedBeatmap, Ruleset = databasedScore.ScoreInfo.Ruleset }
-                        : new LeaderboardCriteria(databasedBeatmap, databasedScore.ScoreInfo.Ruleset, BeatmapLeaderboardScope.Global, null);
+                        ? currentLeaderboard with { Beatmap = databasedBeatmap, Ruleset = scoreLeaderboardRuleset }
+                        : new LeaderboardCriteria(databasedBeatmap, scoreLeaderboardRuleset, BeatmapLeaderboardScope.Global, null);
                     LeaderboardManager.FetchWithCriteria(newLeaderboard);
                 }
 
@@ -1233,6 +1235,7 @@ namespace osu.Game
             loadComponentSingleFile(channelManager = new ChannelManager(API), Add, true);
             loadComponentSingleFile(chatOverlay = new ChatOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(new MessageNotifier(), Add, true);
+            loadComponentSingleFile(new FirstPlaceLostNotifier(), Add, true);
             loadComponentSingleFile(Settings = new SettingsOverlay(), leftFloatingOverlayContent.Add, true);
             loadComponentSingleFile(changelogOverlay = new ChangelogOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(userProfile = new UserProfileOverlay(), overlayContent.Add, true);

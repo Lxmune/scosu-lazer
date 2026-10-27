@@ -65,6 +65,7 @@ namespace osu.Game.Screens.Select
         private FavouriteButton favouriteButton = null!;
         private Statistic lengthStatistic = null!;
         private Statistic bpmStatistic = null!;
+        private StatisticMaximumScore maximumScore = null!;
 
         [Resolved]
         private ISongSelect? songSelect { get; set; }
@@ -169,6 +170,12 @@ namespace osu.Game.Screens.Select
                         new ShearAligningWrapper(new Container
                         {
                             Shear = -OsuGame.SHEAR,
+                            AutoSizeAxes = Axes.Both,
+                            Child = maximumScore = new StatisticMaximumScore(),
+                        }),
+                        new ShearAligningWrapper(new Container
+                        {
+                            Shear = -OsuGame.SHEAR,
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
                             Margin = new MarginPadding { Left = -SongSelect.WEDGE_CONTENT_MARGIN },
@@ -203,6 +210,11 @@ namespace osu.Game.Screens.Select
             statisticsFlow.AutoSizeDuration = 100;
             statisticsFlow.AutoSizeEasing = Easing.OutQuint;
         }
+
+        /// <summary>
+        /// Looks up again what changes after a play.
+        /// </summary>
+        public void Refresh() => maximumScore.Refresh();
 
         protected override void PopIn()
         {

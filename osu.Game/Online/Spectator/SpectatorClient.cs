@@ -89,6 +89,7 @@ namespace osu.Game.Online.Spectator
         private Score? currentScore;
         private long? currentScoreToken;
         private ScoreProcessor? currentScoreProcessor;
+        private GameplayStableScore? currentStableScore;
 
         private readonly Queue<FrameDataBundle> pendingFrameBundles = new Queue<FrameDataBundle>();
 
@@ -302,6 +303,7 @@ namespace osu.Game.Online.Spectator
             currentScore = score;
             currentScoreToken = scoreToken;
             currentScoreProcessor = state.ScoreProcessor;
+            currentStableScore = state.StableScore;
         }
 
         private void clearScoreState()
@@ -311,6 +313,7 @@ namespace osu.Game.Online.Spectator
             currentBeatmap = null;
             currentScore = null;
             currentScoreProcessor = null;
+            currentStableScore = null;
             currentScoreToken = null;
         }
 
@@ -387,6 +390,10 @@ namespace osu.Game.Online.Spectator
 
             var frames = pendingFrames.ToArray();
             var bundle = new FrameDataBundle(currentScore.ScoreInfo, currentScoreProcessor, frames);
+
+            // On servers that rank plays by osu!stable score, others see the play's stable score (see SpectatorScoreProcessor).
+            if (currentStableScore?.Attributes != null)
+                bundle.Header.TotalScore = currentStableScore.TotalScore.Value;
 
             pendingFrames.Clear();
             lastPurgeTime = Time.Current;

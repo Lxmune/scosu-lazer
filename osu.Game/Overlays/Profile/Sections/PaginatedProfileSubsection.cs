@@ -9,8 +9,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Graphics.Containers;
@@ -43,13 +41,10 @@ namespace osu.Game.Overlays.Profile.Sections
         private CancellationTokenSource? loadCancellation;
 
         private ShowMoreButton moreButton = null!;
-        private OsuSpriteText missing = null!;
-        private readonly LocalisableString? missingText;
 
-        protected PaginatedProfileSubsection(Bindable<UserProfileData?> user, LocalisableString? headerText = null, LocalisableString? missingText = null)
+        protected PaginatedProfileSubsection(Bindable<UserProfileData?> user, LocalisableString? headerText = null)
             : base(user, headerText, CounterVisibilityState.AlwaysVisible)
         {
-            this.missingText = missingText;
         }
 
         protected override Drawable CreateContent() => new FillFlowContainer
@@ -77,12 +72,6 @@ namespace osu.Game.Overlays.Profile.Sections
                     Margin = new MarginPadding { Top = 10 },
                     Action = showMore,
                 },
-                missing = new OsuSpriteText
-                {
-                    Font = OsuFont.GetFont(size: 15),
-                    Text = missingText ?? string.Empty,
-                    Alpha = 0,
-                }
             }
         };
 
@@ -99,6 +88,8 @@ namespace osu.Game.Overlays.Profile.Sections
 
             CurrentPage = null;
             ItemsContainer.Clear();
+            // Shown while loading: a hidden drawable doesn't run what it schedules, and the items arrive through its scheduler.
+            HasContent.Value = true;
 
             if (e.NewValue?.User != null)
             {
@@ -128,10 +119,7 @@ namespace osu.Game.Overlays.Profile.Sections
             {
                 moreButton.Hide();
                 moreButton.IsLoading = false;
-
-                if (missingText.HasValue)
-                    missing.Show();
-
+                HasContent.Value = false;
                 return;
             }
 
@@ -144,8 +132,6 @@ namespace osu.Game.Overlays.Profile.Sections
 
             LoadComponentsAsync(items.Select(CreateDrawableItem).Where(d => d != null).Cast<Drawable>(), drawables =>
             {
-                missing.Hide();
-
                 moreButton.FadeTo(hasMore ? 1 : 0);
                 moreButton.IsLoading = false;
 

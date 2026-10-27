@@ -48,6 +48,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
         private bool? epilepsyWarning;
         private BeatmapOnlineStatus? onlineStatus;
+        private bool countsTowardsRankedScore;
 
         [Resolved]
         private AudioManager audioManager { get; set; }
@@ -113,6 +114,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             player = null;
             epilepsyWarning = null;
             onlineStatus = null;
+            countsTowardsRankedScore = false;
         });
 
         [SetUpSteps]
@@ -162,7 +164,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             prepareBeatmap();
 
-            LoadScreen(loader = new TestPlayerLoader(() => player = new TestPlayer(interactive, interactive)));
+            LoadScreen(loader = new TestPlayerLoader(() => player = new TestPlayer(interactive, interactive)) { CountsTowardsRankedScore = countsTowardsRankedScore });
         }
 
         private void prepareBeatmap()
@@ -526,6 +528,37 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             AddAssert("disclaimer count is 2", () => this.ChildrenOfType<PlayerLoaderDisclaimer>().Count(), () => Is.EqualTo(2));
 
+            restoreVolumes();
+        }
+
+        [TestCase(BeatmapOnlineStatus.Ranked, null, true, 0)]
+        [TestCase(BeatmapOnlineStatus.Ranked, "WG", true, 1)]
+        [TestCase(BeatmapOnlineStatus.Ranked, "WG", false, 0)]
+        [TestCase(BeatmapOnlineStatus.Ranked, "DA", true, 0)] // only the approach rate changed
+        [TestCase(BeatmapOnlineStatus.Ranked, "AT", true, 0)] // nobody expects autoplay to count
+        [TestCase(BeatmapOnlineStatus.Graveyard, null, true, 1)]
+        public void TestNoRankedScoreWarning(BeatmapOnlineStatus status, string mod, bool counts, int expectedDisclaimerCount)
+        {
+            saveVolumes();
+            setFullVolume();
+
+            AddStep("rank by stable score", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = true);
+            AddStep("disable epilepsy warning", () => epilepsyWarning = false);
+            AddStep("set beatmap status", () => onlineStatus = status);
+            AddStep("set whether the play counts", () => countsTowardsRankedScore = counts);
+            AddStep("load dummy beatmap", () => resetPlayer(false, () => SelectedMods.Value = mod switch
+            {
+                "WG" => new Mod[] { new OsuModWiggle() },
+                "DA" => new Mod[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } } },
+                "AT" => new Mod[] { new OsuModAutoplay() },
+                _ => Array.Empty<Mod>(),
+            }));
+
+            AddUntilStep("wait for current", () => loader.IsCurrentScreen());
+
+            AddAssert($"disclaimer count is {expectedDisclaimerCount}", () => this.ChildrenOfType<PlayerLoaderDisclaimer>().Count(), () => Is.EqualTo(expectedDisclaimerCount));
+
+            AddStep("reset server kind", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = false);
             restoreVolumes();
         }
 

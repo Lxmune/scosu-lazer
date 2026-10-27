@@ -3,13 +3,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Localisation;
 using osu.Game.Users;
 using osu.Game.Scoring;
 using osu.Framework.Localisation;
@@ -72,6 +77,10 @@ namespace osu.Game.Overlays.Rankings.Tables
                 TextAnchor = Anchor.CentreLeft
             };
             username.AddUserLink(item.User);
+
+            if (item.RankChangeSince14Days is int change && change != 0)
+                return [new UpdateableTeamFlag(item.User.Team) { Size = new Vector2(40, 20) }, username, new RankChangeText(change)];
+
             return [new UpdateableTeamFlag(item.User.Team) { Size = new Vector2(40, 20) }, username];
         }
 
@@ -87,6 +96,33 @@ namespace osu.Game.Overlays.Rankings.Tables
         }).ToArray();
 
         protected abstract RankingsTableColumn[] CreateUniqueHeaders();
+
+        /// <summary>
+        /// "▲2" or "▼3": how the user's rank changed in the last 14 days.
+        /// </summary>
+        private partial class RankChangeText : OsuSpriteText, IHasTooltip
+        {
+            private readonly int change;
+
+            public RankChangeText(int change)
+            {
+                this.change = change;
+
+                Anchor = Anchor.CentreLeft;
+                Origin = Anchor.CentreLeft;
+                Font = OsuFont.GetFont(size: TEXT_SIZE - 2, weight: FontWeight.Bold);
+                Text = $"{(change > 0 ? "▲" : "▼")}{Math.Abs(change):N0}";
+                TooltipText = GainedRankingsStrings.RankChange(change.ToLocalisableString(@"+#,0;-#,0"));
+            }
+
+            public LocalisableString TooltipText { get; }
+
+            [BackgroundDependencyLoader]
+            private void load(OsuColour colours)
+            {
+                Colour = change > 0 ? colours.Lime1 : colours.Red1;
+            }
+        }
 
         protected abstract Drawable[] CreateUniqueContent(UserStatistics item);
 

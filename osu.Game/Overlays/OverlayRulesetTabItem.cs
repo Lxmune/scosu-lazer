@@ -14,7 +14,9 @@ using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Localisation;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Sprites;
 
 namespace osu.Game.Overlays
 {
@@ -29,6 +31,7 @@ namespace osu.Game.Overlays
             {
                 accentColour = value;
                 icon.FadeColour(value, 120, Easing.OutQuint);
+                modLabel?.FadeColour(value, 120, Easing.OutQuint);
             }
         }
 
@@ -38,6 +41,11 @@ namespace osu.Game.Overlays
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
         private readonly Drawable icon;
+
+        /// <summary>
+        /// "RX" or "AP" next to the icon of a Relax or Autopilot leaderboard.
+        /// </summary>
+        private readonly OsuSpriteText? modLabel;
 
         public LocalisableString TooltipText => Value.Name;
 
@@ -65,6 +73,17 @@ namespace osu.Game.Overlays
                 },
                 new HoverSounds(HoverSampleSet.TabSelect)
             });
+
+            if (value.GetRelaxLeaderboardMod() is string mod)
+            {
+                Content.Add(modLabel = new OsuSpriteText
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Text = mod,
+                    Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold),
+                });
+            }
 
             Enabled.Value = true;
         }

@@ -98,11 +98,9 @@ namespace osu.Game.Tests.Visual.Online
             AddAssert(@"no stream selected", () => changelog.Header.Streams.Current.Value == null);
         }
 
-        [TestCase(false)]
-        [TestCase(true)]
-        public void ShowWithBuild(bool isSupporter)
+        [Test]
+        public void ShowWithBuild()
         {
-            AddStep(@"set supporter", () => dummyAPI.LocalUser.Value.IsSupporter = isSupporter);
             showBuild(() => new APIChangelogBuild
             {
                 Version = "2018.712.0",
@@ -168,8 +166,7 @@ namespace osu.Game.Tests.Visual.Online
             AddUntilStep(@"wait for streams", () => changelog.Streams?.Count > 0);
             AddAssert(@"correct build displayed", () => changelog.Current.Value.Version == "2018.712.0");
             AddAssert(@"correct stream selected", () => changelog.Header.Streams.Current.Value.Id == 5);
-            AddUntilStep(@"wait for content load", () => changelog.ChildrenOfType<ChangelogSupporterPromo>().Any());
-            AddAssert(@"supporter promo showed", () => changelog.ChildrenOfType<ChangelogSupporterPromo>().First().Alpha == (isSupporter ? 0 : 1));
+            AddUntilStep(@"wait for content load", () => changelog.ChildrenOfType<ChangelogSingleBuild.ChangelogBuildWithNavigation>().Any());
         }
 
         [Test]

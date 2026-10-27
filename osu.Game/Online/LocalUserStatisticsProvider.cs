@@ -68,13 +68,13 @@ namespace osu.Game.Online
             if (api.LocalUser.Value == null || api.LocalUser.Value.Id <= 1)
                 return;
 
-            foreach (var ruleset in rulesets.AvailableRulesets.Where(r => r.IsLegacyRuleset()))
+            foreach (var ruleset in rulesets.AvailableRulesets.Where(r => r.IsLegacyRuleset()).SelectMany(r => r.WithRelaxLeaderboards()))
                 RefetchStatistics(ruleset);
         }
 
         public void RefetchStatistics(RulesetInfo ruleset, Action<UserStatisticsUpdate>? callback = null)
         {
-            if (!ruleset.IsLegacyRuleset())
+            if (!ruleset.IsLegacyRuleset() && ruleset.GetRelaxLeaderboardMod() == null)
                 throw new InvalidOperationException($@"Retrieving statistics is not supported for ruleset {ruleset.ShortName}");
 
             var request = new GetUserRequest(api.LocalUser.Value.Id, ruleset);

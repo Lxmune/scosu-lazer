@@ -4,6 +4,10 @@
 #nullable disable
 
 using System.Collections.Generic;
+using osu.Game.Graphics.Sprites;
+using osu.Framework.Testing;
+using NUnit.Framework;
+using System.Linq;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Overlays.Rankings.Tables;
 using osu.Framework.Graphics;
@@ -49,6 +53,15 @@ namespace osu.Game.Tests.Visual.Online
             AddStep("Country scores", createCountryTable);
         }
 
+        [Test]
+        public void TestRankChanges()
+        {
+            AddStep("User scores", createScoreTable);
+            AddUntilStep("climb shown", () => this.ChildrenOfType<OsuSpriteText>().Any(t => t.Text.ToString() == "▲2"));
+            AddAssert("fall shown", () => this.ChildrenOfType<OsuSpriteText>().Any(t => t.Text.ToString() == "▼3"));
+            AddAssert("no change without data", () => this.ChildrenOfType<OsuSpriteText>().Count(t => t.Text.ToString().StartsWith('▲') || t.Text.ToString().StartsWith('▼')), () => Is.EqualTo(2));
+        }
+
         private void createCountryTable()
         {
             onLoadStarted();
@@ -92,6 +105,7 @@ namespace osu.Game.Tests.Visual.Online
                 TotalScore = 983_231_234_656,
                 RankedScore = 593_231_345_897,
                 PP = 23_934,
+                RankChangeSince14Days = 2,
                 GradesCount = new UserStatistics.Grades
                 {
                     SS = 35_132,
@@ -112,6 +126,7 @@ namespace osu.Game.Tests.Visual.Online
                 TotalScore = 683_231_234_656,
                 RankedScore = 393_231_345_897,
                 PP = 20_934,
+                RankChangeSince14Days = -3,
                 GradesCount = new UserStatistics.Grades
                 {
                     SS = 32_132,

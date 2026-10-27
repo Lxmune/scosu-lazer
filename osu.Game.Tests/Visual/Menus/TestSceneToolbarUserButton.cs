@@ -7,10 +7,13 @@ using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Framework.Testing;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Overlays.Toolbar;
+using osu.Game.Resources.Localisation.Web;
 using osu.Game.Scoring;
 using osu.Game.Users;
 using osuTK;
@@ -218,6 +221,79 @@ namespace osu.Game.Tests.Visual.Menus
                         PP = null
                     });
             });
+        }
+
+        private Container? stableScoreDisplayContainer;
+        private TransientUserStatisticsUpdateDisplay? stableScoreDisplay;
+
+        [Test]
+        public void TestRankedScoreOnStableScoreServers()
+        {
+            AddStep("rank by stable score", () => dummyAPI.Endpoints.RanksByStableScore = true);
+
+            // The display decides what it shows when it loads, so it is created after the server kind is set.
+            AddStep("create display", () => Add(stableScoreDisplayContainer = new Container
+            {
+                Anchor = Anchor.BottomCentre,
+                Origin = Anchor.BottomCentre,
+                AutoSizeAxes = Axes.X,
+                Height = Toolbar.HEIGHT,
+                Child = stableScoreDisplay = new TransientUserStatisticsUpdateDisplay(),
+            }));
+            AddUntilStep("wait for display", () => stableScoreDisplay?.IsLoaded == true);
+
+            AddStep("gain ranked score", () => stableScoreDisplay!.LatestUpdate.Value = new ScoreBasedUserStatisticsUpdate(
+                new ScoreInfo(),
+                new UserStatistics
+                {
+                    GlobalRank = 123_456,
+                    PP = 1234,
+                    RankedScore = 1_000_000,
+                },
+                new UserStatistics
+                {
+                    GlobalRank = 111_111,
+                    PP = 1357,
+                    RankedScore = 1_250_000,
+                }));
+
+            AddAssert("ranked score shown", () => statisticShown(UsersStrings.ShowStatsRankedScore));
+            AddAssert("pp hidden", () => !statisticShown(RankingsStrings.StatPerformance));
+            AddAssert("rank shown", () => statisticShown(UsersStrings.ShowRankGlobalSimple));
+            AddUntilStep("gain shown", () => displayedTexts().Contains("+250,000"));
+            AddUntilStep("ranked score rolls to its new value", () => displayedTexts().Contains("1,250,000"));
+        }
+
+        [TearDownSteps]
+        public void TearDownSteps()
+        {
+            AddStep("remove stable score display", () =>
+            {
+                if (stableScoreDisplayContainer != null)
+                    Remove(stableScoreDisplayContainer, true);
+
+                stableScoreDisplayContainer = null;
+                stableScoreDisplay = null;
+            });
+            AddStep("reset server kind", () => dummyAPI.Endpoints.RanksByStableScore = false);
+        }
+
+        private string[] displayedTexts() => stableScoreDisplay!.ChildrenOfType<OsuSpriteText>().Select(t => t.Text.ToString()).ToArray();
+
+        /// <summary>
+        /// Whether the statistic titled <paramref name="title"/> is shown (its title itself fades out once the change shows).
+        /// </summary>
+        private bool statisticShown(LocalisableString title)
+        {
+            var titleText = stableScoreDisplay!.ChildrenOfType<OsuSpriteText>().Single(t => t.Text.ToString() == title.ToString());
+
+            for (Drawable? drawable = titleText.Parent; drawable != null && drawable != stableScoreDisplay; drawable = drawable.Parent)
+            {
+                if (drawable.Alpha == 0)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

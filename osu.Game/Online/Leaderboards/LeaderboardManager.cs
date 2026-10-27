@@ -78,7 +78,7 @@ namespace osu.Game.Online.Leaderboards
                                                   + $" AND {nameof(ScoreInfo.BeatmapInfo)}.{nameof(BeatmapInfo.Hash)} == {nameof(ScoreInfo.BeatmapHash)}"
                                                   + $" AND {nameof(ScoreInfo.Ruleset)}.{nameof(RulesetInfo.ShortName)} == $1"
                                                   + $" AND {nameof(ScoreInfo.DeletePending)} == false"
-                            , newCriteria.Beatmap.ID, newCriteria.Ruleset.ShortName), localScoresChanged);
+                            , newCriteria.Beatmap.ID, newCriteria.Ruleset.GetPlayedRulesetShortName()), localScoresChanged);
                     return;
                 }
 
@@ -93,7 +93,7 @@ namespace osu.Game.Online.Leaderboards
                         return;
                     }
 
-                    if (!newCriteria.Ruleset.IsLegacyRuleset())
+                    if (!newCriteria.Ruleset.IsLegacyRuleset() && newCriteria.Ruleset.GetRelaxLeaderboardMod() == null)
                     {
                         scores.Value = LeaderboardScores.Failure(LeaderboardFailState.RulesetUnavailable);
                         return;
@@ -173,7 +173,8 @@ namespace osu.Game.Online.Leaderboards
             if (changes?.HasCollectionChanges() == false)
                 return;
 
-            var newScores = sender.AsEnumerable();
+            // Relax and Autopilot plays are ranked apart from the others (see `RelaxLeaderboards`).
+            var newScores = sender.AsEnumerable().Where(s => s.GetLeaderboardRuleset().Equals(CurrentCriteria.Ruleset));
 
             if (CurrentCriteria.ExactMods != null)
             {

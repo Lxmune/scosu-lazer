@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using osu.Framework.Allocation;
@@ -9,9 +10,12 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Extensions;
 using osu.Game.Online.API;
+using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Rulesets;
 
 namespace osu.Game.Overlays.Dashboard.Friends
 {
@@ -24,6 +28,16 @@ namespace osu.Game.Overlays.Dashboard.Friends
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private IBindable<RulesetInfo> ruleset { get; set; } = null!;
+
+        /// <summary>
+        /// The friends' scores in the current ruleset, on servers that have them.
+        /// </summary>
+        private IReadOnlyDictionary<int, APIFriendScores.Entry>? scores;
+
+        private GetFriendScoresRequest? scoresRequest;
 
         private FriendOnlineStreamControl streamControl = null!;
         private Box background = null!;
@@ -164,9 +178,35 @@ namespace osu.Game.Overlays.Dashboard.Friends
             base.LoadComplete();
 
             apiFriends.BindTo(api.LocalUserState.Friends);
-            apiFriends.BindCollectionChanged((_, _) => reloadList());
+            apiFriends.BindCollectionChanged((_, _) =>
+            {
+                reloadList();
+                Scheduler.AddOnce(fetchScores);
+            });
 
             userListToolbar.DisplayStyle.BindValueChanged(_ => reloadList(), true);
+            ruleset.BindValueChanged(_ => Scheduler.AddOnce(fetchScores), true);
+        }
+
+        private void fetchScores()
+        {
+            scoresRequest?.Cancel();
+            scoresRequest = null;
+
+            if (!api.Endpoints.RanksByStableScore || !ruleset.Value.IsLegacyRuleset())
+                return;
+
+            var request = scoresRequest = new GetFriendScoresRequest(ruleset.Value, GetScoreSummaryRequest.LocalMidnight());
+            request.Success += response =>
+            {
+                if (request != scoresRequest)
+                    return;
+
+                scores = response.Friends.ToDictionary(f => f.UserId);
+                reloadList();
+            };
+            // The cards just go without scores.
+            api.Queue(request);
         }
 
         private void reloadList()
@@ -177,7 +217,7 @@ namespace osu.Game.Overlays.Dashboard.Friends
             // There may be more than one active list in the container due to the delayed fade out.
             FriendsList? currentList = listContainer.SingleOrDefault(d => d.LifetimeEnd == double.MaxValue);
 
-            FriendsList newList = new FriendsList(userListToolbar.DisplayStyle.Value, apiFriends.Select(f => f.TargetUser!).ToArray())
+            FriendsList newList = new FriendsList(userListToolbar.DisplayStyle.Value, apiFriends.Select(f => f.TargetUser!).ToArray(), scores)
             {
                 StatusFilter = { BindTarget = streamControl.Current },
                 SortCriteria = { BindTarget = userListToolbar.SortCriteria },
@@ -208,6 +248,7 @@ namespace osu.Game.Overlays.Dashboard.Friends
 
             listLoadCancellation?.Cancel();
             listLoadCancellation?.Dispose();
+            scoresRequest?.Cancel();
         }
     }
 }

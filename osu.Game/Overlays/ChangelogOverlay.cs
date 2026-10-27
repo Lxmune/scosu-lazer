@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -82,18 +83,17 @@ namespace osu.Game.Overlays
 
             Show();
 
+            // scosu's builds report their version without the update stream (`2026.1026.7`), so
+            // without one, the build is looked for in every stream.
             string[] split = version.Split('-');
 
-            if (split.Length < 2)
-                return;
-
             string versionPart = split[0];
-            string updateStream = split[1];
+            string updateStream = split.Length > 1 ? split[1] : null;
 
             performAfterFetch(() =>
             {
-                var build = builds.Find(b => b.Version == versionPart && b.UpdateStream.Name == updateStream)
-                            ?? Streams.Find(s => s.Name == updateStream)?.LatestBuild;
+                var build = builds.Find(b => b.Version == versionPart && (updateStream == null || b.UpdateStream.Name == updateStream))
+                            ?? (updateStream == null ? Streams.FirstOrDefault() : Streams.Find(s => s.Name == updateStream))?.LatestBuild;
 
                 if (build != null)
                     ShowBuild(build);

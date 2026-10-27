@@ -29,6 +29,7 @@ namespace osu.Game.Users
 
         private GlobalRankDisplay globalRankDisplay = null!;
         private ProfileValueDisplay countryRankDisplay = null!;
+        private ProfileValueDisplay rankedScoreDisplay = null!;
         private LoadingLayer loadingLayer = null!;
 
         public UserRankPanel(APIUser user)
@@ -78,6 +79,7 @@ namespace osu.Game.Users
             globalRankDisplay.UserStatistics.Value = statistics;
 
             countryRankDisplay.Content.Text = statistics?.CountryRank?.ToLocalisableString("\\##,##0") ?? "-";
+            rankedScoreDisplay.Content.Text = statistics?.RankedScore.ToLocalisableString(@"N0") ?? "-";
         }
 
         protected override Drawable CreateLayout()
@@ -187,7 +189,11 @@ namespace osu.Game.Users
                             new Dimension(),
                             new Dimension()
                         },
-                        RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                        RowDimensions = new[]
+                        {
+                            new Dimension(GridSizeMode.AutoSize),
+                            new Dimension(GridSizeMode.AutoSize),
+                        },
                         Content = new[]
                         {
                             new Drawable[]
@@ -197,6 +203,16 @@ namespace osu.Game.Users
                                 {
                                     Title = UsersStrings.ShowRankCountrySimple,
                                 }
+                            },
+                            new Drawable[]
+                            {
+                                // Can be wider than its column: the one beside it is empty.
+                                rankedScoreDisplay = new ProfileValueDisplay(true)
+                                {
+                                    Title = UsersStrings.ShowStatsRankedScore,
+                                    Margin = new MarginPadding { Top = padding },
+                                },
+                                Empty(),
                             }
                         }
                     },

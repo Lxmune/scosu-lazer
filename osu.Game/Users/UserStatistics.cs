@@ -46,6 +46,12 @@ namespace osu.Game.Users
         [JsonProperty(@"country_rank")]
         public int? CountryRank;
 
+        /// <summary>
+        /// How many places the user climbed in the last 14 days (negative if they fell), in the global rankings of scosu servers.
+        /// </summary>
+        [JsonProperty(@"rank_change_since_14_days")]
+        public int? RankChangeSince14Days;
+
         // populated via User model, as that's where the data currently lives.
         public APIRankHistory RankHistory;
 

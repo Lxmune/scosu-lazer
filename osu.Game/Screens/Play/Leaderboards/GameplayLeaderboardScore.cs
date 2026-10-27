@@ -95,10 +95,10 @@ namespace osu.Game.Screens.Play.Leaderboards
             Tracked = tracked;
 
             var scoreProcessor = gameplayState.ScoreProcessor;
-            TotalScore.BindTarget = scoreProcessor.TotalScore;
+            TotalScore.BindTarget = gameplayState.StableScore.TotalScore;
             Accuracy.BindTarget = scoreProcessor.Accuracy;
             Combo.BindTarget = comboMode == ComboDisplayMode.Current ? scoreProcessor.Combo : scoreProcessor.HighestCombo;
-            GetDisplayScore = scoreProcessor.GetDisplayScore;
+            GetDisplayScore = gameplayState.StableScore.GetDisplayScore;
         }
 
         public GameplayLeaderboardScore(IUser user, SpectatorScoreProcessor scoreProcessor, bool tracked, ComboDisplayMode comboMode)
@@ -133,6 +133,15 @@ namespace osu.Game.Screens.Play.Leaderboards
             TotalScoreTiebreaker = score.ID;
             GetDisplayScore = score.GetDisplayScore;
             InitialPosition = score.Position;
+        }
+
+        /// <summary>
+        /// Shows <paramref name="stableScore"/>, the osu!stable score a server that ranks plays by it computed, whatever the scoring mode.
+        /// </summary>
+        public void ShowStableScore(long stableScore)
+        {
+            TotalScore.Value = stableScore;
+            GetDisplayScore = _ => stableScore;
         }
 
         /// <remarks>

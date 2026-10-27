@@ -10,6 +10,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Timing;
+using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
@@ -54,7 +55,10 @@ namespace osu.Game.Online.Spectator
         /// </summary>
         public IReadOnlyList<Mod> Mods => scoreInfo?.Mods ?? Array.Empty<Mod>();
 
-        public Func<ScoringMode, long> GetDisplayScore => mode => scoreInfo?.GetDisplayScore(mode) ?? 0;
+        /// <remarks>
+        /// On servers that rank plays by osu!stable score, players send their play's stable score as the total, whatever the scoring mode.
+        /// </remarks>
+        public Func<ScoringMode, long> GetDisplayScore => mode => api.Endpoints.RanksByStableScore ? TotalScore.Value : scoreInfo?.GetDisplayScore(mode) ?? 0;
 
         private IClock? referenceClock;
 
@@ -72,6 +76,9 @@ namespace osu.Game.Online.Spectator
 
         [Resolved]
         private RulesetStore rulesetStore { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         private readonly IBindableDictionary<int, SpectatorState> spectatorStates = new BindableDictionary<int, SpectatorState>();
         private readonly List<TimedFrame> replayFrames = new List<TimedFrame>();

@@ -42,7 +42,7 @@ namespace osu.Game.Tests.Visual.Navigation
             protected override void LoadComplete()
             {
                 base.LoadComplete();
-                LocalConfig.SetValue(OsuSetting.ShowFirstRunSetup, true);
+                LocalConfig.SetValue(OsuSetting.ShowScosuFirstRunSetup, true);
             }
         }
     }

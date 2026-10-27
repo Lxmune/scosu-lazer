@@ -85,6 +85,8 @@ namespace osu.Game.Tests.Skins
             "Archives/modified-argon-20250308.osk",
             // Covers legacy bar hit error meter
             "Archives/modified-classic-20260806.osk",
+            // Covers ranked score gain counter
+            "Archives/modified-classic-20261026.osk",
         };
 
         /// <summary>

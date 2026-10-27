@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Input.Bindings;
@@ -88,10 +90,18 @@ namespace osu.Game.Screens.Play
         public void AddSettings(PlayerSettingsGroup settings) => Schedule(() => ReplayOverlay.Settings.Add(settings));
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config)
+        private void load(OsuConfigManager config, StableScoreAttributesCache stableScoreAttributesCache)
         {
             if (!LoadedBeatmapSuccessfully)
                 return;
+
+            // Replays have no score token to carry the beatmap's stable score attributes, so ask for them.
+            stableScoreAttributesCache.GetAttributesAsync(Beatmap.Value.BeatmapInfo.OnlineID, GameplayState.Ruleset.RulesetInfo.OnlineID)
+                                      .ContinueWith(task =>
+                                      {
+                                          if (task.GetResultSafely() is StableScoreAttributes attributes)
+                                              Schedule(() => GameplayState.StableScore.Attributes = attributes);
+                                      });
 
             AddInternal(leaderboardProvider);
 

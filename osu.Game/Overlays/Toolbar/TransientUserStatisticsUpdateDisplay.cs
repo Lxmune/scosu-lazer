@@ -13,6 +13,7 @@ using osu.Framework.Threading;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API;
 using osu.Game.Online;
 using osu.Game.Resources.Localisation.Web;
 using osuTK;
@@ -25,12 +26,17 @@ namespace osu.Game.Overlays.Toolbar
 
         private Statistic<int> globalRank = null!;
         private Statistic<int> pp = null!;
+        private Statistic<long> rankedScore = null!;
+        private bool showPerformance;
 
         private ScheduledDelegate? shrinkDelegate;
 
         [BackgroundDependencyLoader]
-        private void load(UserStatisticsWatcher? userStatisticsWatcher)
+        private void load(UserStatisticsWatcher? userStatisticsWatcher, IAPIProvider api)
         {
+            // Servers ranking by osu!stable score only show performance points on the results screen, and the ranked score that ranks players instead.
+            showPerformance = !api.Endpoints.RanksByStableScore;
+
             RelativeSizeAxes = Axes.Y;
 
             InternalChild = new FillFlowContainer
@@ -40,10 +46,11 @@ namespace osu.Game.Overlays.Toolbar
                 Padding = new MarginPadding { Horizontal = 10 },
                 Spacing = new Vector2(10),
                 Direction = FillDirection.Horizontal,
-                Children = new[]
+                Children = new Drawable[]
                 {
                     globalRank = new Statistic<int>(UsersStrings.ShowRankGlobalSimple, @"#", Comparer<int>.Create((before, after) => before - after)),
                     pp = new Statistic<int>(RankingsStrings.StatPerformance, string.Empty, Comparer<int>.Create((before, after) => Math.Sign(after - before))),
+                    rankedScore = new Statistic<long>(UsersStrings.ShowStatsRankedScore, string.Empty, Comparer<long>.Create((before, after) => Math.Sign(after - before))),
                 }
             };
 
@@ -65,9 +72,10 @@ namespace osu.Game.Overlays.Toolbar
                 // null handling here is best effort because it is annoying.
 
                 globalRank.Alpha = update.After.GlobalRank == null ? 0 : 1;
-                pp.Alpha = update.After.PP == null ? 0 : 1;
+                pp.Alpha = update.After.PP == null || !showPerformance ? 0 : 1;
+                rankedScore.Alpha = showPerformance ? 0 : 1;
 
-                if (globalRank.Alpha == 0 && pp.Alpha == 0)
+                if (globalRank.Alpha == 0 && pp.Alpha == 0 && rankedScore.Alpha == 0)
                     return;
 
                 FinishTransforms(true);
@@ -81,13 +89,16 @@ namespace osu.Game.Overlays.Toolbar
                         update.After.GlobalRank.Value);
                 }
 
-                if (update.After.PP != null)
+                if (update.After.PP != null && showPerformance)
                 {
                     int before = (int)Math.Round(update.Before.PP ?? update.After.PP.Value);
                     int after = (int)Math.Round(update.After.PP.Value);
                     int delta = Math.Abs(after - before);
                     pp.Display(before, delta, after);
                 }
+
+                if (!showPerformance)
+                    rankedScore.Display(update.Before.RankedScore, Math.Abs(update.After.RankedScore - update.Before.RankedScore), update.After.RankedScore);
 
                 this.FadeIn(500, Easing.OutQuint);
 

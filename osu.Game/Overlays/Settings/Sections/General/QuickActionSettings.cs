@@ -12,7 +12,6 @@ using osu.Framework.Statistics;
 using osu.Game.Graphics;
 using osu.Game.IO;
 using osu.Game.Localisation;
-using osu.Game.Online.Chat;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Utils;
 using SharpCompress.Archives.Zip;
@@ -55,7 +54,8 @@ namespace osu.Game.Overlays.Settings.Sections.General
                     Text = GeneralSettingsStrings.ReportIssue,
                     TooltipText = GeneralSettingsStrings.ReportIssueTooltip,
                     BackgroundColour = colours.YellowDarker,
-                    Action = () => game?.OpenUrlExternally(@"https://osu.ppy.sh/community/forums/topics/create?forum_id=5", LinkWarnMode.NeverWarn)
+                    // The server's wiki page says where its players report problems (see scosu-rust's README).
+                    Action = () => game?.ShowWiki(@"Feedback")
                 },
             });
 

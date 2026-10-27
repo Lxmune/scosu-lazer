@@ -39,6 +39,13 @@ namespace osu.Game.Online.API.Requests.Responses
         [CanBeNull]
         public UserRankHighest RankHighest;
 
+        /// <summary>
+        /// The ranked score graph, from servers that rank plays by osu!stable score.
+        /// </summary>
+        [JsonProperty(@"ranked_score_history")]
+        [CanBeNull]
+        public APIRankedScoreHistory RankedScoreHistory;
+
         public class UserRankHighest
         {
             [JsonProperty(@"rank")]

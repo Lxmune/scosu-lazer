@@ -14,6 +14,7 @@ using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Resources.Localisation.Web;
@@ -31,6 +32,11 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
         private const int height = 40;
         private const int performance_width = 100;
 
+        /// <summary>
+        /// Wider than <see cref="performance_width"/>, for an osu!stable score in place of performance points.
+        /// </summary>
+        private const int score_width = 150;
+
         private const float performance_background_shear = 0.45f;
 
         protected readonly SoloScoreInfo Score;
@@ -40,6 +46,14 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        /// <summary>
+        /// Servers ranking by osu!stable score show the score where osu! shows performance points.
+        /// </summary>
+        private bool showScore => api.Endpoints.RanksByStableScore;
 
         public DrawableProfileScore(SoloScoreInfo score)
         {
@@ -61,7 +75,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                     new Container
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Padding = new MarginPadding { Left = 20, Right = performance_width },
+                        Padding = new MarginPadding { Left = 20, Right = showScore ? score_width : performance_width },
                         Children = new Drawable[]
                         {
                             new FillFlowContainer
@@ -150,7 +164,7 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
                     new Container
                     {
                         RelativeSizeAxes = Axes.Y,
-                        Width = performance_width,
+                        Width = showScore ? score_width : performance_width,
                         Anchor = Anchor.CentreRight,
                         Origin = Anchor.CentreRight,
                         Children = new Drawable[]
@@ -217,6 +231,16 @@ namespace osu.Game.Overlays.Profile.Sections.Ranks
         private Drawable createDrawablePerformance()
         {
             var font = OsuFont.GetFont(weight: FontWeight.Bold);
+
+            if (showScore)
+            {
+                return new OsuSpriteText
+                {
+                    Text = (Score.LegacyTotalScore ?? Score.TotalScore).ToLocalisableString(@"N0"),
+                    Font = font,
+                    Colour = colourProvider.Highlight1,
+                };
+            }
 
             // cross-reference: https://github.com/ppy/osu-web/blob/a6afee076f4f68bb56dea0cb8f18db63651763a7/resources/js/profile-page/play-detail.tsx#L118-L133
             if (Score.Beatmap?.Status.GrantsPerformancePoints() != true)

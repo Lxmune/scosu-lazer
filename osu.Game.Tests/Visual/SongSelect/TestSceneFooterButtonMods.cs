@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Testing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets.Mods;
@@ -159,6 +160,44 @@ namespace osu.Game.Tests.Visual.SongSelect
             AddStep(@"Clear selected mod", () => changeMods(Array.Empty<Mod>()));
             AddUntilStep("Unranked badge not shown", () => footerButtonMods.ChildrenOfType<FooterButtonMods.UnrankedBadge>().Single().Alpha == 0);
         }
+
+        [Test]
+        public void TestStableScoreServerRules()
+        {
+            AddStep("rank by stable score", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = true);
+            AddStep("Set ruleset", () => footerButtonMods.Ruleset.Value = new OsuRuleset().RulesetInfo);
+
+            AddStep("Approach rate only", () => changeMods(new[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } } }));
+            assertModsMultiplier(1);
+            assertUnrankedBadge(false);
+
+            AddStep("Approach rate and drain rate", () => changeMods(new[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f }, DrainRate = { Value = 3 } } }));
+            assertModsMultiplier(0.5);
+            assertUnrankedBadge(false);
+
+            AddStep("Approach rate and Hidden", () => changeMods(new Mod[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } }, new OsuModHidden() }));
+            assertModsMultiplier(1.06);
+
+            AddStep("Classic and Mirror", () => changeMods(new Mod[] { new OsuModClassic(), new OsuModMirror() }));
+            assertModsMultiplier(1);
+            assertUnrankedBadge(false);
+
+            AddStep("Approach rate below zero", () => changeMods(new[] { new OsuModDifficultyAdjust { ExtendedLimits = { Value = true }, ApproachRate = { Value = -5 } } }));
+            assertUnrankedBadge(true);
+
+            AddStep("Deflate", () => changeMods(new[] { new OsuModDeflate() }));
+            assertUnrankedBadge(true);
+        }
+
+        [TearDownSteps]
+        public void TearDownSteps()
+        {
+            AddStep("reset server kind", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = false);
+        }
+
+        private void assertUnrankedBadge(bool shown) =>
+            AddUntilStep(shown ? "Unranked badge shown" : "Unranked badge not shown",
+                () => footerButtonMods.ChildrenOfType<FooterButtonMods.UnrankedBadge>().Single().Alpha == (shown ? 1 : 0));
 
         private void changeMods(IReadOnlyList<Mod> mods) => footerButtonMods.Mods.Value = mods;
 

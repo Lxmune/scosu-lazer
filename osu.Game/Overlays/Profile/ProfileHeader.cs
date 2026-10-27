@@ -91,6 +91,7 @@ namespace osu.Game.Overlays.Profile
 
         protected override Drawable CreateTabControlContent() => new ProfileRulesetSelector
         {
+            IncludeRelaxLeaderboards = true,
             User = { BindTarget = User }
         };
 

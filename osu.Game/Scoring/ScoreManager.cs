@@ -26,6 +26,7 @@ namespace osu.Game.Scoring
     public class ScoreManager : ModelManager<ScoreInfo>, IModelImporter<ScoreInfo>
     {
         private readonly Func<BeatmapManager> beatmaps;
+        private readonly IAPIProvider api;
         private readonly OsuConfigManager? configManager;
         private readonly ScoreImporter scoreImporter;
         private readonly LegacyScoreExporter scoreExporter;
@@ -45,6 +46,7 @@ namespace osu.Game.Scoring
             : base(storage, realm)
         {
             this.beatmaps = beatmaps;
+            this.api = api;
             this.configManager = configManager;
 
             scoreImporter = new ScoreImporter(rulesets, beatmaps, storage, realm, api)
@@ -120,7 +122,14 @@ namespace osu.Game.Scoring
         /// </remarks>
         /// <param name="score">The <see cref="ScoreInfo"/> to retrieve the bindable for.</param>
         /// <returns>The bindable containing the total score.</returns>
-        public Bindable<long> GetBindableTotalScore(ScoreInfo score) => new TotalScoreBindable(score, configManager);
+        public Bindable<long> GetBindableTotalScore(ScoreInfo score)
+        {
+            // Servers that rank by osu!stable score compute it for every play: show theirs, whatever the display mode.
+            if (api.Endpoints.RanksByStableScore && score.LegacyTotalScore is long stableScore)
+                return new Bindable<long>(stableScore);
+
+            return new TotalScoreBindable(score, configManager);
+        }
 
         /// <summary>
         /// Retrieves a bindable that represents the formatted total score string of a <see cref="ScoreInfo"/>.

@@ -1,10 +1,12 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Graphics;
 using osu.Game.Localisation;
+using osu.Game.Online.API;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets;
 using osu.Game.Users;
@@ -22,7 +24,7 @@ namespace osu.Game.Overlays.Rankings
 
         protected override OverlayTitle CreateTitle() => new RankingsTitle();
 
-        protected override Drawable CreateTabControlContent() => rulesetSelector = new OverlayRulesetSelector();
+        protected override Drawable CreateTabControlContent() => rulesetSelector = new OverlayRulesetSelector { IncludeRelaxLeaderboards = true };
 
         protected override Drawable CreateContent() => countryFilter = new CountryFilter();
 
@@ -36,6 +38,19 @@ namespace osu.Game.Overlays.Rankings
                 Description = NamedOverlayComponentStrings.RankingsDescription;
                 Icon = OsuIcon.Ranking;
             }
+        }
+
+        [BackgroundDependencyLoader]
+        private void load(IAPIProvider api)
+        {
+            // Servers ranking by osu!stable score rank players by score only, and are the only ones with score gained rankings.
+            if (api.Endpoints.RanksByStableScore)
+            {
+                Current.Value = RankingsScope.Score;
+                TabControl.RemoveItem(RankingsScope.Performance);
+            }
+            else
+                TabControl.RemoveItem(RankingsScope.Gained);
         }
 
         protected override void LoadComplete()
@@ -53,6 +68,7 @@ namespace osu.Game.Overlays.Rankings
                 {
                     case RankingsScope.Performance:
                     case RankingsScope.Score:
+                    case RankingsScope.Gained:
                     case RankingsScope.Country:
                     case RankingsScope.Playlists:
                         return true;

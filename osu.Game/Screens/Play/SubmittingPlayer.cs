@@ -124,6 +124,10 @@ namespace osu.Game.Screens.Play
             {
                 Logger.Log($"Score submission token retrieved ({r.ID})");
                 token = r.ID;
+
+                if (api.Endpoints.RanksByStableScore && r.StableScoreAttributes is StableScoreAttributes attributes)
+                    Schedule(() => GameplayState.StableScore.Attributes = attributes);
+
                 tcs.SetResult(true);
             };
             req.Failure += ex => handleTokenFailure(ex, displayNotification: true);
@@ -320,10 +324,20 @@ namespace osu.Game.Screens.Play
             Logger.Log($"Beginning score submission (token:{token.Value})...");
             var request = CreateSubmissionRequest(score, token.Value);
 
+            if (request is SubmitScoreRequest submission && GameplayState.StableScore.Attributes != null)
+                submission.Score.JudgementOrder = GameplayState.StableScore.JudgementOrder;
+
             request.Success += s =>
             {
                 score.ScoreInfo.OnlineID = s.ID;
                 score.ScoreInfo.Position = s.Position;
+
+                if (api.Endpoints.RanksByStableScore)
+                {
+                    // The server computes the osu!stable score and pp of every play itself, and those are the ones its leaderboards use.
+                    score.ScoreInfo.LegacyTotalScore = s.TotalScore;
+                    score.ScoreInfo.PP = s.PP;
+                }
 
                 scoreSubmissionSource.SetResult(true);
                 Logger.Log($"Score submission completed! (token:{token.Value} id:{s.ID})");

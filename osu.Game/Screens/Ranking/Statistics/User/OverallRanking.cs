@@ -7,6 +7,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Extensions;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API;
 using osu.Game.Online;
 using osu.Game.Scoring;
 
@@ -30,8 +31,11 @@ namespace osu.Game.Screens.Ranking.Statistics.User
         }
 
         [BackgroundDependencyLoader]
-        private void load(UserStatisticsWatcher? userStatisticsWatcher)
+        private void load(UserStatisticsWatcher? userStatisticsWatcher, IAPIProvider api)
         {
+            // Servers ranking by osu!stable score only show performance points for the play itself, not the player's total.
+            bool showPerformance = !api.Endpoints.RanksByStableScore;
+
             AutoSizeAxes = Axes.Y;
             AutoSizeEasing = Easing.OutQuint;
             AutoSizeDuration = transition_duration;
@@ -67,7 +71,9 @@ namespace osu.Game.Screens.Ranking.Statistics.User
                         {
                             new GlobalRankChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
                             new SimpleStatisticTable.Spacer(),
-                            new PerformancePointsChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
+                            showPerformance
+                                ? (Drawable)new PerformancePointsChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } }
+                                : new RankedScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
                         },
                         [],
                         new Drawable[]
@@ -79,9 +85,13 @@ namespace osu.Game.Screens.Ranking.Statistics.User
                         [],
                         new Drawable[]
                         {
-                            new RankedScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
+                            showPerformance
+                                ? (Drawable)new RankedScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } }
+                                : new TotalScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
                             new SimpleStatisticTable.Spacer(),
-                            new TotalScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } },
+                            showPerformance
+                                ? (Drawable)new TotalScoreChangeRow { StatisticsUpdate = { BindTarget = DisplayedUpdate } }
+                                : Empty(),
                         }
                     }
                 }

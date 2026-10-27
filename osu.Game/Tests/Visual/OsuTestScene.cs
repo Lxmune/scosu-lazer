@@ -155,6 +155,11 @@ namespace osu.Game.Tests.Visual
                 dummyAPI = new DummyAPIAccess();
                 Dependencies.CacheAs<IAPIProvider>(dummyAPI);
                 base.Content.Add(dummyAPI);
+
+                // The game's cache would ask the game's API.
+                var stableScoreAttributesCache = new StableScoreAttributesCache();
+                Dependencies.Cache(stableScoreAttributesCache);
+                base.Content.Add(stableScoreAttributesCache);
             }
 
             return Dependencies;

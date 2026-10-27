@@ -173,7 +173,7 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.Version, string.Empty);
 
-            SetDefault(OsuSetting.ShowFirstRunSetup, true);
+            SetDefault(OsuSetting.ShowScosuFirstRunSetup, true);
             SetDefault(OsuSetting.ShowMobileDisclaimer, RuntimeInfo.IsMobile);
 
             SetDefault(OsuSetting.ScreenshotFormat, ScreenshotFormat.Jpg);
@@ -246,6 +246,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.DashboardDisplayStyle, OverlayPanelDisplayStyle.Card);
 
             SetDefault(OsuSetting.PMFriendsOnly, false);
+            SetDefault(OsuSetting.CustomServerUrl, string.Empty);
         }
 
         protected override bool CheckLookupContainsPrivateInformation(OsuSetting lookup)
@@ -399,7 +400,13 @@ namespace osu.Game.Configuration
         ToolbarClockDisplayMode,
         SongSelectBackgroundBlur,
         Version,
-        ShowFirstRunSetup,
+
+        /// <summary>
+        /// Not osu!'s <c>ShowFirstRunSetup</c>: scosu can share its storage (and game.ini) with osu!lazer,
+        /// where that one is already off, and scosu's setup should still show once.
+        /// </summary>
+        ShowScosuFirstRunSetup,
+
         ShowConvertedBeatmaps,
         Skin,
         ScreenshotFormat,
@@ -488,5 +495,10 @@ namespace osu.Game.Configuration
         /// </summary>
         PMFriendsOnly,
         HitsoundVolume,
+
+        /// <summary>
+        /// The HTTPS address of the server to connect to. Empty for the scosu server (see <see cref="Online.ProductionEndpointConfiguration.DEFAULT_SERVER_URL"/>).
+        /// </summary>
+        CustomServerUrl,
     }
 }

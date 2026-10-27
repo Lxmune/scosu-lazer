@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -109,6 +110,7 @@ namespace osu.Game.Overlays
 
             userReq?.Cancel();
             lastSection = null;
+            shownSections.Clear();
 
             sections = !user.IsBot
                 ? new ProfileSection[]
@@ -148,7 +150,7 @@ namespace osu.Game.Overlays
             if (changeOverlayColours(profileHue))
                 recreateBaseContent();
 
-            var actualRuleset = rulesets.GetRuleset(userRuleset?.ShortName ?? loadedUser.PlayMode).AsNonNull();
+            var actualRuleset = rulesets.GetLeaderboardRuleset(userRuleset?.ShortName ?? loadedUser.PlayMode).AsNonNull();
 
             var userProfile = new UserProfileData(loadedUser, actualRuleset);
             Header.User.Value = userProfile;
@@ -164,12 +166,35 @@ namespace osu.Game.Overlays
                         sec.User.Value = userProfile;
 
                         sectionsContainer.Add(sec);
-                        tabs.AddItem(sec);
+                        shownSections.Add(sec);
+                        sec.HasContent.BindValueChanged(_ => Scheduler.AddOnce(updateTabs));
                     }
                 }
             }
 
+            updateTabs();
+
             loadingLayer.Hide();
+        }
+
+        /// <summary>
+        /// The sections of the user's profile, in order.
+        /// </summary>
+        private readonly List<ProfileSection> shownSections = new List<ProfileSection>();
+
+        /// <summary>
+        /// Tabs for the sections that have something to show (empty sections are hidden).
+        /// The tab control decides itself which tabs are visible, so the others are removed.
+        /// </summary>
+        private void updateTabs()
+        {
+            if (tabs == null)
+                return;
+
+            tabs.Clear();
+
+            foreach (var section in shownSections.Where(section => section.HasContent.Value))
+                tabs.AddItem(section);
         }
 
         private void recreateBaseContent()

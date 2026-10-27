@@ -11,6 +11,7 @@ using osu.Framework.Logging;
 using osu.Game.Extensions;
 using osu.Game.Online.API;
 using osu.Game.Online.Leaderboards;
+using osu.Game.Rulesets;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.Leaderboards;
 
@@ -54,7 +55,7 @@ namespace osu.Game.Screens.Ranking
             // sort mode intentionally omitted to default to score - results screen only supports sorting by score, so don't pass any other to avoid confusion
             var criteria = new LeaderboardCriteria(
                 Score.BeatmapInfo!,
-                Score.Ruleset,
+                Score.GetLeaderboardRuleset(),
                 leaderboardManager.CurrentCriteria?.Scope ?? BeatmapLeaderboardScope.Global,
                 leaderboardManager.CurrentCriteria?.ExactMods
             );

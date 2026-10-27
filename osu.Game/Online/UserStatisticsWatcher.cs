@@ -9,6 +9,7 @@ using osu.Framework.Graphics;
 using osu.Game.Extensions;
 using osu.Game.Online.API;
 using osu.Game.Online.Spectator;
+using osu.Game.Rulesets;
 using osu.Game.Scoring;
 
 namespace osu.Game.Online
@@ -69,7 +70,7 @@ namespace osu.Game.Online
             if (!watchedScores.Remove(scoreId, out var scoreInfo))
                 return;
 
-            statisticsProvider.RefetchStatistics(scoreInfo.Ruleset, u => Schedule(() =>
+            statisticsProvider.RefetchStatistics(scoreInfo.GetLeaderboardRuleset(), u => Schedule(() =>
             {
                 if (u.OldStatistics != null)
                     latestUpdate.Value = new ScoreBasedUserStatisticsUpdate(scoreInfo, u.OldStatistics, u.NewStatistics);

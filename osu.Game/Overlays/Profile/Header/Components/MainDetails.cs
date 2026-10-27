@@ -2,15 +2,18 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Resources.Localisation.Web;
@@ -29,8 +32,21 @@ namespace osu.Game.Overlays.Profile.Header.Components
         private GlobalRankDisplay detailGlobalRank = null!;
         private ProfileValueDisplay detailCountryRank = null!;
         private RankGraph rankGraph = null!;
+        private RankedScoreGraph rankedScoreGraph = null!;
+        private GridContainer graphs = null!;
+        private ProfileGraphPanel rankGraphPanel = null!;
+        private ProfileGraphPanel rankedScoreGraphPanel = null!;
 
         public readonly Bindable<UserProfileData?> User = new Bindable<UserProfileData?>();
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private OsuColour colours { get; set; } = null!;
+
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -94,16 +110,32 @@ namespace osu.Game.Overlays.Profile.Header.Components
                             }
                         }
                     },
-                    new Container
+                    graphs = new GridContainer
                     {
                         RelativeSizeAxes = Axes.X,
-                        Height = 60,
-                        Children = new Drawable[]
+                        Height = 100,
+                        ColumnDimensions = graphColumns(false),
+                        Content = new[]
                         {
-                            rankGraph = new RankGraph
+                            new Drawable[]
                             {
-                                RelativeSizeAxes = Axes.Both,
-                            },
+                                rankGraphPanel = new ProfileGraphPanel(UsersStrings.ShowRankGlobalSimple, rankGraph = new RankGraph
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                })
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                },
+                                Empty(),
+                                rankedScoreGraphPanel = new ProfileGraphPanel(UsersStrings.ShowStatsRankedScore, rankedScoreGraph = new RankedScoreGraph
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                })
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Alpha = 0,
+                                },
+                            }
                         }
                     },
                     new Container
@@ -128,6 +160,8 @@ namespace osu.Game.Overlays.Profile.Header.Components
                                     ppInfo = new ProfileValueDisplay
                                     {
                                         Title = "pp",
+                                        // Servers ranking by osu!stable score show the ranked score instead (in the extended details).
+                                        Alpha = api.Endpoints.RanksByStableScore ? 0 : 1,
                                     },
                                     new TotalPlayTime
                                     {
@@ -182,6 +216,58 @@ namespace osu.Game.Overlays.Profile.Header.Components
             detailCountryRank.Content.TooltipText = getCountryRankTooltipText(user);
 
             rankGraph.Statistics.Value = user?.Statistics;
+            rankedScoreGraph.History.Value = user?.RankedScoreHistory;
+
+            // Servers ranking by osu!stable score rank players by ranked score. Its graph takes no room when there's nothing to show.
+            bool showRankedScore = api.Endpoints.RanksByStableScore && RankedScoreGraph.HasRankedScore(user?.RankedScoreHistory);
+            rankedScoreGraphPanel.Alpha = showRankedScore ? 1 : 0;
+            graphs.ColumnDimensions = graphColumns(showRankedScore);
+
+            updateRankSummary(user);
+            updateRankedScoreSummary(user?.RankedScoreHistory);
+        }
+
+        /// <summary>
+        /// The rank graph alone takes the whole row; with the ranked score graph, each takes half.
+        /// </summary>
+        private static Dimension[] graphColumns(bool showRankedScore) => showRankedScore
+            ? new[] { new Dimension(), new Dimension(GridSizeMode.Absolute, 10), new Dimension() }
+            : new[] { new Dimension(), new Dimension(GridSizeMode.Absolute, 0), new Dimension(GridSizeMode.Absolute, 0) };
+
+        /// <summary>
+        /// How many places the player climbed (or fell) over the graph's days.
+        /// </summary>
+        private void updateRankSummary(APIUser? user)
+        {
+            int[] ranks = user?.Statistics?.IsRanked == true ? user.Statistics.RankHistory?.Data.Where(rank => rank != 0).ToArray() ?? [] : [];
+
+            if (ranks.Length < 2)
+            {
+                rankGraphPanel.SetSummary(default, colourProvider.Foreground1);
+                return;
+            }
+
+            int climbed = ranks[0] - ranks[^1];
+
+            if (climbed > 0)
+                rankGraphPanel.SetSummary(climbed.ToLocalisableString(@"N0"), colours.Lime1, FontAwesome.Solid.CaretUp);
+            else if (climbed < 0)
+                rankGraphPanel.SetSummary((-climbed).ToLocalisableString(@"N0"), colours.Red1, FontAwesome.Solid.CaretDown);
+            else
+                rankGraphPanel.SetSummary(@"no change", colourProvider.Foreground1);
+        }
+
+        /// <summary>
+        /// How much ranked score the player gained over the graph's days.
+        /// </summary>
+        private void updateRankedScoreSummary(APIRankedScoreHistory? history)
+        {
+            long gained = history?.Data.Length > 1 ? history.Data[^1] - history.Data[0] : 0;
+
+            if (gained > 0)
+                rankedScoreGraphPanel.SetSummary(LocalisableString.Interpolate($"+{gained.ToLocalisableString(@"N0")}"), colours.Lime1);
+            else
+                rankedScoreGraphPanel.SetSummary(@"no change", colourProvider.Foreground1);
         }
 
         private static LocalisableString getCountryRankTooltipText(APIUser? user)

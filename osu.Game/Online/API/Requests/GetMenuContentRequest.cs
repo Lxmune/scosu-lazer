@@ -7,8 +7,9 @@ namespace osu.Game.Online.API.Requests
 {
     public class GetMenuContentRequest : OsuJsonWebRequest<APIMenuContent>
     {
-        public GetMenuContentRequest()
-            : base(@"https://assets.ppy.sh/menu-content.json")
+        /// <param name="apiUrl">The server's <see cref="EndpointConfiguration.APIUrl"/>, whose banners are shown.</param>
+        public GetMenuContentRequest(string apiUrl)
+            : base($@"{apiUrl}/api/v2/menu-content")
         {
         }
     }

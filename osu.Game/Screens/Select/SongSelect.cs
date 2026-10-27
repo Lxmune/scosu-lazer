@@ -689,6 +689,7 @@ namespace osu.Game.Screens.Select
             ensureGlobalBeatmapValid();
 
             detailsArea.Refresh();
+            titleWedge.Refresh();
 
             if (ControlGlobalMusic)
             {

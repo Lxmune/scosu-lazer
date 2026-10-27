@@ -217,7 +217,7 @@ namespace osu.Game.Screens.Select
             FilterBySelectedMods.BindValueChanged(_ => RefetchScores());
             beatmap.BindValueChanged(_ => RefetchScores());
             ruleset.BindValueChanged(_ => RefetchScores());
-            mods.BindValueChanged(_ => refetchScoresFromMods());
+            mods.BindValueChanged(refetchScoresFromMods);
 
             RefetchScores();
         }
@@ -232,11 +232,16 @@ namespace osu.Game.Screens.Select
             this.FadeOut(300, Easing.OutQuint);
         }
 
-        private void refetchScoresFromMods()
+        private void refetchScoresFromMods(ValueChangedEvent<IReadOnlyList<Mod>> e)
         {
-            if (FilterBySelectedMods.Value)
+            // Selecting Relax or Autopilot switches to their own leaderboard.
+            bool leaderboardChanged = getLeaderboardRuleset(e.OldValue)?.Equals(getLeaderboardRuleset(e.NewValue)) == false;
+
+            if (FilterBySelectedMods.Value || leaderboardChanged)
                 RefetchScores();
         }
+
+        private RulesetInfo? getLeaderboardRuleset(IEnumerable<Mod> mods) => (ruleset.Value ?? beatmap.Value.BeatmapInfo.Ruleset)?.GetLeaderboardRuleset(mods.Select(m => m.Acronym));
 
         private bool initialFetchComplete;
 
@@ -260,7 +265,7 @@ namespace osu.Game.Screens.Select
             refetchOperation = Scheduler.AddDelayed(() =>
             {
                 var fetchBeatmapInfo = beatmap.Value.BeatmapInfo;
-                var fetchRuleset = ruleset.Value ?? fetchBeatmapInfo.Ruleset;
+                var fetchRuleset = getLeaderboardRuleset(mods.Value);
                 var fetchSorting = fetchScope == BeatmapLeaderboardScope.Local ? Sorting.Value : LeaderboardSortMode.Score;
 
                 // For now, we forcefully refresh to keep things simple.

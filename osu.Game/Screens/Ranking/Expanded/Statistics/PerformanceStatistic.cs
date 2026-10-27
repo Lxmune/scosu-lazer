@@ -2,8 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
@@ -13,10 +11,11 @@ using osu.Framework.Graphics.Cursor;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.API;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Scoring;
 using osu.Game.Localisation;
-using osu.Game.Rulesets.Mods;
+using osu.Game.Utils;
 
 namespace osu.Game.Screens.Ranking.Expanded.Statistics
 {
@@ -31,6 +30,9 @@ namespace osu.Game.Screens.Ranking.Expanded.Statistics
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         private RollingCounter<int> counter = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         public PerformanceStatistic(ScoreInfo score)
             : base(BeatmapsetsStrings.ShowScoreboardHeaderspp)
@@ -92,15 +94,7 @@ namespace osu.Game.Screens.Ranking.Expanded.Statistics
             }
         }
 
-        private static bool hasUnrankedMods(ScoreInfo scoreInfo)
-        {
-            IEnumerable<Mod> modsToCheck = scoreInfo.Mods;
-
-            if (scoreInfo.IsLegacyScore)
-                modsToCheck = modsToCheck.Where(m => m is not ModClassic);
-
-            return modsToCheck.Any(m => !m.Ranked);
-        }
+        private bool hasUnrankedMods(ScoreInfo scoreInfo) => ModUtils.HasUnrankedMods(scoreInfo.Mods, scoreInfo.Ruleset, scoreInfo.IsLegacyScore, api.Endpoints.RanksByStableScore);
 
         public override void Appear()
         {

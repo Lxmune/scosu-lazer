@@ -40,9 +40,10 @@ namespace osu.Game.Overlays.BeatmapSet.Scores
                 }
             };
 
-            text.AddText("Click ");
-            text.AddLink("here", "/home/support");
-            text.AddText(" to see all the fancy features that you can get!");
+            // scosu: osu!supporter can't be bought on scosu, so there is no link to its page.
+            // text.AddText("Click ");
+            // text.AddLink("here", "/home/support");
+            // text.AddText(" to see all the fancy features that you can get!");
         }
     }
 }

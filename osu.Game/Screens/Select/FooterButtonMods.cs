@@ -17,14 +17,17 @@ using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
+using osu.Game.Online.API;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Scoring;
 using osu.Game.Screens.Footer;
 using osu.Game.Screens.Play.HUD;
 using osu.Game.Utils;
@@ -81,6 +84,9 @@ namespace osu.Game.Screens.Select
 
         [Resolved]
         private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         private IBindable<Language> currentLanguage = null!;
 
@@ -213,6 +219,20 @@ namespace osu.Game.Screens.Select
 
         private void updateDisplay()
         {
+            var rulesetInstance = Ruleset.Value?.CreateInstance();
+            double multiplier;
+            bool ranked;
+
+            // Servers that rank plays by osu!stable score have their own multipliers and ranked mods.
+            if (rulesetInstance != null && api.Endpoints.RanksByStableScore && rulesetInstance.RulesetInfo.IsLegacyRuleset())
+                (multiplier, ranked) = StableScoreCalculator.GetModEffects(rulesetInstance, beatmap.Value.BeatmapInfo, Mods.Value);
+            else
+            {
+                var scoreMultiplierCalculator = rulesetInstance?.CreateScoreMultiplierCalculator(new ScoreMultiplierContext(beatmap.Value.BeatmapInfo.Difficulty));
+                multiplier = scoreMultiplierCalculator?.CalculateFor(Mods.Value) ?? 1;
+                ranked = Mods.Value.All(m => m.Ranked);
+            }
+
             if (Mods.Value.Count == 0)
             {
                 modDisplayBar.MoveToY(20, duration, easing);
@@ -228,7 +248,7 @@ namespace osu.Game.Screens.Select
             }
             else
             {
-                if (Mods.Value.Any(m => !m.Ranked))
+                if (!ranked)
                 {
                     unrankedBadge.MoveToX(0, duration, easing);
                     unrankedBadge.FadeIn(duration, easing);
@@ -249,8 +269,6 @@ namespace osu.Game.Screens.Select
                 modDisplay.FadeIn(duration, easing);
             }
 
-            var scoreMultiplierCalculator = Ruleset.Value?.CreateInstance().CreateScoreMultiplierCalculator(new ScoreMultiplierContext(beatmap.Value.BeatmapInfo.Difficulty));
-            double multiplier = scoreMultiplierCalculator?.CalculateFor(Mods.Value) ?? 1;
             multiplierText.Text = ModUtils.FormatScoreMultiplier(multiplier);
 
             if (multiplier > 1)

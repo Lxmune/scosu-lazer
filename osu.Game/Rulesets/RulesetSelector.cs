@@ -19,6 +19,11 @@ namespace osu.Game.Rulesets
 
         protected virtual bool LegacyOnly => false;
 
+        /// <summary>
+        /// Whether to also show the Relax and Autopilot leaderboards of each ruleset (see <see cref="RelaxLeaderboards"/>).
+        /// </summary>
+        public bool IncludeRelaxLeaderboards { get; init; }
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -29,7 +34,8 @@ namespace osu.Game.Rulesets
 
                 try
                 {
-                    AddItem(ruleset);
+                    foreach (var item in IncludeRelaxLeaderboards ? ruleset.WithRelaxLeaderboards() : new[] { ruleset })
+                        AddItem(item);
                 }
                 catch (Exception e)
                 {

@@ -50,12 +50,12 @@ namespace osu.Game.Overlays.Profile.Sections.Historical
 
             if (values == null || values.Length <= 1)
             {
-                Hide();
+                HasContent.Value = false;
                 return;
             }
 
             chart.Values = fillZeroValues(values);
-            Show();
+            HasContent.Value = true;
         }
 
         /// <summary>
