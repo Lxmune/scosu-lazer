@@ -1,0 +1,118 @@
+# Builds the game for every desktop platform and publishes it as a GitHub release when a version tag is pushed,
+# e.g. `git tag 2026.1028.0 && git push origin 2026.1028.0`. A tag with a suffix (`2026.1028.0-tachyon`) makes a pre-release.
+#
+# The releases are Velopack packages: installed games update from them (see osu.Desktop/Updater/VelopackUpdateManager.cs),
+# and the website links to the latest one's files.
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: read
+
+env:
+  # Keep in step with the Velopack package in osu.Desktop/osu.Desktop.csproj.
+  VPK_VERSION: 1.2.0
+
+jobs:
+  build:
+    name: Build (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Windows x64 keeps Velopack's default `win` channel, which the earlier installers were made with.
+          - { rid: win-x64, channel: win, os: windows-latest, exe: scosu.exe, icon: osu.Desktop/lazer.ico }
+          - { rid: win-arm64, channel: win-arm64, os: windows-11-arm, exe: scosu.exe, icon: osu.Desktop/lazer.ico }
+          # Velopack only takes .icns icons on macOS, so the app bundle gets its default one.
+          - { rid: osx-x64, channel: osx-x64, os: macos-15-intel, exe: scosu, icon: '' }
+          - { rid: osx-arm64, channel: osx-arm64, os: macos-latest, exe: scosu, icon: '' }
+          - { rid: linux-x64, channel: linux-x64, os: ubuntu-latest, exe: scosu, icon: assets/lazer.png }
+          - { rid: linux-arm64, channel: linux-arm64, os: ubuntu-24.04-arm, exe: scosu, icon: assets/lazer.png }
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Install Velopack
+        run: |
+          dotnet tool install vpk --version $VPK_VERSION --tool-path "$RUNNER_TEMP/vpk"
+          echo "$RUNNER_TEMP/vpk" >> $GITHUB_PATH
+
+      # Velopack builds the AppImage with it.
+      - name: Install squashfs-tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y squashfs-tools
+
+      - name: Read version from tag
+        run: |
+          echo "VERSION=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          # File versions can't have a suffix.
+          echo "FILE_VERSION=${GITHUB_REF_NAME%%-*}" >> $GITHUB_ENV
+          if [[ $GITHUB_REF_NAME == *-* ]]; then echo "PRERELEASE=--pre" >> $GITHUB_ENV; fi
+
+      - name: Publish
+        run: dotnet publish osu.Desktop -c Release -r ${{ matrix.rid }} --self-contained -p:Version=$VERSION -p:FileVersion=$FILE_VERSION -o build
+
+      # Velopack makes delta updates against the previous release, and adds to its release list.
+      # The first release of a channel has no previous one: vpk warns and carries on.
+      - name: Download previous release
+        run: vpk download github --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }} --channel ${{ matrix.channel }} -o releases $PRERELEASE
+
+      - name: Pack
+        run: >
+          vpk pack --packId scosu --packTitle scosu --packAuthors scosu
+          --packVersion $VERSION --packDir build --mainExe ${{ matrix.exe }}
+          --channel ${{ matrix.channel }} --runtime ${{ matrix.rid }} --outputDir releases
+          ${{ matrix.icon && format('--icon {0}', matrix.icon) || '' }}
+
+      # Only this version's files go up; the previous release's package was just for the delta.
+      - name: Drop previous release files
+        run: |
+          find releases -name '*.nupkg' ! -name "*-$VERSION-*" -delete
+          rm -f releases/assets.*.json
+          ls -l releases
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.rid }}
+          path: releases/*
+          if-no-files-found: error
+
+  # One job makes the release with every platform's files, so games never see one half uploaded.
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: releases
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ls -l releases
+          gh release create "$GITHUB_REF_NAME" releases/* \
+            --repo ${{ github.repository }} \
+            --title "scosu $GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag \
+            $([[ $GITHUB_REF_NAME == *-* ]] && echo --prerelease)
