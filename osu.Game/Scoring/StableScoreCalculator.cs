@@ -226,6 +226,7 @@ namespace osu.Game.Scoring
         /// <summary>
         /// osu!stable's score multiplier of <paramref name="mods"/> (lazer's <c>GetLegacyScoreMultiplier</c>), with scosu's house rules:
         /// Relax and Autopilot count ×1 (their plays have their own leaderboards), and so does Difficulty Adjust when it only changes the approach rate.
+        /// Speed mods count their speed (Double Time at 1.15× is ×1.15), and osu!'s Classic ×0.99, or ×0.97 without its note lock.
         /// </summary>
         /// <param name="rulesetId">The online ID of the ruleset played.</param>
         /// <param name="mods">The mods, with their settings.</param>
@@ -258,6 +259,9 @@ namespace osu.Game.Scoring
             if (mod.Acronym == "DA" && mod.Settings.Keys.Any(setting => setting != "approach_rate" && setting != "extended_limits"))
                 return 0.5;
 
+            if (speed(mod) is double speedChange)
+                return speedChange;
+
             switch (mod.Acronym)
             {
                 case "NF":
@@ -268,21 +272,18 @@ namespace osu.Game.Scoring
             }
 
             if (rulesetId == 3)
-                return mod.Acronym is "HT" or "DC" ? 0.5 : 1;
-
-            if (mod.Acronym is "HT" or "DC")
-                return 0.3;
+                return 1;
 
             switch (rulesetId, mod.Acronym)
             {
+                case (0, "CL"):
+                    return mod.Settings.TryGetValue("classic_note_lock", out object? noteLock) && !Convert.ToBoolean(noteLock, CultureInfo.InvariantCulture) ? 0.97 : 0.99;
+
                 case (0, "HD"):
                     return 1.06;
 
                 case (0, "HR"):
                     return scoreV2 ? 1.10 : 1.06;
-
-                case (0, "DT" or "NC"):
-                    return scoreV2 ? 1.20 : 1.12;
 
                 case (0, "FL"):
                     return 1.12;
@@ -293,7 +294,7 @@ namespace osu.Game.Scoring
                 case (1, "HD" or "HR"):
                     return 1.06;
 
-                case (1, "DT" or "NC" or "FL"):
+                case (1, "FL"):
                     return 1.12;
 
                 case (2, "HD"):
@@ -302,12 +303,32 @@ namespace osu.Game.Scoring
                 case (2, "HR" or "FL"):
                     return 1.12;
 
-                case (2, "DT" or "NC"):
-                    return 1.06;
-
                 default:
                     return 1;
             }
+        }
+
+        /// <summary>
+        /// The default speed of a speed mod (Double Time, Nightcore, Half Time, Daycore) and the speeds lazer allows it,
+        /// or <c>null</c> for other mods (scosu's <c>scoring::speed_range</c>).
+        /// </summary>
+        private static (double Default, double Min, double Max)? speedRange(string acronym) => acronym switch
+        {
+            "DT" or "NC" => (1.5, 1.01, 2),
+            "HT" or "DC" => (0.75, 0.5, 0.99),
+            _ => null,
+        };
+
+        /// <summary>
+        /// The speed <paramref name="mod"/> plays at if it is a speed mod, kept to the speeds lazer allows like the server does.
+        /// </summary>
+        private static double? speed(APIMod mod)
+        {
+            if (speedRange(mod.Acronym) is not { } range)
+                return null;
+
+            double speedChange = mod.Settings.TryGetValue("speed_change", out object? value) ? Convert.ToDouble(value, CultureInfo.InvariantCulture) : range.Default;
+            return Math.Clamp(speedChange, range.Min, range.Max);
         }
 
         /// <summary>
@@ -373,26 +394,33 @@ namespace osu.Game.Scoring
         /// </summary>
         private static readonly string[][] ranked_with_defaults =
         {
-            new[] { "DC", "EZ", "FL", "HD", "HR", "NC", "NF", "SO", "TD" },
-            new[] { "DC", "EZ", "FL", "HD", "HR", "NC", "NF" },
-            new[] { "DC", "EZ", "FL", "HD", "HR", "NC", "NF" },
-            new[] { "4K", "5K", "6K", "7K", "8K", "9K", "DC", "EZ", "FI", "FL", "HD", "MR", "NC", "NF" },
+            new[] { "EZ", "FL", "HD", "HR", "NF", "SO", "TD" },
+            new[] { "EZ", "FL", "HD", "HR", "NF" },
+            new[] { "EZ", "FL", "HD", "HR", "NF" },
+            new[] { "4K", "5K", "6K", "7K", "8K", "9K", "EZ", "FI", "FL", "HD", "MR", "NF" },
         };
 
         /// <summary>
         /// Whether servers that rank plays by osu!stable score rank plays with <paramref name="mod"/> (scosu's <c>scoring::is_ranked_mod</c>).
         /// Unlike lazer's <see cref="Mod.Ranked"/>: Difficulty Adjust (unless it sets an approach rate below 0), Classic,
-        /// osu!'s Mirror and osu!taiko's Accuracy Challenge are ranked, and so are Relax and Autopilot, on leaderboards of their own.
+        /// osu!'s Mirror and osu!taiko's Accuracy Challenge are ranked, so are speed mods at any speed lazer allows,
+        /// and so are Relax and Autopilot, on leaderboards of their own.
         /// </summary>
         /// <param name="rulesetId">The online ID of the ruleset played.</param>
         /// <param name="mod">The mod, with the settings that differ from its defaults.</param>
         public static bool IsRankedMod(int rulesetId, APIMod mod)
         {
+            if (speedRange(mod.Acronym) is { } speeds)
+            {
+                if (!mod.Settings.TryGetValue("speed_change", out object? value))
+                    return true;
+
+                double speedChange = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                return speedChange >= speeds.Min && speedChange <= speeds.Max;
+            }
+
             switch (mod.Acronym)
             {
-                case "DT" or "HT":
-                    return !mod.Settings.ContainsKey("speed_change");
-
                 case "DA":
                     return !(mod.Settings.TryGetValue("approach_rate", out object? approachRate) && Convert.ToDouble(approachRate, CultureInfo.InvariantCulture) < 0);
             }
