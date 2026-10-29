@@ -179,7 +179,11 @@ namespace osu.Game.Tests.Visual.SongSelect
             assertModsMultiplier(1.06);
 
             AddStep("Classic and Mirror", () => changeMods(new Mod[] { new OsuModClassic(), new OsuModMirror() }));
-            assertModsMultiplier(1);
+            assertModsMultiplier(0.99);
+            assertUnrankedBadge(false);
+
+            AddStep("Double Time at 1.2x", () => changeMods(new[] { new OsuModDoubleTime { SpeedChange = { Value = 1.2 } } }));
+            assertModsMultiplier(1.2);
             assertUnrankedBadge(false);
 
             AddStep("Approach rate below zero", () => changeMods(new[] { new OsuModDifficultyAdjust { ExtendedLimits = { Value = true }, ApproachRate = { Value = -5 } } }));

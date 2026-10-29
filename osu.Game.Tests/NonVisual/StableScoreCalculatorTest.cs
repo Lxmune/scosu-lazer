@@ -65,7 +65,7 @@ namespace osu.Game.Tests.NonVisual
             };
             Assert.That(calculate(osu, 0, fullCombo, 650), Is.EqualTo(2_412_128));
 
-            Assert.That(calculate(osu, 0, osu_misses, 220, mods: new[] { new APIMod { Acronym = "HD" }, new APIMod { Acronym = "DT" } }), Is.EqualTo(714_364));
+            Assert.That(calculate(osu, 0, osu_misses, 220, mods: new[] { new APIMod { Acronym = "HD" }, new APIMod { Acronym = "DT" } }), Is.EqualTo(936_821));
 
             var classic = new Dictionary<HitResult, int>
             {
@@ -75,7 +75,7 @@ namespace osu.Game.Tests.NonVisual
                 [HitResult.SmallTickHit] = 70,
                 [HitResult.SmallTickMiss] = 10,
             };
-            Assert.That(calculate(osu, 0, classic, 400, mods: new[] { new APIMod { Acronym = "CL" }, new APIMod { Acronym = "HR" } }), Is.EqualTo(1_197_454));
+            Assert.That(calculate(osu, 0, classic, 400, mods: new[] { new APIMod { Acronym = "CL" }, new APIMod { Acronym = "HR" } }), Is.EqualTo(1_186_093));
 
             var partial = new Dictionary<HitResult, int>
             {
@@ -292,7 +292,9 @@ namespace osu.Game.Tests.NonVisual
         [TestCase(0, "HD", null, true)]
         [TestCase(0, "HD", "only_fade_approach_circles", false)]
         [TestCase(0, "DT", "adjust_pitch", true)]
-        [TestCase(0, "DT", "speed_change", false)]
+        [TestCase(0, "DT", "speed_change", true)]
+        [TestCase(3, "NC", "speed_change", true)]
+        [TestCase(1, "HT", "speed_change", false)]
         [TestCase(0, "CL", "no_slider_head_accuracy", true)]
         [TestCase(0, "MR", "reflection", true)]
         [TestCase(0, "RX", null, true)]
@@ -345,7 +347,15 @@ namespace osu.Game.Tests.NonVisual
             var lowApproachRate = new OsuModDifficultyAdjust { ExtendedLimits = { Value = true }, ApproachRate = { Value = -5 } };
             Assert.That(StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { lowApproachRate }).Ranked, Is.False);
 
-            Assert.That(StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { new OsuModClassic(), new OsuModMirror() }), Is.EqualTo((1.0, true)));
+            Assert.That(StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { new OsuModClassic(), new OsuModMirror() }), Is.EqualTo((0.99, true)));
+            Assert.That(StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { new OsuModClassic { ClassicNoteLock = { Value = false } } }), Is.EqualTo((0.97, true)));
+
+            // Speed mods count their speed, at any speed lazer allows.
+            var customSpeed = StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { new OsuModDoubleTime { SpeedChange = { Value = 1.15 } } });
+            Assert.That(customSpeed.Multiplier, Is.EqualTo(1.15).Within(1e-9));
+            Assert.That(customSpeed.Ranked, Is.True);
+            Assert.That(StableScoreCalculator.GetModEffects(osuRuleset, beatmap, new Mod[] { new OsuModHalfTime() }), Is.EqualTo((0.75, true)));
+            Assert.That(StableScoreCalculator.ScoreMultiplier(0, new[] { new APIMod { Acronym = "NC", Settings = { ["speed_change"] = 10.0 } } }, 0), Is.EqualTo(2));
 
             // The converter gives this beatmap 7 keys: fewer cost 0.04 more each.
             var maniaRuleset = new ManiaRuleset();
