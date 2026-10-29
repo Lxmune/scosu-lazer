@@ -362,7 +362,7 @@ namespace osu.Game.Screens.Play
                 case @"invalid verification hash":
                 case @"invalid token":
                 case @"outdated client":
-                    return "Please ensure that you are using the latest version of the official game releases.";
+                    return "Please ensure that you are using the latest version of the scosu releases.";
 
                 case @"invalid or missing beatmap_hash":
                     return "This beatmap does not match the online version. Please update or redownload it.";
