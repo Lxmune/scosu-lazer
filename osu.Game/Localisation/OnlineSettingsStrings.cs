@@ -45,9 +45,9 @@ namespace osu.Game.Localisation
         public static LocalisableString RestartToChangeServer => new TranslatableString(getKey(@"restart_to_change_server"), @"Restart the game to connect to the new server.");
 
         /// <summary>
-        /// "Changing the server is at your own risk: this is a modified osu!lazer client."
+        /// "Changing the server is at your own risk, as this is a modified osu!lazer client. We will not be responsible in case of any misuse or bans that will occur on the custom server you are connecting to."
         /// </summary>
-        public static LocalisableString ChangeServerRisk => new TranslatableString(getKey(@"change_server_risk"), @"Changing the server is at your own ris, as this is a modified osu!lazer client. We will not be responsible in case of any misuse or bans that will occur on the custom server you are connecting to.");
+        public static LocalisableString ChangeServerRisk => new TranslatableString(getKey(@"change_server_risk"), @"Changing the server is at your own risk, as this is a modified osu!lazer client. We will not be responsible in case of any misuse or bans that will occur on the custom server you are connecting to.");
 
         /// <summary>
         /// "Alerts and Privacy"

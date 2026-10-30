@@ -30,6 +30,7 @@ using osu.Game.Input.Bindings;
 using osu.Game.IO;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Matchmaking;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
@@ -113,6 +114,9 @@ namespace osu.Game.Screens.Menu
         // scosu: osu!supporter can't be bought on scosu, so its prompt is disabled.
         // private SupporterDisplay supporterDisplay;
         private ScoreSummaryDisplay scoreSummaryDisplay;
+        private EventMenuCard eventMenuCard;
+        private FillFlowContainer leftDisplays;
+        private FillFlowContainer rightDisplays;
         private OnlinePlayersDisplay onlinePlayersDisplay;
 
         private Sample reappearSampleSwoosh;
@@ -220,27 +224,41 @@ namespace osu.Game.Screens.Menu
                 //     Anchor = Anchor.TopLeft,
                 //     Origin = Anchor.TopLeft,
                 // },
-                // scosu: in its place, the ranked score gained today and this week, then the other players online
-                // (whose rows have a right-click menu, hence the menu container).
+                // scosu: in its place, the scosu! event's card (when there is one, here or on the right, see placeEventCard()),
+                // the ranked score gained today and this week, then the other players online (whose rows have a right-click menu,
+                // hence the menu container).
                 new OsuContextMenuContainer
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Child = new FillFlowContainer
+                    Children = new Drawable[]
                     {
-                        AutoSizeAxes = Axes.Both,
-                        Direction = FillDirection.Vertical,
-                        Anchor = Anchor.TopLeft,
-                        Origin = Anchor.TopLeft,
-                        Children = new Drawable[]
+                        leftDisplays = new FillFlowContainer
                         {
-                            scoreSummaryDisplay = new ScoreSummaryDisplay
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            Anchor = Anchor.TopLeft,
+                            Origin = Anchor.TopLeft,
+                            Children = new Drawable[]
                             {
-                                Margin = new MarginPadding(10),
+                                eventMenuCard = new EventMenuCard(),
+                                scoreSummaryDisplay = new ScoreSummaryDisplay
+                                {
+                                    Margin = new MarginPadding(10),
+                                },
+                                onlinePlayersDisplay = new OnlinePlayersDisplay
+                                {
+                                    Margin = new MarginPadding { Horizontal = 10 },
+                                },
                             },
-                            onlinePlayersDisplay = new OnlinePlayersDisplay
-                            {
-                                Margin = new MarginPadding { Horizontal = 10 },
-                            },
+                        },
+                        // Below the song ticker.
+                        rightDisplays = new FillFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            Margin = new MarginPadding { Top = 50 },
                         },
                     },
                 },
@@ -257,6 +275,7 @@ namespace osu.Game.Screens.Menu
                     case ButtonSystemState.Exit:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Hidden;
+                        eventMenuCard.Hide();
                         scoreSummaryDisplay.Hide();
                         onlinePlayersDisplay.Hide();
                         break;
@@ -264,6 +283,7 @@ namespace osu.Game.Screens.Menu
                     default:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Visible;
+                        eventMenuCard.Show();
                         scoreSummaryDisplay.Show();
                         onlinePlayersDisplay.Show();
                         break;
@@ -280,6 +300,27 @@ namespace osu.Game.Screens.Menu
         {
             base.LoadComplete();
             GetContainingInputManager();
+
+            eventMenuCard.MenuPosition.BindValueChanged(position => placeEventCard(position.NewValue), true);
+        }
+
+        /// <summary>
+        /// Moves the event's card to the side its event asks for: above the score summary, or on its own on the right.
+        /// </summary>
+        private void placeEventCard(ScosuEventMenuPosition position)
+        {
+            var target = position == ScosuEventMenuPosition.TopRight ? rightDisplays : leftDisplays;
+
+            if (eventMenuCard.Parent == target)
+                return;
+
+            ((FillFlowContainer)eventMenuCard.Parent)?.Remove(eventMenuCard, false);
+
+            eventMenuCard.Anchor = eventMenuCard.Origin = target == rightDisplays ? Anchor.TopRight : Anchor.TopLeft;
+            target.Add(eventMenuCard);
+
+            // The flows lay out by depth: first in the left column.
+            target.SetLayoutPosition(eventMenuCard, -1);
         }
 
         public void ReturnToOsuLogo() => Buttons.State = ButtonSystemState.Initial;
@@ -409,6 +450,7 @@ namespace osu.Game.Screens.Menu
             // supporterDisplay
             //     .FadeOut(500, Easing.OutQuint);
 
+            eventMenuCard.Hide();
             scoreSummaryDisplay.Hide();
             onlinePlayersDisplay.Hide();
 
@@ -434,7 +476,9 @@ namespace osu.Game.Screens.Menu
                 .ScaleTo(1, 1000, Easing.OutQuint)
                 .FadeIn(1000, Easing.OutQuint);
 
-            // After a play, the score gained has likely changed.
+            // After a play, the score gained (and the event's standing) has likely changed.
+            eventMenuCard.Refresh();
+            eventMenuCard.Show();
             scoreSummaryDisplay.Refresh();
             scoreSummaryDisplay.Show();
             onlinePlayersDisplay.Show();
@@ -490,6 +534,7 @@ namespace osu.Game.Screens.Menu
             // supporterDisplay
             //     .FadeOut(500, Easing.OutQuint);
 
+            eventMenuCard.Hide();
             scoreSummaryDisplay.Hide();
             onlinePlayersDisplay.Hide();
 
