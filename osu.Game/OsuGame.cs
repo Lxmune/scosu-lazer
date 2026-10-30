@@ -60,6 +60,7 @@ using osu.Game.Overlays.Mods;
 using osu.Game.Overlays.Music;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
+using osu.Game.Overlays.ScosuEvent;
 using osu.Game.Overlays.SkinEditor;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Overlays.Volume;
@@ -148,6 +149,8 @@ namespace osu.Game
         private BeatmapSetOverlay beatmapSetOverlay;
 
         private WikiOverlay wikiOverlay;
+
+        private ScosuEventOverlay eventOverlay;
 
         private ChangelogOverlay changelogOverlay;
 
@@ -1241,6 +1244,8 @@ namespace osu.Game
             loadComponentSingleFile(userProfile = new UserProfileOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(beatmapSetOverlay = new BeatmapSetOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(wikiOverlay = new WikiOverlay(), overlayContent.Add, true);
+            // scosu: the scosu! event's page, opened from the main menu's event card.
+            loadComponentSingleFile(eventOverlay = new ScosuEventOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(skinEditor = new SkinEditorOverlay(ScreenContainer), overlayContent.Add, true);
 
             loadComponentSingleFile(loginOverlay = new LoginOverlay
@@ -1294,7 +1299,7 @@ namespace osu.Game
             }
 
             // ensure only one of these overlays are open at once.
-            var singleDisplayOverlays = new OverlayContainer[] { chatOverlay, news, dashboard, beatmapListing, changelogOverlay, rankingsOverlay, wikiOverlay };
+            var singleDisplayOverlays = new OverlayContainer[] { chatOverlay, news, dashboard, beatmapListing, changelogOverlay, rankingsOverlay, wikiOverlay, eventOverlay };
 
             foreach (var overlay in singleDisplayOverlays)
             {
