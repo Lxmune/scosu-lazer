@@ -69,8 +69,9 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.SongSelectBackgroundBlur, false);
 
             // Online settings
-            SetDefault(OsuSetting.Username, string.Empty);
-            SetDefault(OsuSetting.Token, string.Empty);
+            SetDefault(OsuSetting.ScosuUsername, string.Empty);
+            SetDefault(OsuSetting.ScosuToken, string.Empty);
+            SetDefault(OsuSetting.ScosuTokenServer, string.Empty);
 
             SetDefault(OsuSetting.AutomaticallyDownloadMissingBeatmaps, true);
 
@@ -79,14 +80,14 @@ namespace osu.Game.Configuration
                 if (enabled.NewValue)
                     SetValue(OsuSetting.SaveUsername, true);
                 else
-                    GetBindable<string>(OsuSetting.Token).SetDefault();
+                    GetBindable<string>(OsuSetting.ScosuToken).SetDefault();
             };
 
             SetDefault(OsuSetting.SaveUsername, true).ValueChanged += enabled =>
             {
                 if (!enabled.NewValue)
                 {
-                    GetBindable<string>(OsuSetting.Username).SetDefault();
+                    GetBindable<string>(OsuSetting.ScosuUsername).SetDefault();
                     SetValue(OsuSetting.SavePassword, false);
                 }
             };
@@ -253,7 +254,7 @@ namespace osu.Game.Configuration
         {
             switch (lookup)
             {
-                case OsuSetting.Token:
+                case OsuSetting.ScosuToken:
                     return true;
             }
 
@@ -336,7 +337,11 @@ namespace osu.Game.Configuration
     public enum OsuSetting
     {
         Ruleset,
-        Token,
+        /// <summary>
+        /// Not osu!'s <c>Token</c>: scosu can share its game.ini with osu!lazer, and osu!'s login
+        /// must never be sent to a scosu server (or the other way round).
+        /// </summary>
+        ScosuToken,
         MenuCursorSize,
         GameplayCursorSize,
         AutoCursorSize,
@@ -383,7 +388,10 @@ namespace osu.Game.Configuration
         BeatmapDetailTab,
         BeatmapLeaderboardSortMode,
         BeatmapDetailModsFilter,
-        Username,
+        /// <summary>
+        /// Not osu!'s <c>Username</c>, for the same reason as <see cref="ScosuToken"/>.
+        /// </summary>
+        ScosuUsername,
         ReleaseStream,
         SavePassword,
         SaveUsername,
@@ -406,6 +414,11 @@ namespace osu.Game.Configuration
         /// where that one is already off, and scosu's setup should still show once.
         /// </summary>
         ShowScosuFirstRunSetup,
+
+        /// <summary>
+        /// The API URL <see cref="ScosuToken"/> was issued by, so a token is never sent to another server.
+        /// </summary>
+        ScosuTokenServer,
 
         ShowConvertedBeatmaps,
         Skin,

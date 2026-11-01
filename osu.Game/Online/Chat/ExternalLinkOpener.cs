@@ -54,7 +54,12 @@ namespace osu.Game.Online.Chat
             }
             else
             {
-                isTrustedDomain = url.StartsWith(api.Endpoints.WebsiteUrl, StringComparison.Ordinal);
+                // The whole host must match: a plain prefix check would trust "https://site.net.evil.com".
+                isTrustedDomain = Uri.TryCreate(url, UriKind.Absolute, out var target)
+                                  && Uri.TryCreate(api.Endpoints.WebsiteUrl, UriKind.Absolute, out var website)
+                                  && target.Scheme == website.Scheme
+                                  && string.Equals(target.Host, website.Host, StringComparison.OrdinalIgnoreCase)
+                                  && target.Port == website.Port;
             }
 
             if (!url.CheckIsValidUrl())

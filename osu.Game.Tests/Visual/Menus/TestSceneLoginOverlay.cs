@@ -338,7 +338,7 @@ namespace osu.Game.Tests.Visual.Menus
         public void TestUncheckingRememberUsernameClearsIt()
         {
             AddStep("logout", () => API.Logout());
-            AddStep("set username", () => localConfig.SetValue(OsuSetting.Username, "test_user"));
+            AddStep("set username", () => localConfig.SetValue(OsuSetting.ScosuUsername, "test_user"));
             AddStep("set remember password", () => localConfig.SetValue(OsuSetting.SavePassword, true));
             AddStep("uncheck remember username", () =>
             {
@@ -347,14 +347,14 @@ namespace osu.Game.Tests.Visual.Menus
             });
             AddAssert("remember username off", () => localConfig.Get<bool>(OsuSetting.SaveUsername), () => Is.False);
             AddAssert("remember password off", () => localConfig.Get<bool>(OsuSetting.SavePassword), () => Is.False);
-            AddAssert("username cleared", () => localConfig.Get<string>(OsuSetting.Username), () => Is.Empty);
+            AddAssert("username cleared", () => localConfig.Get<string>(OsuSetting.ScosuUsername), () => Is.Empty);
         }
 
         [Test]
         public void TestUncheckingRememberPasswordClearsToken()
         {
             AddStep("logout", () => API.Logout());
-            AddStep("set token", () => localConfig.SetValue(OsuSetting.Token, "test_token"));
+            AddStep("set token", () => localConfig.SetValue(OsuSetting.ScosuToken, "test_token"));
             AddStep("set remember password", () => localConfig.SetValue(OsuSetting.SavePassword, true));
             AddStep("uncheck remember token", () =>
             {
@@ -362,7 +362,7 @@ namespace osu.Game.Tests.Visual.Menus
                 InputManager.Click(MouseButton.Left);
             });
             AddAssert("remember password off", () => localConfig.Get<bool>(OsuSetting.SavePassword), () => Is.False);
-            AddAssert("token cleared", () => localConfig.Get<string>(OsuSetting.Token), () => Is.Empty);
+            AddAssert("token cleared", () => localConfig.Get<string>(OsuSetting.ScosuToken), () => Is.Empty);
         }
     }
 }
