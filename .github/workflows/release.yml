@@ -83,6 +83,14 @@ jobs:
           rm -f releases/assets.*.json
           ls -l releases
 
+      # The game's version hash (see OsuGameBase.VersionHash): the server only takes plays from the
+      # newest release's builds (scosu-rust's src/client_releases.rs).
+      - name: Hash osu.Game.dll
+        run: |
+          if command -v md5sum > /dev/null; then hash=$(md5sum build/osu.Game.dll); else hash=$(md5 -q build/osu.Game.dll); fi
+          echo "${hash%% *}  ${{ matrix.rid }}" > releases/version-hash.${{ matrix.rid }}.txt
+          cat releases/version-hash.${{ matrix.rid }}.txt
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
@@ -109,6 +117,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cat releases/version-hash.*.txt > releases/version-hashes.txt
+          rm releases/version-hash.*.txt
           ls -l releases
           gh release create "$GITHUB_REF_NAME" releases/* \
             --repo ${{ github.repository }} \
