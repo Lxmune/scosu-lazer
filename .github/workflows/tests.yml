@@ -1,0 +1,88 @@
+# Runs every test on pushes to master and on pull requests into it.
+# For master to only take changes that pass, make the "All tests passed" check required in the repository's
+# branch protection (Settings → Rules → Rulesets).
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.os.prettyname }}, ${{ matrix.threadingMode }})
+    runs-on: ${{ matrix.os.fullname }}
+    env:
+      OSU_EXECUTION_MODE: ${{ matrix.threadingMode }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - { prettyname: Windows, fullname: windows-latest }
+          - { prettyname: Linux, fullname: ubuntu-latest }
+        threadingMode: ['SingleThread', 'MultiThreaded']
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Compile
+        run: dotnet build -c Debug -warnaserror osu.Desktop.slnf
+
+      - name: Test
+        run: dotnet test osu.Desktop.slnf --no-build --logger "trx;LogFileName=TestResults-${{ matrix.os.prettyname }}-${{ matrix.threadingMode }}.trx" -- NUnit.ConsoleOut=0
+
+      # Attempt to upload results even if test fails.
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: test-results-${{ matrix.os.prettyname }}-${{ matrix.threadingMode }}
+          path: ${{ github.workspace }}/**/TestResults/TestResults-${{ matrix.os.prettyname }}-${{ matrix.threadingMode }}.trx
+
+  # The one check to require: it lists the failed tests in the run's summary, and fails unless every test run passed.
+  results:
+    name: All tests passed
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    needs: test
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+
+      - name: Add test results summary to workflow run
+        uses: dorny/test-reporter@v3.0.0
+        with:
+          name: Results
+          path: "**/*.trx"
+          reporter: dotnet-trx
+          list-suites: 'failed'
+          list-tests: 'failed'
+          use-actions-summary: 'true'
+          fail-on-empty: 'false'
+
+      - name: Fail unless every test run passed
+        if: ${{ needs.test.result != 'success' }}
+        run: |
+          echo "::error::Test runs finished as '${{ needs.test.result }}'."
+          exit 1

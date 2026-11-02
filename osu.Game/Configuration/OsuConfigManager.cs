@@ -35,6 +35,14 @@ namespace osu.Game.Configuration
         {
         }
 
+        protected override void PerformLoad()
+        {
+            base.PerformLoad();
+
+            // scosu: the score display mode isn't a setting here, so a "Classic" saved before it was removed doesn't stay.
+            SetValue(OsuSetting.ScoreDisplayMode, ScoringMode.Standardised);
+        }
+
         protected override void InitialiseDefaults()
         {
             // UI/selection defaults
