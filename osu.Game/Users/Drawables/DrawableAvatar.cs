@@ -8,6 +8,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Graphics;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 
 namespace osu.Game.Users.Drawables
@@ -16,6 +17,9 @@ namespace osu.Game.Users.Drawables
     public partial class DrawableAvatar : Sprite
     {
         private readonly IUser user;
+
+        [Resolved(canBeNull: true)]
+        private IAPIProvider api { get; set; }
 
         /// <summary>
         /// A simple, non-interactable avatar sprite for the specified user.
@@ -37,10 +41,16 @@ namespace osu.Game.Users.Drawables
             if (user != null && user.OnlineID > 1)
                 // TODO: The fallback here should not need to exist. Users should be looked up and populated via UserLookupCache or otherwise
                 // in remaining cases where this is required (chat tabs, local leaderboard), at which point this should be removed.
-                Texture = onlineTextures.Get((user as APIUser)?.AvatarUrl ?? $@"https://a.ppy.sh/{user.OnlineID}");
+                Texture = onlineTextures.Get((user as APIUser)?.AvatarUrl ?? fallbackAvatarUrl());
 
             Texture ??= textures.Get(@"Online/avatar-guest");
         }
+
+        // scosu: users known only by their id get their picture from this server. osu!'s picture of the same id
+        // belongs to someone else. Players without a picture get a 404 there, and so the guest avatar.
+        private string fallbackAvatarUrl() => api?.Endpoints.RanksByStableScore == true
+            ? $@"{api.Endpoints.APIUrl}/images/avatar/{user.OnlineID}"
+            : $@"https://a.ppy.sh/{user.OnlineID}";
 
         protected override void LoadComplete()
         {
