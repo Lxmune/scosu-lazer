@@ -34,6 +34,7 @@ namespace osu.Game.Screens.Utility
     {
         private FrameSync previousFrameSyncMode;
         private double previousActiveHz;
+        private bool previousAllowUnlimitedFrames;
 
         private readonly OsuTextFlowContainer statusText;
 
@@ -211,6 +212,7 @@ namespace osu.Game.Screens.Utility
 
             previousFrameSyncMode = config.Get<FrameSync>(FrameworkSetting.FrameSync);
             previousActiveHz = host.UpdateThread.ActiveHz;
+            previousAllowUnlimitedFrames = host.AllowBenchmarkUnlimitedFrames;
             config.SetValue(FrameworkSetting.FrameSync, FrameSync.Unlimited);
             host.UpdateThread.ActiveHz = target_host_update_frames;
             host.AllowBenchmarkUnlimitedFrames = true;
@@ -220,7 +222,8 @@ namespace osu.Game.Screens.Utility
 
         public override bool OnExiting(ScreenExitEvent e)
         {
-            host.AllowBenchmarkUnlimitedFrames = false;
+            // The "Unlimited" frame limiter may already have been uncapped (see UnlimitedFrameLimiter).
+            host.AllowBenchmarkUnlimitedFrames = previousAllowUnlimitedFrames;
             config.SetValue(FrameworkSetting.FrameSync, previousFrameSyncMode);
             host.UpdateThread.ActiveHz = previousActiveHz;
             return base.OnExiting(e);

@@ -34,6 +34,8 @@ namespace osu.Game.Screens.Play
     {
         public const double BASE_SEEK_AMOUNT = 1000;
 
+        private static readonly TimeSpan attributes_timeout = TimeSpan.FromSeconds(10);
+
         private readonly Func<IBeatmap, IReadOnlyList<Mod>, Score> createScore;
 
         [Cached(typeof(IGameplayLeaderboardProvider))]
@@ -96,12 +98,18 @@ namespace osu.Game.Screens.Play
                 return;
 
             // Replays have no score token to carry the beatmap's stable score attributes, so ask for them.
-            stableScoreAttributesCache.GetAttributesAsync(Beatmap.Value.BeatmapInfo.OnlineID, GameplayState.Ruleset.RulesetInfo.OnlineID)
-                                      .ContinueWith(task =>
-                                      {
-                                          if (task.GetResultSafely() is StableScoreAttributes attributes)
-                                              Schedule(() => GameplayState.StableScore.Attributes = attributes);
-                                      });
+            var attributesTask = stableScoreAttributesCache.GetAttributesAsync(Beatmap.Value.BeatmapInfo.OnlineID, GameplayState.Ruleset.RulesetInfo.OnlineID);
+
+            // Like the score token of a play, wait for them (for a while) before the replay starts,
+            // so that it shows its stable score from the start rather than its lazer score until the server answers.
+            // (Task.WhenAny doesn't fault: a failed request is handled below.)
+            Task.WhenAny(attributesTask).Wait(attributes_timeout);
+
+            attributesTask.ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully && task.GetResultSafely() is StableScoreAttributes attributes)
+                    Schedule(() => GameplayState.StableScore.Attributes = attributes);
+            });
 
             AddInternal(leaderboardProvider);
 
@@ -147,6 +155,7 @@ namespace osu.Game.Screens.Play
                             return;
 
                         ValidForResume = false;
+                        GameplayState.StableScore.PopulateScore(Score.ScoreInfo);
                         this.Push(new SoloResultsScreen(Score.ScoreInfo));
                     }
                 }

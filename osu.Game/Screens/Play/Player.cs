@@ -921,6 +921,8 @@ namespace osu.Game.Screens.Play
             if (!canShowResults && !forceImport)
                 return Task.FromResult<ScoreInfo>(null);
 
+            GameplayState.StableScore.PopulateScore(Score.ScoreInfo);
+
             // Clone score before beginning any async processing.
             // - Must be run synchronously as the score may potentially be mutated in the background.
             // - Must be cloned for the same reason.

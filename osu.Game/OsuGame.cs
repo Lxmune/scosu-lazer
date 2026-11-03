@@ -1107,6 +1107,7 @@ namespace osu.Game
             });
 
             Add(sessionIdleTracker);
+            Add(new UnlimitedFrameLimiter());
 
             Container logoContainer;
 
