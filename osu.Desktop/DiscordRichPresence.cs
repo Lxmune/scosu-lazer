@@ -29,7 +29,7 @@ namespace osu.Desktop
 {
     internal partial class DiscordRichPresence : Component
     {
-        private const string client_id = "1216669957799018608";
+        private const string client_id = "1564082817464410132";
 
         private DiscordRpcClient client = null!;
 

@@ -19,7 +19,7 @@ namespace osu.Game.Graphics
         /// <summary>
         /// osu!framework's cap when <see cref="GameHost.AllowBenchmarkUnlimitedFrames"/> isn't set.
         /// </summary>
-        private const double capped_hz = 1000;
+        public const double CAPPED_HZ = 1000;
 
         [Resolved]
         private GameHost host { get; set; } = null!;
@@ -58,8 +58,8 @@ namespace osu.Game.Graphics
                 }
                 else
                 {
-                    host.MaximumDrawHz = Math.Min(host.MaximumDrawHz, capped_hz);
-                    host.MaximumUpdateHz = Math.Min(host.MaximumUpdateHz, capped_hz);
+                    host.MaximumDrawHz = Math.Min(host.MaximumDrawHz, CAPPED_HZ);
+                    host.MaximumUpdateHz = Math.Min(host.MaximumUpdateHz, CAPPED_HZ);
                 }
             }, true);
         }
