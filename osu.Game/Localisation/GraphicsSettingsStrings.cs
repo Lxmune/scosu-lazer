@@ -30,6 +30,11 @@ namespace osu.Game.Localisation
         public static LocalisableString FrameLimiter => new TranslatableString(getKey(@"frame_limiter"), @"Frame limiter");
 
         /// <summary>
+        /// "Unlimited"
+        /// </summary>
+        public static LocalisableString UnlimitedFrameLimiter => new TranslatableString(getKey(@"unlimited_frame_limiter"), @"Unlimited");
+
+        /// <summary>
         /// "Threading mode"
         /// </summary>
         public static LocalisableString ThreadingMode => new TranslatableString(getKey(@"threading_mode"), @"Threading mode");

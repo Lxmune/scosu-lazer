@@ -113,6 +113,16 @@ namespace osu.Game.Screens.Play
         /// </summary>
         public long GetDisplayScore(ScoringMode mode) => IsKnown ? TotalScore.Value : scoreProcessor.GetDisplayScore(mode);
 
+        /// <summary>
+        /// Records the stable score on <paramref name="score"/> as its <see cref="ScoreInfo.LegacyTotalScore"/> (which results and leaderboards show), once it is known.
+        /// A score that already has one (from the server, or from osu!stable) keeps it.
+        /// </summary>
+        public void PopulateScore(ScoreInfo score)
+        {
+            if (IsKnown)
+                score.LegacyTotalScore ??= TotalScore.Value;
+        }
+
         private void update()
         {
             if (spectatedScore != null)
