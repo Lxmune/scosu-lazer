@@ -231,7 +231,6 @@ namespace osu.Game.Tournament.Components
                                             },
                                             new OsuLogo
                                             {
-                                                Triangles = false,
                                                 Scale = new Vector2(0.08f),
                                                 Margin = new MarginPadding(50),
                                                 X = -10,

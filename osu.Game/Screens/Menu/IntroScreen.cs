@@ -323,7 +323,6 @@ namespace osu.Game.Screens.Menu
             base.LogoArriving(logo, resuming);
 
             logo.Colour = Color4.White;
-            logo.Triangles = false;
             logo.Ripple = false;
 
             if (!resuming)

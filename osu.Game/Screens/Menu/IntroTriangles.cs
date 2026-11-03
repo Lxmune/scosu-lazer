@@ -11,6 +11,7 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Screens;
 using osu.Framework.Timing;
@@ -108,7 +109,7 @@ namespace osu.Game.Screens.Menu
             private RulesetFlow rulesets;
             private Container rulesetsScale;
             private Container logoContainerSecondary;
-            private LazerLogo lazerLogo;
+            private ScosuLogo scosuLogo;
 
             private GlitchingTriangles triangles;
 
@@ -159,7 +160,7 @@ namespace osu.Game.Screens.Menu
                         RelativeSizeAxes = Axes.Both,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
-                        Child = lazerLogo = new LazerLogo
+                        Child = scosuLogo = new ScosuLogo
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre
@@ -190,7 +191,7 @@ namespace osu.Game.Screens.Menu
                 const float scale_adjust = 0.8f;
 
                 rulesets.Hide();
-                lazerLogo.Hide();
+                scosuLogo.Hide();
 
                 using (BeginAbsoluteSequence(0))
                 {
@@ -236,18 +237,17 @@ namespace osu.Game.Screens.Menu
                         rulesets.FadeOut();
 
                         // matching flyte curve y = 0.25x^2 + (max(0, x - 0.7) / 0.3) ^ 5
-                        lazerLogo.FadeIn().ScaleTo(scale_start).Then().Delay(logo_scale_duration * 0.7f).ScaleTo(scale_start - scale_adjust, logo_scale_duration * 0.3f, Easing.InQuint);
-
-                        lazerLogo.TransformTo(nameof(LazerLogo.Progress), 1f, logo_scale_duration);
+                        // scosu: fades in, where osu!lazer's logo was drawn in.
+                        scosuLogo.FadeIn(logo_scale_duration * 0.5f).ScaleTo(scale_start).Then().Delay(logo_scale_duration * 0.7f).ScaleTo(scale_start - scale_adjust, logo_scale_duration * 0.3f, Easing.InQuint);
 
                         logoContainerSecondary.ScaleTo(scale_start).Then().ScaleTo(scale_start - scale_adjust * 0.25f, logo_scale_duration, Easing.InQuad);
                     }
 
                     using (BeginDelayedSequence(logo_2))
                     {
-                        lazerLogo.FadeOut().OnComplete(_ =>
+                        scosuLogo.FadeOut().OnComplete(_ =>
                         {
-                            logoContainerSecondary.Remove(lazerLogo, true);
+                            logoContainerSecondary.Remove(scosuLogo, true);
 
                             logo.FadeIn();
 
@@ -279,43 +279,21 @@ namespace osu.Game.Screens.Menu
                 }
             }
 
-            private partial class LazerLogo : CompositeDrawable
+            /// <summary>
+            /// scosu's logo, in place of osu!lazer's drawn-in one. Its size makes it end up the size of <see cref="OsuLogo"/>,
+            /// which takes over from it at the end of the sequence.
+            /// </summary>
+            private partial class ScosuLogo : Sprite
             {
-                private LogoAnimation highlight, background;
-
-                public float Progress
+                public ScosuLogo()
                 {
-                    get => background.AnimationProgress;
-                    set
-                    {
-                        background.AnimationProgress = value;
-                        highlight.AnimationProgress = value;
-                    }
-                }
-
-                public LazerLogo()
-                {
-                    Size = new Vector2(960);
+                    Size = new Vector2(1280);
                 }
 
                 [BackgroundDependencyLoader]
                 private void load(LargeTextureStore textures)
                 {
-                    InternalChildren = new Drawable[]
-                    {
-                        highlight = new LogoAnimation
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Texture = textures.Get(@"Intro/Triangles/logo-highlight"),
-                            Colour = Color4.White,
-                        },
-                        background = new LogoAnimation
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Texture = textures.Get(@"Intro/Triangles/logo-background"),
-                            Colour = OsuColour.Gray(0.6f),
-                        },
-                    };
+                    Texture = textures.Get(@"Menu/scosu-logo");
                 }
             }
 

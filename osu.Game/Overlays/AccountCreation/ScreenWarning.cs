@@ -82,7 +82,6 @@ namespace osu.Game.Overlays.AccountCreation
                             {
                                 Scale = new Vector2(0.1f),
                                 Anchor = Anchor.Centre,
-                                Triangles = false,
                             },
                         },
                         new OsuSpriteText

@@ -270,7 +270,6 @@ namespace osu.Game.Screens
             logo.ChangeAnchor(Anchor.TopLeft);
             logo.RelativePositionAxes = Axes.Both;
 
-            logo.Triangles = true;
             logo.Ripple = true;
         }
 

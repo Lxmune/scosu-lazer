@@ -43,6 +43,9 @@ namespace osu.Game.Tests.Visual.UserInterface
                     Scale = new Vector2(scale),
                 };
             });
+
+            // The logo sprite takes its size from its texture: a missing texture leaves it at zero size.
+            AddUntilStep("scosu logo image loaded", () => logo!.SizeForFlow, () => Is.EqualTo(512));
         }
 
         [Test]

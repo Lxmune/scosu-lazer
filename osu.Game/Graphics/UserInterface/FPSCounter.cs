@@ -246,10 +246,12 @@ namespace osu.Game.Graphics.UserInterface
 
         private bool updateAimFPS()
         {
+            // The uncapped "Unlimited" frame limiter (see UnlimitedFrameLimiter) aims for int.MaxValue,
+            // which would show any real frame rate as failing to reach it.
             if (updateClock.Throttling)
             {
-                double newAimDrawFPS = drawClock.MaximumUpdateHz;
-                double newAimUpdateFPS = updateClock.MaximumUpdateHz;
+                double newAimDrawFPS = Math.Min(drawClock.MaximumUpdateHz, UnlimitedFrameLimiter.CAPPED_HZ);
+                double newAimUpdateFPS = Math.Min(updateClock.MaximumUpdateHz, UnlimitedFrameLimiter.CAPPED_HZ);
 
                 if (aimDrawFPS != newAimDrawFPS || aimUpdateFPS != newAimUpdateFPS)
                 {
@@ -260,7 +262,7 @@ namespace osu.Game.Graphics.UserInterface
             }
             else
             {
-                double newAimFPS = inputClock.MaximumUpdateHz;
+                double newAimFPS = Math.Min(inputClock.MaximumUpdateHz, UnlimitedFrameLimiter.CAPPED_HZ);
 
                 if (aimDrawFPS != newAimFPS || aimUpdateFPS != newAimFPS)
                 {
