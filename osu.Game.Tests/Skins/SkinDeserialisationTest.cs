@@ -87,6 +87,9 @@ namespace osu.Game.Tests.Skins
             "Archives/modified-classic-20260806.osk",
             // Covers ranked score gain counter
             "Archives/modified-classic-20261026.osk",
+            // Covers results screen components
+            "Archives/modified-argon-20261028.osk",
+            "Archives/modified-classic-20261028.osk",
         };
 
         /// <summary>
@@ -104,6 +107,7 @@ namespace osu.Game.Tests.Skins
                 {
                     var skin = new TestSkin(new SkinInfo(), null, storage);
 
+                    // TODO: results exclusion is temporary, to be removed when skinable results are user-facing
                     foreach (var target in skin.LayoutInfos)
                     {
                         foreach (var info in target.Value.AllDrawables)
