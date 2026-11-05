@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
+using osu.Game.Online.API;
 using osu.Game.Scoring;
 using osuTK;
 using osuTK.Input;
@@ -143,8 +145,6 @@ namespace osu.Game.Screens.Ranking
                 return;
 
             var score = trackingContainer.Panel.Score;
-
-            flow.SetLayoutPosition(trackingContainer, score.TotalScore);
 
             trackingContainer.Show();
 
@@ -321,6 +321,9 @@ namespace osu.Game.Screens.Ranking
         {
             public override IEnumerable<Drawable> FlowingChildren => applySorting(AliveInternalChildren);
 
+            [Resolved]
+            private IAPIProvider api { get; set; } = null!;
+
             public int GetPanelIndex(ScoreInfo score) => applySorting(Children).TakeWhile(s => !s.Panel.Score.Equals(score)).Count();
 
             public ScoreInfo? GetPreviousScore(ScoreInfo score) => applySorting(Children).TakeWhile(s => !s.Panel.Score.Equals(score)).LastOrDefault()?.Panel.Score;
@@ -328,7 +331,7 @@ namespace osu.Game.Screens.Ranking
             public ScoreInfo? GetNextScore(ScoreInfo score) => applySorting(Children).SkipWhile(s => !s.Panel.Score.Equals(score)).ElementAtOrDefault(1)?.Panel.Score;
 
             private IEnumerable<ScorePanelTrackingContainer> applySorting(IEnumerable<Drawable> drawables) => drawables.OfType<ScorePanelTrackingContainer>()
-                                                                                                                       .OrderByDescending(GetLayoutPosition)
+                                                                                                                       .OrderByDescending(s => s.Panel.Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore))
                                                                                                                        .ThenBy(s => s.Panel.Score.OnlineID);
         }
 

@@ -42,7 +42,7 @@ namespace osu.Game.Screens.Play.Leaderboards
 
             if (globalScores != null)
             {
-                foreach (var topScore in globalScores.AllScores.OrderByTotalScore())
+                foreach (var topScore in globalScores.AllScores.OrderByTotalScore(api.Endpoints.RanksByStableScore))
                 {
                     var score = new GameplayLeaderboardScore(topScore, false, GameplayLeaderboardScore.ComboDisplayMode.Highest);
 
