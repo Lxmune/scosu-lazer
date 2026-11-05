@@ -18,8 +18,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
-using osu.Game.Online.API;
-using osu.Game.Online.API.Requests;
+using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.ScosuEvent;
 using osuTK;
@@ -45,7 +44,7 @@ namespace osu.Game.Screens.Menu
         private readonly Bindable<ScosuEventMenuPosition> menuPosition = new Bindable<ScosuEventMenuPosition>();
 
         [Resolved]
-        private IAPIProvider api { get; set; } = null!;
+        private ScosuEventProvider? eventProvider { get; set; }
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
@@ -53,9 +52,8 @@ namespace osu.Game.Screens.Menu
         [Resolved]
         private ScosuEventOverlay? eventOverlay { get; set; }
 
-        private readonly IBindable<APIState> apiState = new Bindable<APIState>();
+        private readonly IBindable<APIScosuEvent?> currentEvent = new Bindable<APIScosuEvent?>();
 
-        private GetScosuEventRequest? request;
         private APIScosuEvent? shown;
         private ScheduledDelegate? ticker;
 
@@ -85,43 +83,15 @@ namespace osu.Game.Screens.Menu
         {
             base.LoadComplete();
 
-            // The API's state changes on its own thread.
-            apiState.BindTo(api.State);
-            apiState.BindValueChanged(_ => Schedule(Refresh), true);
+            if (eventProvider != null)
+                currentEvent.BindTo(eventProvider.Event);
+            currentEvent.BindValueChanged(e => display(e.NewValue), true);
         }
 
         /// <summary>
         /// Fetches the event again, e.g. after a play.
         /// </summary>
-        public void Refresh() => Scheduler.AddOnce(fetch);
-
-        private void fetch()
-        {
-            request?.Cancel();
-            request = null;
-
-            // Only scosu servers have events.
-            if (!api.Endpoints.RanksByStableScore || apiState.Value != APIState.Online)
-            {
-                display(null);
-                return;
-            }
-
-            var req = request = new GetScosuEventRequest();
-
-            req.Success += response =>
-            {
-                if (req == request)
-                    display(response.Event);
-            };
-            req.Failure += _ =>
-            {
-                if (req == request)
-                    display(null);
-            };
-
-            api.Queue(req);
-        }
+        public void Refresh() => eventProvider?.Refresh();
 
         private void display(APIScosuEvent? ev)
         {
@@ -443,12 +413,9 @@ namespace osu.Game.Screens.Menu
             var left = target - DateTimeOffset.Now;
             countdown.Text = EventDisplay.ShortCountdown(left);
 
-            // The event just started or ended: the server knows what comes next.
+            // The event just started or ended: the provider fetches what comes next.
             if (left <= TimeSpan.Zero)
-            {
                 ticker?.Cancel();
-                Scheduler.AddDelayed(Refresh, 5000);
-            }
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -475,13 +442,5 @@ namespace osu.Game.Screens.Menu
         protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
 
         protected override void PopOut() => this.FadeOut(transition_duration, Easing.OutQuint);
-
-        protected override void Dispose(bool isDisposing)
-        {
-            request?.Cancel();
-            request = null;
-
-            base.Dispose(isDisposing);
-        }
     }
 }

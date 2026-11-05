@@ -21,8 +21,7 @@ using osu.Game.Graphics.Containers.Markdown;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Localisation;
-using osu.Game.Online.API;
-using osu.Game.Online.API.Requests;
+using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.Select;
@@ -51,10 +50,18 @@ namespace osu.Game.Overlays.ScosuEvent
         [Resolved]
         private OsuGame? game { get; set; }
 
-        private readonly IBindable<APIState> apiState = new Bindable<APIState>();
+        [Resolved]
+        private ScosuEventProvider? eventProvider { get; set; }
 
-        private GetScosuEventRequest? request;
+        private readonly IBindable<APIScosuEvent?> currentEvent = new Bindable<APIScosuEvent?>();
+        private readonly IBindable<bool> fetching = new Bindable<bool>();
+
         private APIScosuEvent? shown;
+
+        /// <summary>
+        /// Whether the page shows an event, or that there is none (rather than nothing yet).
+        /// </summary>
+        private bool displayed;
         private ScheduledDelegate? ticker;
 
         private readonly Container body;
@@ -77,62 +84,46 @@ namespace osu.Game.Overlays.ScosuEvent
         {
             base.LoadComplete();
 
-            // The API's state changes on its own thread.
-            apiState.BindTo(API.State);
-            apiState.BindValueChanged(_ => Schedule(() =>
+            if (eventProvider == null)
+                return;
+
+            currentEvent.BindTo(eventProvider.Event);
+            fetching.BindTo(eventProvider.Fetching);
+
+            // Built only while the page shows: opening it shows the latest.
+            currentEvent.BindValueChanged(e =>
             {
                 if (State.Value == Visibility.Visible)
-                    fetch();
-            }));
+                    display(e.NewValue);
+            });
+            fetching.BindValueChanged(f =>
+            {
+                if (f.NewValue)
+                    return;
+
+                Loading.Hide();
+                if (State.Value == Visibility.Visible && !displayed)
+                    display(currentEvent.Value);
+            });
         }
 
         protected override void PopIn()
         {
             base.PopIn();
-            fetch();
-        }
 
-        protected override void PopOutComplete()
-        {
-            base.PopOutComplete();
-
-            request?.Cancel();
-            request = null;
-        }
-
-        private void fetch()
-        {
-            request?.Cancel();
-            request = null;
-
-            if (!API.Endpoints.RanksByStableScore || apiState.Value != APIState.Online)
-                return;
-
-            // Only the first load covers the page; a refresh keeps the previous one meanwhile.
-            if (shown == null)
+            // What is known so far, while the ranking is fetched again. Only a first load covers the page.
+            if (currentEvent.Value != null || !fetching.Value)
+                display(currentEvent.Value);
+            else
                 Loading.Show();
 
-            var req = request = new GetScosuEventRequest();
-
-            req.Success += response =>
-            {
-                if (req != request)
-                    return;
-
-                Loading.Hide();
-                display(response.Event);
-            };
-            req.Failure += _ =>
-            {
-                if (req == request)
-                    Loading.Hide();
-            };
-
-            API.Queue(req);
+            eventProvider?.Refresh();
         }
 
         private void display(APIScosuEvent? ev)
         {
+            displayed = true;
+
             ticker?.Cancel();
             ticker = null;
             countdownValues.Clear();
@@ -479,12 +470,9 @@ namespace osu.Game.Overlays.ScosuEvent
             countdownValues[2].Text = left.Minutes.ToString(@"00");
             countdownValues[3].Text = left.Seconds.ToString(@"00");
 
-            // The event just started or ended: the server knows what comes next.
+            // The event just started or ended: the provider fetches what comes next.
             if (left == TimeSpan.Zero)
-            {
                 ticker?.Cancel();
-                Scheduler.AddDelayed(fetch, 5000);
-            }
         }
 
         #endregion
@@ -1317,13 +1305,5 @@ namespace osu.Game.Overlays.ScosuEvent
         }
 
         private void openWebsite() => game?.OpenUrlExternally(@"/event");
-
-        protected override void Dispose(bool isDisposing)
-        {
-            request?.Cancel();
-            request = null;
-
-            base.Dispose(isDisposing);
-        }
     }
 }

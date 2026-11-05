@@ -164,7 +164,13 @@ namespace osu.Game.Scoring
         private static long maniaScore(Play play, double multiplier)
         {
             long[] counts = mania_judgements.Select(j => play.Count(j.Result)).ToArray();
-            long notes = Math.Max(counts.Sum(), mania_judgements.Sum(j => play.Maximum(j.Result)));
+            long mentioned = counts.Sum();
+            long maximum = mania_judgements.Sum(j => play.Maximum(j.Result));
+            // Notes the play doesn't mention (not reached yet, or a failed play) count as misses.
+            int missIndex = Array.FindIndex(mania_judgements, j => j.Result == HitResult.Miss);
+            long unjudged = Math.Max(maximum - mentioned, 0);
+            counts[missIndex] += unjudged;
+            long notes = Math.Max(mentioned, maximum);
             if (notes == 0)
                 return 0;
 
@@ -175,8 +181,10 @@ namespace osu.Game.Scoring
             double baseHalf = mania_half * hitValues / (320.0 * notes);
 
             // Bonus half: replays stable's bonus counter over the judgements in order.
-            // When the order isn't known, the judgements are spread evenly over the beatmap instead.
+            // Notes without a judgement come last, as misses. When the order isn't known, the judgements
+            // are spread evenly over the beatmap instead.
             var order = play.Order?.Select(result => Array.FindIndex(mania_judgements, j => j.Result == result)).Where(index => index >= 0)
+                                  .Concat(Enumerable.Repeat(missIndex, (int)unjudged))
                         ?? evenlySpread(counts);
 
             long bonusCounter = 100;

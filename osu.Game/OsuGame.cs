@@ -1245,7 +1245,10 @@ namespace osu.Game
             loadComponentSingleFile(userProfile = new UserProfileOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(beatmapSetOverlay = new BeatmapSetOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(wikiOverlay = new WikiOverlay(), overlayContent.Add, true);
-            // scosu: the scosu! event's page, opened from the main menu's event card.
+            // scosu: the scosu! event (shown by the main menu's card and by its page, opened from the card).
+            loadComponentSingleFile(new ScosuEventProvider(), Add, true);
+            // scosu: tells the player right away when the server no longer accepts plays from this build.
+            loadComponentSingleFile(new ScosuClientVersionChecker(), Add);
             loadComponentSingleFile(eventOverlay = new ScosuEventOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(skinEditor = new SkinEditorOverlay(ScreenContainer), overlayContent.Add, true);
 

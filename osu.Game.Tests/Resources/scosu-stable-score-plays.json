@@ -1,0 +1,3842 @@
+[
+  {
+    "name": "osu 75.osu perfect",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 314,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1477776
+  },
+  {
+    "name": "osu 75.osu perfect (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 314,
+    "mods": [],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTG",
+    "score": 1477776
+  },
+  {
+    "name": "osu 75.osu some 100s and 50s",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 185,
+      "large_tick_hit": 90,
+      "meh": 3,
+      "ok": 6,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 314,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1428363
+  },
+  {
+    "name": "osu 75.osu some 100s and 50s (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 185,
+      "large_tick_hit": 90,
+      "meh": 3,
+      "ok": 6,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 314,
+    "mods": [],
+    "judgement_order": "GTGSGTGGTGGTGSGTGGTGoGTGGSGTGGTGTGGSGTGGTGmGTGGTGSGTGGTGGTGSGTGGTGGSTGGTGGTGoGTGSGGTGGTGTGSGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGoGTGGTGSGTGGTGGSTGGTGGTGmGTGGSGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGTGGTGGSGTGoGTGGTGGTSGGTGGTGSGTGGTGGTGmGTGSGTGGTGGTGSGTGGTGGSGTGGTGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGTG",
+    "score": 1428363
+  },
+  {
+    "name": "osu 75.osu misses and dropped ticks",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 187,
+      "large_tick_hit": 88,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "ok": 3,
+      "slider_tail_hit": 29
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 74,
+    "mods": [],
+    "judgement_order": null,
+    "score": 336970
+  },
+  {
+    "name": "osu 75.osu misses and dropped ticks (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 187,
+      "large_tick_hit": 88,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "ok": 3,
+      "slider_tail_hit": 29
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 74,
+    "mods": [],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGGTGxGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGtGTGSGTGGTGGTGSGTGGTGGTGSGGTGTGGTGSGGTGGTGxGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGoGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGxGTGSGTGGTGGTGSGTGGTGGTGGSGTGGTGtGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGxGTGSGTGGTGGTGSGGTGTGGSGTGGTGGTGSGTGGTG",
+    "score": 272511
+  },
+  {
+    "name": "osu 75.osu choke at the end",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 193,
+      "large_tick_hit": 90,
+      "miss": 1,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 313,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1468450
+  },
+  {
+    "name": "osu 75.osu choke at the end (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 193,
+      "large_tick_hit": 90,
+      "miss": 1,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 313,
+    "mods": [],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGGSTGGTGGTGGSGTGGTGGTGSGTGGTGGTGGSGTGGTGGTGSGTGGTGx",
+    "score": 1468450
+  },
+  {
+    "name": "osu 75.osu misses with HD",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 593242
+  },
+  {
+    "name": "osu 75.osu misses with HR",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 593242
+  },
+  {
+    "name": "osu 75.osu misses with HDHR",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "HD"
+      },
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 625237
+  },
+  {
+    "name": "osu 75.osu misses with DT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 814591
+  },
+  {
+    "name": "osu 75.osu misses with DT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "DT",
+        "settings": {
+          "speed_change": 1.2
+        }
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 663671
+  },
+  {
+    "name": "osu 75.osu misses with NC",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "NC",
+        "settings": {
+          "speed_change": 3.0
+        }
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 1066123
+  },
+  {
+    "name": "osu 75.osu misses with HT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "HT"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 437292
+  },
+  {
+    "name": "osu 75.osu misses with FL",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 623426
+  },
+  {
+    "name": "osu 75.osu misses with SO",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "SO"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 512752
+  },
+  {
+    "name": "osu 75.osu misses with EZ",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "EZ"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 311526
+  },
+  {
+    "name": "osu 75.osu misses with NF",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "NF"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 311526
+  },
+  {
+    "name": "osu 75.osu misses with HRSV2",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "HR"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 613365
+  },
+  {
+    "name": "osu 75.osu misses with NFSV2",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "NF"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 563059
+  },
+  {
+    "name": "osu 75.osu misses with DA",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "DA",
+        "settings": {
+          "approach_rate": 9.5
+        }
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 563059
+  },
+  {
+    "name": "osu 75.osu misses with DA",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "DA",
+        "settings": {
+          "circle_size": 5.0
+        }
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 311526
+  },
+  {
+    "name": "osu 75.osu misses with RX",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 189,
+      "large_tick_hit": 90,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 90,
+      "slider_tail_hit": 30
+    },
+    "max_combo": 145,
+    "mods": [
+      {
+        "acronym": "RX"
+      }
+    ],
+    "judgement_order": "GTGGSTGGTGGTGGSGTGTGGTGGSGTGGTGoGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGGTGGTGSGTGGTGGTGSGTGGTGGTGoGTGSGGTGGTGGTGSGTGGTGGTGSGTGGTGGSGTGTGGTGGSGTGGTGGTGSGTGGTGGTGxGTGSGGTGTGGSGTGGTGGTGSGTGGTGGTGGTGSGTGGTGGSGTGTGGoGTGGTGSGTGGTGGTGSGTGGTGGTGSGGTGGTGSGTGGTGGTGSGTGGTG",
+    "score": 563059
+  },
+  {
+    "name": "osu 75.osu Classic perfect",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 194,
+      "large_tick_hit": 120,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 120,
+      "small_tick_hit": 30
+    },
+    "max_combo": 314,
+    "mods": [
+      {
+        "acronym": "CL"
+      }
+    ],
+    "judgement_order": null,
+    "score": 1463610
+  },
+  {
+    "name": "osu 75.osu Classic tails missed",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 188,
+      "large_tick_hit": 120,
+      "miss": 3,
+      "ok": 3,
+      "small_tick_hit": 27,
+      "small_tick_miss": 3
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 120,
+      "small_tick_hit": 30
+    },
+    "max_combo": 104,
+    "mods": [
+      {
+        "acronym": "CL"
+      }
+    ],
+    "judgement_order": "GTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGoGTGTGGTGTGGTGTGGTGGTGTGxGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGoGTGTGGTGTGGTGGTGTGGTGTGGTGxGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGoGTGGTGTGGTGTGGTGTGGTGxGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTG",
+    "score": 431443
+  },
+  {
+    "name": "osu 75.osu Classic no note lock",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 61200,
+      "combo_score": 1416576,
+      "bonus_score": 47900,
+      "max_combo": 314,
+      "object_count": 194,
+      "slider_count": 30,
+      "nested_score": 3000,
+      "nested_count": 150,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 192,
+      "large_tick_hit": 120,
+      "miss": 1,
+      "ok": 1,
+      "small_tick_hit": 29,
+      "small_tick_miss": 1
+    },
+    "maximum_statistics": {
+      "great": 194,
+      "large_tick_hit": 120,
+      "small_tick_hit": 30
+    },
+    "max_combo": 165,
+    "mods": [
+      {
+        "acronym": "CL",
+        "settings": {
+          "classic_note_lock": false
+        }
+      }
+    ],
+    "judgement_order": "GTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGoGTGTGGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGxGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTGGTGTGGTGGTGTG",
+    "score": 740818
+  },
+  {
+    "name": "osu 100.osu perfect",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 222,
+    "mods": [],
+    "judgement_order": null,
+    "score": 470396
+  },
+  {
+    "name": "osu 100.osu perfect (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 222,
+    "mods": [],
+    "judgement_order": "GTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGGTSGTGGTGSGTGGTGSTGGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGGTSGTGGTGSGTGGTGSTGGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTG",
+    "score": 470396
+  },
+  {
+    "name": "osu 100.osu some 100s and 50s",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 111,
+      "large_tick_hit": 68,
+      "meh": 3,
+      "ok": 6,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 222,
+    "mods": [],
+    "judgement_order": null,
+    "score": 445073
+  },
+  {
+    "name": "osu 100.osu some 100s and 50s (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 111,
+      "large_tick_hit": 68,
+      "meh": 3,
+      "ok": 6,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 222,
+    "mods": [],
+    "judgement_order": "GTGSTGGTGSGTGoTGSGTGGTSGTGGTGSGTGmTGSGTGTGSGTGGTSGTGGTGSoGTGTGSGTGTGSGTGGTGSTGGTGSGTGTGSGTGoGTSGTGGTGSTGGTGSGTGmTGSGTGGTSGTGGTGSTGoGTGSGTGTGSGTGGTSGTGGTGSGTGTGSGTGoTGSGTGGTGSTGGTGSGTGmTGSGTGTGSGTGGTGSTGGoTGSGTGTGSGTGGTSGTG",
+    "score": 445073
+  },
+  {
+    "name": "osu 100.osu misses and dropped ticks",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 113,
+      "large_tick_hit": 66,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "ok": 3,
+      "slider_tail_hit": 33
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 53,
+    "mods": [],
+    "judgement_order": null,
+    "score": 121815
+  },
+  {
+    "name": "osu 100.osu misses and dropped ticks (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 113,
+      "large_tick_hit": 66,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "ok": 3,
+      "slider_tail_hit": 33
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 53,
+    "mods": [],
+    "judgement_order": "GTGSGTGTGSGTGxGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGtTGSGTGGTGSGTGTGSGTGTGSGTGxGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGxTGSGTGGTGSGTGTGSGTGtGTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGxTGGSTGGTGSGTGTGSGTGTGSGTG",
+    "score": 102476
+  },
+  {
+    "name": "osu 100.osu choke at the end",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 119,
+      "large_tick_hit": 68,
+      "miss": 1,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 221,
+    "mods": [],
+    "judgement_order": null,
+    "score": 466203
+  },
+  {
+    "name": "osu 100.osu choke at the end (in order)",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 119,
+      "large_tick_hit": 68,
+      "miss": 1,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 221,
+    "mods": [],
+    "judgement_order": "GTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGGTGSGTGTGSGTGx",
+    "score": 466203
+  },
+  {
+    "name": "osu 100.osu misses with HD",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 198490
+  },
+  {
+    "name": "osu 100.osu misses with HR",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 198490
+  },
+  {
+    "name": "osu 100.osu misses with HDHR",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "HD"
+      },
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 208138
+  },
+  {
+    "name": "osu 100.osu misses with DT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 265238
+  },
+  {
+    "name": "osu 100.osu misses with DT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "DT",
+        "settings": {
+          "speed_change": 1.2
+        }
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 219728
+  },
+  {
+    "name": "osu 100.osu misses with NC",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "NC",
+        "settings": {
+          "speed_change": 3.0
+        }
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 341088
+  },
+  {
+    "name": "osu 100.osu misses with HT",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "HT"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 151463
+  },
+  {
+    "name": "osu 100.osu misses with FL",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 207592
+  },
+  {
+    "name": "osu 100.osu misses with SO",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "SO"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 174218
+  },
+  {
+    "name": "osu 100.osu misses with EZ",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "EZ"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 113538
+  },
+  {
+    "name": "osu 100.osu misses with NF",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "NF"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 113538
+  },
+  {
+    "name": "osu 100.osu misses with HRSV2",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "HR"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 204558
+  },
+  {
+    "name": "osu 100.osu misses with NFSV2",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "NF"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 189388
+  },
+  {
+    "name": "osu 100.osu misses with DA",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "DA",
+        "settings": {
+          "approach_rate": 9.5
+        }
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 189388
+  },
+  {
+    "name": "osu 100.osu misses with DA",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "DA",
+        "settings": {
+          "circle_size": 5.0
+        }
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 113538
+  },
+  {
+    "name": "osu 100.osu misses with RX",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 115,
+      "large_tick_hit": 68,
+      "miss": 2,
+      "ok": 3,
+      "slider_tail_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 68,
+      "slider_tail_hit": 34
+    },
+    "max_combo": 103,
+    "mods": [
+      {
+        "acronym": "RX"
+      }
+    ],
+    "judgement_order": "GTGSGTGTGSGTGTGSGTGGTGSGTGoTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGxGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGoGTGSGTGTGSGTGTGSGTGGTGSGTGTGSGTGTGSGTG",
+    "score": 189388
+  },
+  {
+    "name": "osu 100.osu Classic perfect",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 120,
+      "large_tick_hit": 102,
+      "small_tick_hit": 34
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 102,
+      "small_tick_hit": 34
+    },
+    "max_combo": 222,
+    "mods": [
+      {
+        "acronym": "CL"
+      }
+    ],
+    "judgement_order": null,
+    "score": 466081
+  },
+  {
+    "name": "osu 100.osu Classic tails missed",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 114,
+      "large_tick_hit": 102,
+      "miss": 3,
+      "ok": 3,
+      "small_tick_hit": 31,
+      "small_tick_miss": 3
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 102,
+      "small_tick_hit": 34
+    },
+    "max_combo": 75,
+    "mods": [
+      {
+        "acronym": "CL"
+      }
+    ],
+    "judgement_order": "GTGTGTGTGTGTGTGTGTGoGTGTGTGTGTGTGTGTGxGTGTGTGTGTGTGTGTGGTGTGTGTGTGTGTGTGTGGTGTGTGTGTGTGTGTGTGGTGToGTGTGTGTGTGTGGTxGTGTGTGTGTGTGTGGTGTGTGTGTGTGTGTGTGGTGTGTGTGTGTGTGTGTGGToGTGTGTGTGTGTGTGGTGTxGTGTGTGTGTGTGGTGTGTGTGTGTGTGTGTG",
+    "score": 152220
+  },
+  {
+    "name": "osu 100.osu Classic no note lock",
+    "ruleset_id": 0,
+    "attributes": {
+      "accuracy_score": 38900,
+      "combo_score": 431496,
+      "bonus_score": 14900,
+      "max_combo": 222,
+      "object_count": 120,
+      "slider_count": 34,
+      "nested_score": 2900,
+      "nested_count": 136,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 118,
+      "large_tick_hit": 102,
+      "miss": 1,
+      "ok": 1,
+      "small_tick_hit": 33,
+      "small_tick_miss": 1
+    },
+    "maximum_statistics": {
+      "great": 120,
+      "large_tick_hit": 102,
+      "small_tick_hit": 34
+    },
+    "max_combo": 122,
+    "mods": [
+      {
+        "acronym": "CL",
+        "settings": {
+          "classic_note_lock": false
+        }
+      }
+    ],
+    "judgement_order": "GTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGoTGGTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGTGGTGTGTGTGTGxTGGTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGTGGTGTGTGTGTGTGTGGTGTGTGTGTGTG",
+    "score": 245914
+  },
+  {
+    "name": "taiko 75.osu perfect",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 208,
+    "mods": [],
+    "judgement_order": null,
+    "score": 443080
+  },
+  {
+    "name": "taiko 75.osu perfect (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 208,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 443080
+  },
+  {
+    "name": "taiko 75.osu goods and misses",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 193,
+      "large_bonus": 3,
+      "miss": 3,
+      "ok": 12,
+      "small_bonus": 41
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 69,
+    "mods": [],
+    "judgement_order": null,
+    "score": 271739
+  },
+  {
+    "name": "taiko 75.osu goods and misses (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 193,
+      "large_bonus": 3,
+      "miss": 3,
+      "ok": 12,
+      "small_bonus": 41
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 69,
+    "mods": [],
+    "judgement_order": "GGGGGGGoGGGGGGGGGGGGGGGoGGGGGGGGGGxGGGGGGGGGGGoGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGoGGGGGGGGGGGxGGGGGGGGGGoGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGoGGGGGGGGGGGxGGGGGGGGGGoGGGGGGGGGGGGGGGoGGGGGGG",
+    "score": 264628
+  },
+  {
+    "name": "taiko 75.osu choke at the end",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 206,
+      "miss": 2
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 206,
+    "mods": [],
+    "judgement_order": null,
+    "score": 243108
+  },
+  {
+    "name": "taiko 75.osu choke at the end (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 206,
+      "miss": 2
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 206,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxx",
+    "score": 243108
+  },
+  {
+    "name": "taiko 75.osu goods with HD",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 202,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 118,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGG",
+    "score": 357190
+  },
+  {
+    "name": "taiko 75.osu goods with HR",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 202,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 118,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGG",
+    "score": 357190
+  },
+  {
+    "name": "taiko 75.osu goods with FL",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 202,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 118,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGG",
+    "score": 363423
+  },
+  {
+    "name": "taiko 75.osu goods with DT",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 202,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 118,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGG",
+    "score": 402900
+  },
+  {
+    "name": "taiko 75.osu goods with EZ",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 82200,
+      "combo_score": 163840,
+      "bonus_score": 197040,
+      "max_combo": 208,
+      "object_count": 208,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 202,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 208,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 118,
+    "mods": [
+      {
+        "acronym": "EZ"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGG",
+    "score": 299013
+  },
+  {
+    "name": "taiko 4475055.osu perfect",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 286,
+    "mods": [],
+    "judgement_order": null,
+    "score": 374052
+  },
+  {
+    "name": "taiko 4475055.osu perfect (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 286,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 374052
+  },
+  {
+    "name": "taiko 4475055.osu goods and misses",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 271,
+      "large_bonus": 3,
+      "miss": 3,
+      "ok": 12,
+      "small_bonus": 41
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 95,
+    "mods": [],
+    "judgement_order": null,
+    "score": 234428
+  },
+  {
+    "name": "taiko 4475055.osu goods and misses (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 271,
+      "large_bonus": 3,
+      "miss": 3,
+      "ok": 12,
+      "small_bonus": 41
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 95,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGG",
+    "score": 221913
+  },
+  {
+    "name": "taiko 4475055.osu choke at the end",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 284,
+      "miss": 2
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 284,
+    "mods": [],
+    "judgement_order": null,
+    "score": 314223
+  },
+  {
+    "name": "taiko 4475055.osu choke at the end (in order)",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 284,
+      "miss": 2
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 284,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxx",
+    "score": 314223
+  },
+  {
+    "name": "taiko 4475055.osu goods with HD",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 280,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 163,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 318252
+  },
+  {
+    "name": "taiko 4475055.osu goods with HR",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 280,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 163,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 318252
+  },
+  {
+    "name": "taiko 4475055.osu goods with FL",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 280,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 163,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 328349
+  },
+  {
+    "name": "taiko 4475055.osu goods with DT",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 280,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 163,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 392301
+  },
+  {
+    "name": "taiko 4475055.osu goods with EZ",
+    "ruleset_id": 1,
+    "attributes": {
+      "accuracy_score": 92700,
+      "combo_score": 224112,
+      "bonus_score": 57240,
+      "max_combo": 286,
+      "object_count": 286,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 280,
+      "large_bonus": 4,
+      "miss": 1,
+      "ok": 5,
+      "small_bonus": 50
+    },
+    "maximum_statistics": {
+      "great": 286,
+      "large_bonus": 4,
+      "small_bonus": 60
+    },
+    "max_combo": 163,
+    "mods": [
+      {
+        "acronym": "EZ"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGoGGGGGGGGGGGGGGGGGGGGGGGGGG",
+    "score": 224008
+  },
+  {
+    "name": "catch 75.osu perfect",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 310,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1889588
+  },
+  {
+    "name": "catch 75.osu perfect (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 310,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGG",
+    "score": 1889588
+  },
+  {
+    "name": "catch 75.osu misses and dropped droplets",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 296,
+      "large_bonus": 58,
+      "large_tick_hit": 8,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "small_tick_hit": 22,
+      "small_tick_miss": 8
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 68,
+    "mods": [],
+    "judgement_order": null,
+    "score": 459398
+  },
+  {
+    "name": "catch 75.osu misses and dropped droplets (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 296,
+      "large_bonus": 58,
+      "large_tick_hit": 8,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "small_tick_hit": 22,
+      "small_tick_miss": 8
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 68,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGtGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGtGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 392354
+  },
+  {
+    "name": "catch 75.osu choke at the end",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 299,
+      "large_tick_hit": 10,
+      "miss": 1,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 309,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1750909
+  },
+  {
+    "name": "catch 75.osu choke at the end (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 299,
+      "large_tick_hit": 10,
+      "miss": 1,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 309,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGx",
+    "score": 1750909
+  },
+  {
+    "name": "catch 75.osu misses with HD",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 298,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 154,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 747138
+  },
+  {
+    "name": "catch 75.osu misses with HR",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 298,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 154,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 784296
+  },
+  {
+    "name": "catch 75.osu misses with FL",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 298,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 154,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 784296
+  },
+  {
+    "name": "catch 75.osu misses with HDSV2",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 298,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 154,
+    "mods": [
+      {
+        "acronym": "HD"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 709980
+  },
+  {
+    "name": "catch 75.osu misses with DT",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 81600,
+      "combo_score": 1670688,
+      "bonus_score": 127600,
+      "max_combo": 310,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 4,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 298,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 300,
+      "large_bonus": 116,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 154,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 1019631
+  },
+  {
+    "name": "catch lazer-test-2571731.osu perfect",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 318,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1732968
+  },
+  {
+    "name": "catch lazer-test-2571731.osu perfect (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 318,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGG",
+    "score": 1732968
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses and dropped droplets",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 304,
+      "large_bonus": 42,
+      "large_tick_hit": 8,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "small_tick_hit": 22,
+      "small_tick_miss": 8
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 70,
+    "mods": [],
+    "judgement_order": null,
+    "score": 422453
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses and dropped droplets (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 304,
+      "large_bonus": 42,
+      "large_tick_hit": 8,
+      "large_tick_miss": 2,
+      "miss": 4,
+      "small_tick_hit": 22,
+      "small_tick_miss": 8
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 70,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGtGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGtGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 359752
+  },
+  {
+    "name": "catch lazer-test-2571731.osu choke at the end",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 307,
+      "large_tick_hit": 10,
+      "miss": 1,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 317,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1629446
+  },
+  {
+    "name": "catch lazer-test-2571731.osu choke at the end (in order)",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 307,
+      "large_tick_hit": 10,
+      "miss": 1,
+      "small_tick_hit": 30
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 317,
+    "mods": [],
+    "judgement_order": "GGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGx",
+    "score": 1629446
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses with HD",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 306,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 158,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 700529
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses with HR",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 306,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 158,
+    "mods": [
+      {
+        "acronym": "HR"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 734913
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses with FL",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 306,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 158,
+    "mods": [
+      {
+        "acronym": "FL"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 734913
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses with HDSV2",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 306,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 158,
+    "mods": [
+      {
+        "acronym": "HD"
+      },
+      {
+        "acronym": "SV2"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 666146
+  },
+  {
+    "name": "catch lazer-test-2571731.osu misses with DT",
+    "ruleset_id": 2,
+    "attributes": {
+      "accuracy_score": 89690,
+      "combo_score": 1545768,
+      "bonus_score": 93500,
+      "max_combo": 318,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 3,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 306,
+      "large_tick_hit": 10,
+      "miss": 2,
+      "small_tick_hit": 28,
+      "small_tick_miss": 2
+    },
+    "maximum_statistics": {
+      "great": 308,
+      "large_bonus": 85,
+      "large_tick_hit": 10,
+      "small_tick_hit": 30
+    },
+    "max_combo": 158,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "GGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGxGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGGGGGGGGGGGGGGGGTGGGGGGGGGGGGGG",
+    "score": 952678
+  },
+  {
+    "name": "mania perfect",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "perfect": 600
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 600,
+    "mods": [],
+    "judgement_order": null,
+    "score": 1000000
+  },
+  {
+    "name": "mania perfect (in order)",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "perfect": 600
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 600,
+    "mods": [],
+    "judgement_order": "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
+    "score": 1000000
+  },
+  {
+    "name": "mania every judgement",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "good": 25,
+      "great": 40,
+      "meh": 10,
+      "miss": 10,
+      "ok": 15,
+      "perfect": 500
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 59,
+    "mods": [],
+    "judgement_order": null,
+    "score": 662274
+  },
+  {
+    "name": "mania every judgement (in order)",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "good": 25,
+      "great": 40,
+      "meh": 10,
+      "miss": 10,
+      "ok": 15,
+      "perfect": 500
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 59,
+    "mods": [],
+    "judgement_order": "PPPPGPPPPgPPPPPoPPPPPGPPPPPmPPPPxPPPPPgPPPGPPPPPPPPGPPPPPoPPPPgPPPPPGPPPPPPPmPPPPGPPPPgPPPPPxPPPPPGPPPPPoPPPPPgPPPPGPPPPPPPPGPPPPgPPPPPoPPPPPGPPPPPmPPPPxPPPPPgPPPGPPPPPPPPGPPPPPoPPPPgPPPPPGPPPPPPPmPPPPGPPPPgPPPPPxPPPPPGPPPPPoPPPPPgPPPPGPPPPPPPPGPPPPgPPPPPoPPPPPGPPPPPmPPPPxPPPPPgPPPGPPPPPPPPGPPPPPoPPPPgPPPPPGPPPPPPPmPPPPGPPPPgPPPPPxPPPPPGPPPPPoPPPPPgPPPPGPPPPPPPPGPPPPgPPPPPoPPPPPGPPPPPmPPPPxPPPPPgPPPGPPPPPPPPGPPPPPoPPPPgPPPPPGPPPPPPPmPPPPGPPPPgPPPPPxPPPPPGPPPPPoPPPPPgPPPPGPPPPPPPPGPPPPgPPPPPoPPPPPGPPPPPmPPPPxPPPPPgPPPGPPPPPPPPGPPPPPoPPPPgPPPPPGPPPPPPPmPPPPGPPPPgPPPPPxPPPPPGPPPPPoPPPPPgPPPPGPPPP",
+    "score": 662274
+  },
+  {
+    "name": "mania choke at the end",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 20,
+      "miss": 10,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 590,
+    "mods": [],
+    "judgement_order": null,
+    "score": 847194
+  },
+  {
+    "name": "mania choke at the end (in order)",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 20,
+      "miss": 10,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 590,
+    "mods": [],
+    "judgement_order": "PPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPxxxxxxxxxx",
+    "score": 982292
+  },
+  {
+    "name": "mania failed halfway",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 15,
+      "miss": 5,
+      "perfect": 280
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 295,
+    "mods": [],
+    "judgement_order": null,
+    "score": 279870
+  },
+  {
+    "name": "mania failed halfway (in order)",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 0
+    },
+    "statistics": {
+      "great": 15,
+      "miss": 5,
+      "perfect": 280
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 295,
+    "mods": [],
+    "judgement_order": "PPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPGPPPPPPPPPxxxxx",
+    "score": 490885
+  },
+  {
+    "name": "mania converted 75.osu (7K) with NF",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "NF"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 473038
+  },
+  {
+    "name": "mania converted 75.osu (7K) with EZ",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "EZ"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 473038
+  },
+  {
+    "name": "mania converted 75.osu (7K) with DT",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "DT"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 1419113
+  },
+  {
+    "name": "mania converted 75.osu (7K) with HD",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "HD"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 946075
+  },
+  {
+    "name": "mania converted 75.osu (7K) with 8K",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "8K"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 851468
+  },
+  {
+    "name": "mania converted 75.osu (7K) with 5K",
+    "ruleset_id": 3,
+    "attributes": {
+      "accuracy_score": 0,
+      "combo_score": 1000000,
+      "bonus_score": 0,
+      "max_combo": 0,
+      "object_count": 0,
+      "slider_count": 0,
+      "nested_score": 0,
+      "nested_count": 0,
+      "difficulty_multiplier": 0,
+      "converted_columns": 7
+    },
+    "statistics": {
+      "good": 7,
+      "great": 20,
+      "miss": 3,
+      "perfect": 570
+    },
+    "maximum_statistics": {
+      "perfect": 600
+    },
+    "max_combo": 217,
+    "mods": [
+      {
+        "acronym": "5K"
+      }
+    ],
+    "judgement_order": "PPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPxPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPgPPPPPPPPPPPGPPPPPPPPPPPPPPPPPPPPPPPPGPPPPPPPPPPP",
+    "score": 775782
+  }
+]
