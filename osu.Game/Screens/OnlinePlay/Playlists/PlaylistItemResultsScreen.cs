@@ -275,7 +275,7 @@ namespace osu.Game.Screens.OnlinePlay.Playlists
             return scores
                    .Where(s => s.ID != Score?.OnlineID)
                    .Select(s => s.CreateScoreInfo(ScoreManager, Rulesets, beatmapsById[s.BeatmapId]))
-                   .OrderByTotalScore()
+                   .OrderByTotalScore(API.Endpoints.RanksByStableScore)
                    .ToArray();
         }
 

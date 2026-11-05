@@ -137,7 +137,7 @@ namespace osu.Game.Online.Leaderboards
                         var result = LeaderboardScores.Success
                         (
                             response.Scores.Select(s => s.ToScoreInfo(rulesets, newCriteria.Beatmap))
-                                    .OrderByTotalScore()
+                                    .OrderByTotalScore(api.Endpoints.RanksByStableScore)
                                     .Select((s, idx) =>
                                     {
                                         s.Position = idx + 1;
