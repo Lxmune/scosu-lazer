@@ -234,7 +234,7 @@ namespace osu.Game.Scoring
         /// <summary>
         /// osu!stable's score multiplier of <paramref name="mods"/> (lazer's <c>GetLegacyScoreMultiplier</c>), with scosu's house rules:
         /// Relax and Autopilot count ×1 (their plays have their own leaderboards), and so does Difficulty Adjust when it only changes the approach rate.
-        /// Speed mods count their speed (Double Time at 1.15× is ×1.15), and osu!'s Classic ×0.99, or ×0.97 without its note lock.
+        /// osu!'s Classic counts ×0.99, or ×0.97 without its note lock. Speed mods count lazer's multiplier for their speed (<see cref="speedMultiplier"/>; they are ranked at any speed lazer allows).
         /// </summary>
         /// <param name="rulesetId">The online ID of the ruleset played.</param>
         /// <param name="mods">The mods, with their settings.</param>
@@ -268,7 +268,7 @@ namespace osu.Game.Scoring
                 return 0.5;
 
             if (speed(mod) is double speedChange)
-                return speedChange;
+                return speedMultiplier(rulesetId, mod.Acronym, speedChange);
 
             switch (mod.Acronym)
             {
@@ -310,6 +310,45 @@ namespace osu.Game.Scoring
 
                 case (2, "HR" or "FL"):
                     return 1.12;
+
+                default:
+                    return 1;
+            }
+        }
+
+        /// <summary>
+        /// Lazer's score multiplier for a speed mod at <paramref name="speedChange"/> (the rulesets' <see cref="ScoreMultiplierCalculator"/>s),
+        /// computed like scosu's server does (<c>stable_score::mods::speed_multiplier</c>).
+        /// </summary>
+        private static double speedMultiplier(int rulesetId, string acronym, double speedChange)
+        {
+            bool faster = acronym is "DT" or "NC";
+
+            switch (rulesetId)
+            {
+                case 0 when faster:
+                {
+                    // Rounded down to 0.1; ×1.23 at the default 1.5×, 0.01 less at other speeds.
+                    double value = (int)(speedChange * 10) / 10.0;
+                    double penalty = value != 1.5 && value != 1.0 ? 0.01 : 0.0;
+                    return (value - 1) * 0.46 + 1 - penalty;
+                }
+
+                case 0:
+                    // Rounded down to 0.05; ×0.55 at the default 0.75×.
+                    return (int)(speedChange * 20) / 20.0 * 1.4 - 0.5;
+
+                case 3 when faster:
+                    return 1;
+
+                case 1:
+                case 2:
+                case 3:
+                {
+                    // Rounded down to 0.1; ×1.1 at 1.5×, ×0.3 at 0.75×.
+                    double value = (int)(speedChange * 10) / 10.0 - 1;
+                    return speedChange >= 1 ? 1 + value / 5 : 0.6 + value;
+                }
 
                 default:
                     return 1;
