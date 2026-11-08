@@ -30,12 +30,17 @@ namespace osu.Game.Online.Rooms
             req.Method = HttpMethod.Put;
             req.Timeout = 30000;
 
-            req.AddRaw(JsonConvert.SerializeObject(Score, new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            }));
+            req.AddRaw(SerializeScore());
 
             return req;
         }
+
+        /// <summary>
+        /// The request's body. scosu: also saved by <see cref="Solo.ScoreSubmissionQueue"/>, so a retry sends exactly the same.
+        /// </summary>
+        public string SerializeScore() => JsonConvert.SerializeObject(Score, new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
     }
 }
