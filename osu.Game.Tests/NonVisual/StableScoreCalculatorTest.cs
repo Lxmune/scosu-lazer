@@ -6,8 +6,14 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using osu.Game.Beatmaps;
 using osu.Game.Online.API;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Catch;
+using osu.Game.Rulesets.Mania;
+using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
+using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Tests.Resources;
 
@@ -24,11 +30,23 @@ namespace osu.Game.Tests.NonVisual
         [TestCaseSource(nameof(sharedPlays))]
         public void TestServerScore(SharedPlay play)
         {
-            long score = StableScoreCalculator.Calculate(play.Attributes, play.RulesetId, play.Statistics, play.MaximumStatistics, play.MaxCombo, play.Mods,
+            // lazer's own multiplier code (through StableScoreCalculator.ScoreMultiplier), against the server's port of it.
+            var ruleset = rulesets[play.RulesetId];
+            var difficulty = new BeatmapDifficulty
+            {
+                CircleSize = play.Attributes.CircleSize,
+                DrainRate = play.Attributes.DrainRate,
+                OverallDifficulty = play.Attributes.OverallDifficulty,
+            };
+            double multiplier = StableScoreCalculator.ScoreMultiplier(ruleset, difficulty, play.Mods.Select(m => m.ToMod(ruleset)));
+
+            long score = StableScoreCalculator.Calculate(play.Attributes, play.RulesetId, play.Statistics, play.MaximumStatistics, play.MaxCombo, multiplier,
                 play.JudgementOrder);
 
             Assert.That(score, Is.EqualTo(play.Score));
         }
+
+        private static readonly Ruleset[] rulesets = { new OsuRuleset(), new TaikoRuleset(), new CatchRuleset(), new ManiaRuleset() };
 
         private static IEnumerable<TestCaseData> sharedPlays() => loadSharedPlays().Select(play => new TestCaseData(play).SetName(play.Name));
 

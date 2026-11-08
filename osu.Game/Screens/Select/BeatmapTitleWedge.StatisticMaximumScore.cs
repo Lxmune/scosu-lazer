@@ -154,7 +154,8 @@ namespace osu.Game.Screens.Select
                     return;
                 }
 
-                long maximum = StableScoreCalculator.MaximumScore(attributes, ruleset.Value.OnlineID, mods.Value.Select(m => new APIMod(m)).ToArray());
+                double multiplier = StableScoreCalculator.ScoreMultiplier(ruleset.Value.CreateInstance(), working.Value.BeatmapInfo.Difficulty, mods.Value);
+                long maximum = StableScoreCalculator.MaximumScore(attributes, ruleset.Value.OnlineID, multiplier);
                 var maximumText = maximum.ToLocalisableString(@"N0");
 
                 if (best is not long bestScore || bestScore <= 0)
