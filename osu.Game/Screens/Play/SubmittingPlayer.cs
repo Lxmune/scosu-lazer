@@ -8,8 +8,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
@@ -19,9 +21,11 @@ using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
+using osu.Game.Online.Solo;
 using osu.Game.Online.Spectator;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
+using osu.Game.Rulesets.Replays.Types;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.Ranking;
@@ -54,6 +58,10 @@ namespace osu.Game.Screens.Play
         [Resolved(canBeNull: true)]
         [CanBeNull]
         private INotificationOverlay notifications { get; set; }
+
+        [Resolved(canBeNull: true)]
+        [CanBeNull]
+        private ScoreSubmissionQueue submissionQueue { get; set; }
 
         private readonly Lock scoreSubmissionLock = new Lock();
         private TaskCompletionSource<bool> scoreSubmissionSource;
@@ -327,6 +335,10 @@ namespace osu.Game.Screens.Play
             if (request is SubmitScoreRequest submission && GameplayState.StableScore.Attributes != null)
                 submission.Score.JudgementOrder = GameplayState.StableScore.JudgementOrder;
 
+            // scosu: solo submissions are saved first, so one that fails for network reasons is retried later.
+            long submittedToken = token.Value;
+            bool queued = request is SubmitSoloScoreRequest solo && submissionQueue?.Add(createPendingSubmission(solo, score, submittedToken)) == true;
+
             request.Success += s =>
             {
                 score.ScoreInfo.OnlineID = s.ID;
@@ -339,18 +351,79 @@ namespace osu.Game.Screens.Play
                     score.ScoreInfo.PP = s.PP;
                 }
 
+                if (queued)
+                    submissionQueue.Remove(submittedToken);
+
                 scoreSubmissionSource.SetResult(true);
                 Logger.Log($"Score submission completed! (token:{token.Value} id:{s.ID})");
             };
 
             request.Failure += e =>
             {
-                Logger.Error(e, $"{getUserFacingAPIError(e)}\n\nScore was not submitted (id: {token.Value})");
+                if (queued && !ScoreSubmissionQueue.IsPermanentFailure(e))
+                {
+                    Logger.Log($"Score submission failed, it will be retried (token:{submittedToken}): {e.Message}");
+                    notifications?.Post(new SimpleNotification
+                    {
+                        Text = "Your score couldn't be submitted. It's saved and will be submitted once the connection is back.",
+                        Icon = FontAwesome.Solid.Unlink,
+                    });
+                }
+                else
+                {
+                    if (queued)
+                        submissionQueue.Remove(submittedToken);
+
+                    Logger.Error(e, $"{getUserFacingAPIError(e)}\n\nScore was not submitted (id: {token.Value})");
+                }
+
                 scoreSubmissionSource.SetResult(false);
             };
 
             api.Queue(request);
             return scoreSubmissionSource.Task;
+        }
+
+        /// <summary>
+        /// The most frames scosu keeps in a replay (the server refuses more).
+        /// </summary>
+        private const int max_replay_frames = 216_000;
+
+        private PendingScoreSubmission createPendingSubmission(SubmitSoloScoreRequest request, Score score, long scoreToken) => new PendingScoreSubmission
+        {
+            Token = scoreToken,
+            UserId = api.LocalUser.Value.OnlineID,
+            BeatmapId = score.ScoreInfo.BeatmapInfo.OnlineID,
+            BeatmapTitle = score.ScoreInfo.BeatmapInfo.GetDisplayTitle(),
+            ScoreJson = request.SerializeScore(),
+            ReplayJson = createReplayJson(score),
+            CreatedAt = DateTimeOffset.Now,
+        };
+
+        /// <summary>
+        /// The play's frames as scosu's replay upload takes them: the same legacy frames the spectator server receives.
+        /// </summary>
+        [CanBeNull]
+        private string createReplayJson(Score score)
+        {
+            try
+            {
+                var frames = score.Replay.Frames
+                                  .OfType<IConvertibleReplayFrame>()
+                                  .Select(f => f.ToLegacy(GameplayState.Beatmap))
+                                  .Select(f => new object[] { f.Time, f.MouseX, f.MouseY, (int)f.ButtonState })
+                                  .ToList();
+
+                if (frames.Count == 0 || frames.Count > max_replay_frames)
+                    return null;
+
+                return JsonConvert.SerializeObject(new { frames });
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, "Could not save the replay for retrying its submission");
+                return null;
+            }
         }
 
         private static string getUserFacingAPIError(Exception exception)
