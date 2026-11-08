@@ -166,24 +166,35 @@ namespace osu.Game.Tests.Visual.SongSelect
         {
             AddStep("rank by stable score", () => ((DummyAPIAccess)API).Endpoints.RanksByStableScore = true);
             AddStep("Set ruleset", () => footerButtonMods.Ruleset.Value = new OsuRuleset().RulesetInfo);
+            AddStep("Set beatmap", () =>
+            {
+                var beatmap = CreateWorkingBeatmap(new OsuRuleset().RulesetInfo);
+                beatmap.BeatmapInfo.Difficulty = new BeatmapDifficulty { ApproachRate = 9, OverallDifficulty = 8, CircleSize = 4, DrainRate = 5 };
+                Beatmap.Value = beatmap;
+            });
 
+            // lazer's multipliers, except that the approach rate never changes Difficulty Adjust's, and Relax and Autopilot count ×1.
             AddStep("Approach rate only", () => changeMods(new[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } } }));
             assertModsMultiplier(1);
             assertUnrankedBadge(false);
 
-            AddStep("Approach rate and drain rate", () => changeMods(new[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f }, DrainRate = { Value = 3 } } }));
+            AddStep("Approach rate and drain rate", () => changeMods(new[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f }, DrainRate = { Value = 4 } } }));
             assertModsMultiplier(0.5);
             assertUnrankedBadge(false);
 
             AddStep("Approach rate and Hidden", () => changeMods(new Mod[] { new OsuModDifficultyAdjust { ApproachRate = { Value = 9.5f } }, new OsuModHidden() }));
-            assertModsMultiplier(1.06);
+            assertModsMultiplier(1.04);
+
+            AddStep("Relax and Hidden", () => changeMods(new Mod[] { new OsuModRelax(), new OsuModHidden() }));
+            assertModsMultiplier(1.04);
+            assertUnrankedBadge(false);
 
             AddStep("Classic and Mirror", () => changeMods(new Mod[] { new OsuModClassic(), new OsuModMirror() }));
-            assertModsMultiplier(0.99);
+            assertModsMultiplier(0.985);
             assertUnrankedBadge(false);
 
             AddStep("Double Time at 1.2x", () => changeMods(new[] { new OsuModDoubleTime { SpeedChange = { Value = 1.2 } } }));
-            assertModsMultiplier(1.2);
+            assertModsMultiplier(1.082);
             assertUnrankedBadge(false);
 
             AddStep("Approach rate below zero", () => changeMods(new[] { new OsuModDifficultyAdjust { ExtendedLimits = { Value = true }, ApproachRate = { Value = -5 } } }));

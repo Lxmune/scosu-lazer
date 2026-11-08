@@ -107,7 +107,7 @@ namespace osu.Game.Screens.Play
             };
             Mods = mods ?? Array.Empty<Mod>();
             ScoreProcessor = scoreProcessor ?? ruleset.CreateScoreProcessor();
-            StableScore = new GameplayStableScore(ScoreProcessor, ruleset, Mods);
+            StableScore = new GameplayStableScore(ScoreProcessor, ruleset, beatmap.BeatmapInfo.Difficulty, Mods);
             HealthProcessor = healthProcessor ?? ruleset.CreateHealthProcessor(beatmap.HitObjects[0].StartTime);
             Storyboard = storyboard ?? new Storyboard();
 

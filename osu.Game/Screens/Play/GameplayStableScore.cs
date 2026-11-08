@@ -2,11 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using osu.Framework.Bindables;
+using osu.Game.Beatmaps;
 using osu.Game.Online;
-using osu.Game.Online.API;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Mods;
@@ -30,18 +29,18 @@ namespace osu.Game.Screens.Play
 
         private readonly ScoreProcessor scoreProcessor;
         private readonly int rulesetId;
-        private readonly APIMod[] mods;
+        private readonly double multiplier;
 
         private readonly StringBuilder judgementOrder = new StringBuilder();
 
         private StableScoreAttributes? attributes;
         private IBindable<long>? spectatedScore;
 
-        public GameplayStableScore(ScoreProcessor scoreProcessor, Ruleset ruleset, IEnumerable<Mod> mods)
+        public GameplayStableScore(ScoreProcessor scoreProcessor, Ruleset ruleset, IBeatmapDifficultyInfo difficulty, IEnumerable<Mod> mods)
         {
             this.scoreProcessor = scoreProcessor;
             rulesetId = ruleset.RulesetInfo.OnlineID;
-            this.mods = mods.Select(m => new APIMod(m)).ToArray();
+            multiplier = StableScoreCalculator.ScoreMultiplier(ruleset, difficulty, mods);
 
             // Judgements are followed below, once the order includes them.
             scoreProcessor.TotalScore.BindValueChanged(_ =>
@@ -133,7 +132,7 @@ namespace osu.Game.Screens.Play
 
             TotalScore.Value = attributes == null
                 ? scoreProcessor.TotalScore.Value
-                : StableScoreCalculator.Calculate(attributes, rulesetId, scoreProcessor.Statistics, scoreProcessor.MaximumStatistics, scoreProcessor.HighestCombo.Value, mods,
+                : StableScoreCalculator.Calculate(attributes, rulesetId, scoreProcessor.Statistics, scoreProcessor.MaximumStatistics, scoreProcessor.HighestCombo.Value, multiplier,
                     judgementOrder.ToString());
         }
     }

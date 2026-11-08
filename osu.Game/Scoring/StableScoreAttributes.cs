@@ -50,9 +50,16 @@ namespace osu.Game.Scoring
         public long NestedCount { get; set; }
 
         /// <summary>
-        /// For osu! beatmaps converted to osu!mania: the key count the converter picks (0 otherwise).
+        /// The beatmap's own circle size, which osu!'s Difficulty Adjust multiplier is measured against.
+        /// Games use the beatmap's own <see cref="Beatmaps.IBeatmapInfo.Difficulty"/>, which is the same.
         /// </summary>
-        [JsonProperty("converted_columns")]
-        public long ConvertedColumns { get; set; }
+        [JsonProperty("circle_size")]
+        public float CircleSize { get; set; }
+
+        [JsonProperty("drain_rate")]
+        public float DrainRate { get; set; }
+
+        [JsonProperty("overall_difficulty")]
+        public float OverallDifficulty { get; set; }
     }
 }
