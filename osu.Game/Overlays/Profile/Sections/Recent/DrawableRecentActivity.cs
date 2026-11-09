@@ -210,8 +210,18 @@ namespace osu.Game.Overlays.Profile.Sections.Recent
             }
         }
 
-        private string getRulesetName() =>
-            rulesets.AvailableRulesets.FirstOrDefault(r => r.ShortName == activity.Mode)?.Name ?? activity.Mode;
+        private string getRulesetName()
+        {
+            // scosu: a Relax or Autopilot leaderboard ("osurx") is named like the ruleset selector names it ("osu! (RX)").
+            var mode = new RulesetInfo { ShortName = activity.Mode };
+            string playedShortName = mode.GetPlayedRulesetShortName();
+            string? name = rulesets.AvailableRulesets.FirstOrDefault(r => r.ShortName == playedShortName)?.Name;
+
+            if (name == null)
+                return activity.Mode;
+
+            return mode.GetRelaxLeaderboardMod() is string mod ? $@"{name} ({mod})" : name;
+        }
 
         private void addUserLink()
             => content.AddLink(activity.User.AsNonNull().Username, LinkAction.OpenUserProfile, getLinkArgument(activity.User.AsNonNull().Url), creationParameters: t => t.Font = getLinkFont(FontWeight.Bold));
