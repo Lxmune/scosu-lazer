@@ -8,6 +8,8 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API.Requests;
@@ -44,6 +46,15 @@ namespace osu.Game.Tests.Visual.Online
                     },
                 }
             };
+        }
+
+        [Test]
+        public void TestRelaxLeaderboardIsNamed()
+        {
+            // scosu: "osurx" is shown as the ruleset selector names it.
+            // The text flow splits words into separate sprites.
+            AddUntilStep("relax rank shown", () => this.ChildrenOfType<DrawableRecentActivity>().Any(activity =>
+                string.Concat(activity.ChildrenOfType<SpriteText>().Select(t => t.Text.ToString())).Replace(" ", "").Contains("(osu!(RX))")));
         }
 
         private IEnumerable<APIRecentActivity> createDummyActivities()
@@ -152,6 +163,14 @@ namespace osu.Game.Tests.Visual.Online
                     Type = RecentActivityType.Rank,
                     Rank = 1,
                     Mode = "vitaru",
+                    Beatmap = dummyBeatmap,
+                },
+                new APIRecentActivity
+                {
+                    User = dummyUser,
+                    Type = RecentActivityType.Rank,
+                    Rank = 1,
+                    Mode = "osurx",
                     Beatmap = dummyBeatmap,
                 },
                 new APIRecentActivity
