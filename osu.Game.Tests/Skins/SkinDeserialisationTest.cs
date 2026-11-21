@@ -88,7 +88,7 @@ namespace osu.Game.Tests.Skins
             // Covers ranked score gain counter
             "Archives/modified-classic-20261026.osk",
             // Covers results screen components
-            "Archives/modified-argon-20261028.osk",
+            "Archives/modified-argon-20261109.osk",
             "Archives/modified-classic-20261028.osk",
         };
 
@@ -116,9 +116,9 @@ namespace osu.Game.Tests.Skins
                 }
             }
 
-            var editableTypes = SerialisedDrawableInfo.GetAllAvailableDrawables().Where(t => (Activator.CreateInstance(t) as ISerialisableDrawable)?.IsEditable == true);
+            var availableTypes = SerialisedDrawableInfo.GetAllAvailableDrawables();
 
-            Assert.That(instantiatedTypes, Is.EquivalentTo(editableTypes));
+            Assert.That(instantiatedTypes, Is.EquivalentTo(availableTypes));
         }
 
         [Test]

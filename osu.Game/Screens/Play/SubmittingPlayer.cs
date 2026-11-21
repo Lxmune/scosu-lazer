@@ -12,11 +12,13 @@ using Newtonsoft.Json;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Database;
+using osu.Game.Localisation;
 using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.Multiplayer;
@@ -156,12 +158,12 @@ namespace osu.Game.Screens.Play
 
                 if (displayNotification || shouldExit)
                 {
-                    string whatWillHappen = shouldExit
-                        ? "Cannot start play"
-                        : "Score will not be submitted";
+                    LocalisableString whatWillHappen = shouldExit
+                        ? NotificationsStrings.CannotStartPlay
+                        : NotificationsStrings.ScoreWillNotBeSubmitted;
 
                     if (string.IsNullOrEmpty(exception.Message))
-                        notifications?.Post(new ScoreSubmissionFailureNotification(whatWillHappen, "Failed to retrieve a score submission token."));
+                        notifications?.Post(new ScoreSubmissionFailureNotification(whatWillHappen, NotificationsStrings.FailedToRetrieveScoreSubmissionToken));
                     else
                         notifications?.Post(new ScoreSubmissionFailureNotification(whatWillHappen, getUserFacingAPIError(exception)));
                 }
@@ -426,7 +428,7 @@ namespace osu.Game.Screens.Play
             }
         }
 
-        private static string getUserFacingAPIError(Exception exception)
+        private static LocalisableString getUserFacingAPIError(Exception exception)
         {
             switch (exception.Message)
             {
@@ -438,10 +440,15 @@ namespace osu.Game.Screens.Play
                     return "Please ensure that you are using the latest version of the scosu releases.";
 
                 case @"invalid or missing beatmap_hash":
-                    return "This beatmap does not match the online version. Please update or redownload it.";
+                    return NotificationsStrings.PreventSubmittingWithInvalidBeatmapHash;
 
                 case @"expired token":
-                    return "Your system clock is set incorrectly. Please check your system time, date and timezone.";
+                    return NotificationsStrings.PreventSubmittingWithExpiredToken;
+
+                // Exception message, may be actually displayed to user.
+                // See https://github.com/ppy/osu/blob/382c3bf717b7736bc74387b82249757ef5b12947/osu.Game/Screens/Play/SubmittingPlayer.cs#L111
+                case @"Online functionality is not available.":
+                    return NotificationsStrings.OnlineFunctionalityIsNotAvailable;
 
                 default:
                     return exception.Message;
