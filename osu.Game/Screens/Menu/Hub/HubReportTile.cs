@@ -41,13 +41,6 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly Bindable<string> seenWeek = new Bindable<string>();
         private readonly IBindable<APIState> apiState = new Bindable<APIState>();
 
-        /// <summary>
-        /// Whether there is a report to show: the hub leaves the tile out otherwise.
-        /// </summary>
-        public IBindable<bool> HasReport => hasReport;
-
-        private readonly Bindable<bool> hasReport = new Bindable<bool>();
-
         public HubReportTile()
         {
             Eyebrow.Text = MenuHubStrings.WeeklyReport.ToUpper();
@@ -73,7 +66,6 @@ namespace osu.Game.Screens.Menu.Hub
             if (reports.Value is not IReadOnlyList<APIWeeklyReport> list)
             {
                 ShowPlaceholder(FontAwesome.Solid.FileAlt, api.IsLoggedIn ? MenuHubStrings.NoReport : MenuHubStrings.LogInForReport);
-                hasReport.Value = false;
                 return;
             }
 
@@ -85,12 +77,10 @@ namespace osu.Game.Screens.Menu.Hub
             if (report == null)
             {
                 ShowPlaceholder(FontAwesome.Solid.FileAlt, MenuHubStrings.NoReport);
-                hasReport.Value = false;
                 return;
             }
 
             ShowContent();
-            hasReport.Value = true;
 
             var highlights = ScosuMenuFormatting.PickHighlights(report);
             var highlight = highlights.FirstOrDefault();

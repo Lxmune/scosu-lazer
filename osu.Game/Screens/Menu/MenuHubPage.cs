@@ -56,7 +56,7 @@ namespace osu.Game.Screens.Menu
         private readonly HubTile[] tiles;
         private readonly HubDailyTile dailyTile;
         private readonly HubEventTile eventTile;
-        private readonly HubReportTile reportTile;
+        private readonly IBindable<IReadOnlyList<APIWeeklyReport>?> reports = new Bindable<IReadOnlyList<APIWeeklyReport>?>();
         private readonly Dictionary<HubTile, Container> cells = new Dictionary<HubTile, Container>();
         private readonly (HubTile tile, int column, int row, int columns, int rows)[] withEvent;
         private readonly (HubTile tile, int column, int row, int columns, int rows)[] withEventNoReport;
@@ -66,6 +66,9 @@ namespace osu.Game.Screens.Menu
 
         [Resolved]
         private ScosuEventProvider? eventProvider { get; set; }
+
+        [Resolved]
+        private WeeklyReportProvider? reportProvider { get; set; }
         private readonly HubNewsTile newsTile;
         private readonly HubProfileProvider profile;
 
@@ -81,7 +84,7 @@ namespace osu.Game.Screens.Menu
 
             var score = new HubScoreTile(profile);
             var friends = new HubFriendsTile();
-            var report = reportTile = new HubReportTile();
+            var report = new HubReportTile();
             newsTile = new HubNewsTile();
             var plays = new HubPlaysTile(profile);
             var accuracy = new HubAccuracyTile(profile);
@@ -212,8 +215,12 @@ namespace osu.Game.Screens.Menu
             if (eventProvider != null)
                 currentEvent.BindTo(eventProvider.Event);
 
+            // Asked of the providers, not the tiles: a tile left out isn't updated, so it couldn't say it has something again.
+            if (reportProvider != null)
+                reports.BindTo(reportProvider.Reports);
+
             currentEvent.BindValueChanged(_ => applyLayout(true));
-            reportTile.HasReport.BindValueChanged(_ => applyLayout(true));
+            reports.BindValueChanged(_ => applyLayout(true));
             applyLayout(false);
         }
 
@@ -224,7 +231,8 @@ namespace osu.Game.Screens.Menu
         private void applyLayout(bool animate)
         {
             bool hasEvent = currentEvent.Value != null;
-            bool hasReport = reportTile.HasReport.Value;
+            // The report tile shows the latest report when there is no new one, so any report will do.
+            bool hasReport = reports.Value?.Count > 0;
 
             var layout = hasEvent
                 ? hasReport ? withEvent : withEventNoReport
