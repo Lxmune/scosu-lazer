@@ -207,12 +207,13 @@ namespace osu.Game.Beatmaps.Drawables.Cards
                                                     {
                                                         new Dimension(GridSizeMode.AutoSize),
                                                         new Dimension(GridSizeMode.AutoSize),
+                                                        new Dimension(GridSizeMode.AutoSize),
                                                         new Dimension()
                                                     },
                                                     Content = new[]
                                                     {
-                                                        new Drawable[3],
-                                                        new Drawable[3]
+                                                        new Drawable[4],
+                                                        new Drawable[4]
                                                     }
                                                 },
                                                 new BeatmapCardExtraInfoRow(BeatmapSet)
@@ -304,16 +305,31 @@ namespace osu.Game.Beatmaps.Drawables.Cards
             if (nominationsStatistic != null)
                 statisticsContainer.Content[1][0] = withMargin(nominationsStatistic);
 
-            statisticsContainer.Content[0][1] = withMargin(new PlayCountStatistic(BeatmapSet));
+            // bancho's counts come first, labelled on the first statistic of the column.
+            // When they're shown, scosu's own counts get a label of their own.
+            var banchoPlays = BanchoStatistic.CreatePlaysFor(BeatmapSet);
+            if (banchoPlays != null)
+                statisticsContainer.Content[0][1] = withMargin(banchoPlays);
 
-            statisticsContainer.Content[1][1] = withMargin(new FavouritesStatistic(BeatmapSet)
+            var banchoFavourites = BanchoStatistic.CreateFavouritesFor(BeatmapSet, withLabel: banchoPlays == null);
+            if (banchoFavourites != null)
+                statisticsContainer.Content[1][1] = withMargin(banchoFavourites);
+
+            bool showsBancho = banchoPlays != null || banchoFavourites != null;
+
+            statisticsContainer.Content[0][2] = withMargin(new PlayCountStatistic(BeatmapSet)
+            {
+                SourceLabel = showsBancho ? "scosu" : string.Empty,
+            });
+
+            statisticsContainer.Content[1][2] = withMargin(new FavouritesStatistic(BeatmapSet)
             {
                 Current = FavouriteState,
             });
 
             var dateStatistic = BeatmapCardDateStatistic.CreateFor(BeatmapSet);
             if (dateStatistic != null)
-                statisticsContainer.Content[0][2] = withMargin(dateStatistic);
+                statisticsContainer.Content[0][3] = withMargin(dateStatistic);
         }
 
         protected override void UpdateState()

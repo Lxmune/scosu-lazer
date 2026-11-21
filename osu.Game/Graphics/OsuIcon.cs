@@ -72,6 +72,11 @@ namespace osu.Game.Graphics
         public static IconUsage Notification => get(OsuIconMapping.Notification);
         public static IconUsage Online => get(OsuIconMapping.Online);
         public static IconUsage Play => get(OsuIconMapping.Play);
+
+        /// <summary>
+        /// scosu: a play triangle in the thin ring of the other circled glyphs (the main menu's play button).
+        /// </summary>
+        public static IconUsage PlayCircle => get(OsuIconMapping.PlayCircle);
         public static IconUsage Player => get(OsuIconMapping.Player);
         public static IconUsage PlayerFollow => get(OsuIconMapping.PlayerFollow);
         public static IconUsage Prev => get(OsuIconMapping.Prev);
@@ -360,6 +365,9 @@ namespace osu.Game.Graphics
 
             [Description(@"play")]
             Play,
+
+            [Description(@"play-circle")]
+            PlayCircle,
 
             [Description(@"player")]
             Player,

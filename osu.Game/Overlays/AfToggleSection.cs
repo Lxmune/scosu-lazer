@@ -335,7 +335,7 @@ namespace osu.Game.Overlays
                                     Origin = Anchor.Centre,
                                     Depth = float.MinValue,
                                     Size = new Vector2(30),
-                                    Texture = textures.Get(@"Menu/logo"),
+                                    Texture = textures.Get(@"Menu/scosu-logo"),
                                     RelativePositionAxes = Axes.Both,
                                     Position = new Vector2(RNG.NextSingle(), RNG.NextSingle()),
                                     Alpha = 0,

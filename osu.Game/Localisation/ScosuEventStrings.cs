@@ -6,7 +6,7 @@ using osu.Framework.Localisation;
 namespace osu.Game.Localisation
 {
     /// <summary>
-    /// Strings of the scosu! event: its main menu card and its overlay.
+    /// Strings of the scosu event: its main menu card and its overlay.
     /// </summary>
     public static class ScosuEventStrings
     {
@@ -23,9 +23,9 @@ namespace osu.Game.Localisation
         public static LocalisableString HeaderDescription => new TranslatableString(getKey(@"header_description"), @"climb the ranking, finish the objectives, earn a title");
 
         /// <summary>
-        /// "scosu! event"
+        /// "scosu event"
         /// </summary>
-        public static LocalisableString Label => new TranslatableString(getKey(@"label"), @"scosu! event");
+        public static LocalisableString Label => new TranslatableString(getKey(@"label"), @"scosu event");
 
         /// <summary>
         /// "Upcoming"

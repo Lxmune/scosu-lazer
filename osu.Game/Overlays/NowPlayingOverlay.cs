@@ -9,6 +9,7 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -36,14 +37,16 @@ namespace osu.Game.Overlays
         public LocalisableString Description => NowPlayingStrings.HeaderDescription;
 
         private const float player_width = 400;
-        private const float player_height = 130;
+        private const float player_height = 150;
         private const float transition_length = 500;
-        private const float progress_height = 10;
-        private const float bottom_black_area_height = 55;
+        private const float progress_height = 12;
+        private const float bottom_black_area_height = 74;
         private const float margin = 10;
 
         private Drawable background = null!;
         private ProgressBar progressBar = null!;
+        private OsuSpriteText elapsedText = null!, totalText = null!;
+        private int lastElapsedSecond = -1, lastTotalSecond = -1;
 
         private IconButton prevButton = null!;
         private IconButton playButton = null!;
@@ -73,8 +76,16 @@ namespace osu.Game.Overlays
         private Bindable<bool> allowTrackControl = null!;
         private readonly BindableBool shuffle = new BindableBool(true);
 
-        private static readonly FontUsage title_font = OsuFont.GetFont(size: 25, italics: true);
-        private static readonly FontUsage artist_font = OsuFont.GetFont(size: 15, weight: FontWeight.Bold, italics: true);
+        private static readonly Color4 inactive_colour = new Color4(1f, 1f, 1f, 0.65f);
+
+        private static string formatTime(double ms)
+        {
+            var t = TimeSpan.FromMilliseconds(Math.Max(0, ms));
+            return t.TotalHours >= 1 ? $@"{(int)t.TotalHours}:{t.Minutes:00}:{t.Seconds:00}" : $@"{t.Minutes}:{t.Seconds:00}";
+        }
+
+        private static readonly FontUsage title_font = OsuFont.GetFont(size: 22, weight: FontWeight.SemiBold);
+        private static readonly FontUsage artist_font = OsuFont.GetFont(size: 14, weight: FontWeight.Medium);
 
         public NowPlayingOverlay()
         {
@@ -113,7 +124,7 @@ namespace osu.Game.Overlays
                                 {
                                     Origin = Anchor.BottomCentre,
                                     Anchor = Anchor.TopCentre,
-                                    Position = new Vector2(0, 40),
+                                    Position = new Vector2(0, 42),
                                     Colour = Color4.White,
                                     CreateContent = () => new OsuSpriteText
                                     {
@@ -129,7 +140,7 @@ namespace osu.Game.Overlays
                                 {
                                     Origin = Anchor.TopCentre,
                                     Anchor = Anchor.TopCentre,
-                                    Position = new Vector2(0, 45),
+                                    Position = new Vector2(0, 46),
                                     Colour = Color4.White,
                                     CreateContent = () => new OsuSpriteText
                                     {
@@ -184,11 +195,29 @@ namespace osu.Game.Overlays
                                                 },
                                             }
                                         },
+                                        elapsedText = new OsuSpriteText
+                                        {
+                                            Anchor = Anchor.BottomLeft,
+                                            Origin = Anchor.BottomLeft,
+                                            Margin = new MarginPadding { Left = 15, Bottom = 3 },
+                                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold, fixedWidth: true),
+                                            Colour = colours.PinkLighter,
+                                            Text = formatTime(0),
+                                        },
+                                        totalText = new OsuSpriteText
+                                        {
+                                            Anchor = Anchor.BottomRight,
+                                            Origin = Anchor.BottomRight,
+                                            Margin = new MarginPadding { Right = 15, Bottom = 3 },
+                                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold, fixedWidth: true),
+                                            Colour = colours.PinkLight,
+                                            Text = formatTime(0),
+                                        },
                                         shuffleButton = new MusicIconButton
                                         {
                                             Anchor = Anchor.CentreLeft,
                                             Origin = Anchor.Centre,
-                                            Position = new Vector2(bottom_black_area_height / 2, 0),
+                                            Position = new Vector2(37, -6),
                                             Action = shuffle.Toggle,
                                             Icon = FontAwesome.Solid.Random,
                                         },
@@ -196,8 +225,9 @@ namespace osu.Game.Overlays
                                         {
                                             Origin = Anchor.Centre,
                                             Anchor = Anchor.CentreRight,
-                                            Position = new Vector2(-bottom_black_area_height / 2, 0),
+                                            Position = new Vector2(-37, -6),
                                             Icon = FontAwesome.Solid.Bars,
+                                            Colour = inactive_colour,
                                             Action = togglePlaylist
                                         },
                                     }
@@ -206,9 +236,9 @@ namespace osu.Game.Overlays
                                 {
                                     Origin = Anchor.BottomCentre,
                                     Anchor = Anchor.BottomCentre,
-                                    Height = progress_height / 2,
-                                    FillColour = colours.Yellow,
-                                    BackgroundColour = colours.YellowDarker.Opacity(0.5f),
+                                    Height = progress_height / 3,
+                                    FillColour = colours.PinkLight,
+                                    BackgroundColour = colours.PinkDarker.Opacity(0.6f),
                                     OnSeek = onSeek,
                                     OnCommit = onCommit,
                                 }
@@ -258,7 +288,7 @@ namespace osu.Game.Overlays
                 {
                     playlistContainer.Add(playlist);
 
-                    playlist.State.BindValueChanged(s => playlistButton.FadeColour(s.NewValue == Visibility.Visible ? colours.Yellow : Color4.White, 200, Easing.OutQuint), true);
+                    playlist.State.BindValueChanged(s => playlistButton.FadeColour(s.NewValue == Visibility.Visible ? colours.PinkLight : inactive_colour, 200, Easing.OutQuint), true);
 
                     togglePlaylist();
                 });
@@ -280,7 +310,7 @@ namespace osu.Game.Overlays
             allowTrackControl.BindValueChanged(_ => Scheduler.AddOnce(updateEnabledStates), true);
 
             shuffle.BindTo(musicController.Shuffle);
-            shuffle.BindValueChanged(s => shuffleButton.FadeColour(s.NewValue ? colours.Yellow : Color4.White, 200, Easing.OutQuint), true);
+            shuffle.BindValueChanged(s => shuffleButton.FadeColour(s.NewValue ? colours.PinkLight : inactive_colour, 200, Easing.OutQuint), true);
 
             musicController.TrackChanged += trackChanged;
             trackChanged(beatmap.Value);
@@ -329,6 +359,7 @@ namespace osu.Game.Overlays
             }
 
             var track = musicController.CurrentTrack;
+            updateTimeLabels();
 
             if (!progressBar.Seeking)
             {
@@ -345,6 +376,28 @@ namespace osu.Game.Overlays
                     progressBar.EndTime = 1;
                     playButton.Icon = FontAwesome.Regular.PlayCircle;
                 }
+            }
+        }
+
+        private void updateTimeLabels()
+        {
+            double current = progressBar.Current.Value;
+            double total = ((BindableNumber<double>)progressBar.Current).MaxValue;
+            if (musicController.CurrentTrack.IsDummyDevice) total = 0;
+
+            int cs = (int)(current / 1000);
+            int ts = (int)(total / 1000);
+
+            if (cs != lastElapsedSecond)
+            {
+                lastElapsedSecond = cs;
+                elapsedText.Text = formatTime(current);
+            }
+
+            if (ts != lastTotalSecond)
+            {
+                lastTotalSecond = ts;
+                totalText.Text = formatTime(total);
             }
         }
 
@@ -443,8 +496,8 @@ namespace osu.Game.Overlays
             [BackgroundDependencyLoader]
             private void load(OsuColour colours)
             {
-                HoverColour = colours.YellowDark.Opacity(0.6f);
-                FlashColour = colours.Yellow;
+                HoverColour = colours.Pink.Opacity(0.55f);
+                FlashColour = colours.PinkLighter;
             }
 
             protected override void LoadComplete()
@@ -461,6 +514,7 @@ namespace osu.Game.Overlays
         {
             private readonly Sprite sprite;
             private readonly WorkingBeatmap beatmap;
+            private readonly Box tint;
 
             public Background(WorkingBeatmap beatmap)
                 : base(cachedFrameBuffer: true)
@@ -475,25 +529,23 @@ namespace osu.Game.Overlays
                     sprite = new Sprite
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = OsuColour.Gray(150),
+                        Colour = OsuColour.Gray(170),
                         FillMode = FillMode.Fill,
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                     },
-                    new Box
+                    tint = new Box
                     {
-                        RelativeSizeAxes = Axes.X,
-                        Height = bottom_black_area_height,
-                        Origin = Anchor.BottomCentre,
-                        Anchor = Anchor.BottomCentre,
+                        RelativeSizeAxes = Axes.Both,
                         Colour = Color4.Black.Opacity(0.5f)
                     }
                 };
             }
 
             [BackgroundDependencyLoader]
-            private void load(LargeTextureStore textures)
+            private void load(LargeTextureStore textures, OsuColour colours)
             {
+                tint.Colour = ColourInfo.GradientVertical(colours.GreyVioletDarker.Opacity(0.15f), colours.GreyVioletDarker.Opacity(0.9f));
                 sprite.Texture = beatmap.GetBackground() ?? textures.Get(@"Backgrounds/bg2");
             }
         }
@@ -526,6 +578,9 @@ namespace osu.Game.Overlays
         {
             public override bool HandleNonPositionalInput => IsHovered;
 
+            [Resolved]
+            private OsuColour colours { get; set; } = null!;
+
             public HoverableProgressBar()
                 : base(true)
             {
@@ -533,13 +588,15 @@ namespace osu.Game.Overlays
 
             protected override bool OnHover(HoverEvent e)
             {
-                this.ResizeHeightTo(progress_height, 500, Easing.OutQuint);
+                FillColour = colours.Violet;
+                this.ResizeHeightTo(progress_height / 1.5f, 300, Easing.OutQuint);
                 return base.OnHover(e);
             }
 
             protected override void OnHoverLost(HoverLostEvent e)
             {
-                this.ResizeHeightTo(progress_height / 2, 500, Easing.OutQuint);
+                FillColour = colours.PinkLight;
+                this.ResizeHeightTo(progress_height / 3, 300, Easing.OutQuint);
                 base.OnHoverLost(e);
             }
         }

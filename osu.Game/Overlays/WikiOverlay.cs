@@ -39,7 +39,7 @@ namespace osu.Game.Overlays
         private bool displayUpdateRequired = true;
 
         public WikiOverlay()
-            : base(OverlayColourScheme.Orange, false)
+            : base(OverlayColourScheme.Purple, false) // scosu: every in-game web page uses the accent colour (violet)
         {
         }
 

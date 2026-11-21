@@ -7,7 +7,10 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -29,6 +32,9 @@ namespace osu.Game.Overlays.Login
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
+
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
 
         private UserDropdown? dropdown;
 
@@ -172,6 +178,7 @@ namespace osu.Game.Overlays.Login
                                 Action = RequestHide
                             },
                             dropdown = new UserDropdown { RelativeSizeAxes = Axes.X },
+                            createWebsiteLinks(),
                         },
                     };
 
@@ -207,6 +214,134 @@ namespace osu.Game.Overlays.Login
             if (form != null)
                 ScheduleAfterChildren(() => GetContainingFocusManager()?.ChangeFocus(form));
         });
+
+        /// <summary>
+        /// scosu: the player's own pages on the website (restricted players get the standing and appeal page like everyone else).
+        /// Nothing on servers that aren't scosu servers.
+        /// </summary>
+        private Drawable createWebsiteLinks()
+        {
+            if (!api.Endpoints.RanksByStableScore)
+                return Empty();
+
+            string website = api.Endpoints.WebsiteUrl;
+
+            return new Container
+            {
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Masking = true,
+                CornerRadius = 10,
+                Children = new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = colourProvider.Background5,
+                    },
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Padding = new MarginPadding(5),
+                        Spacing = new Vector2(0, 2),
+                        Children = new Drawable[]
+                        {
+                            new WebsiteLink(FontAwesome.Solid.CalendarAlt, ScosuMenuStrings.WeeklyReports, $@"{website}/weekly-reports"),
+                            new WebsiteLink(FontAwesome.Solid.BalanceScale, ScosuMenuStrings.AccountStanding, $@"{website}/appeal"),
+                            new WebsiteLink(FontAwesome.Solid.Cog, ScosuMenuStrings.AccountSettings, $@"{website}/settings"),
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// scosu: a row of <see cref="createWebsiteLinks"/>, opening a page of the website in the browser.
+        /// </summary>
+        private partial class WebsiteLink : OsuClickableContainer
+        {
+            private readonly IconUsage icon;
+            private readonly LocalisableString text;
+            private readonly string url;
+
+            private Box hoverBox = null!;
+
+            [Resolved]
+            private OverlayColourProvider colourProvider { get; set; } = null!;
+
+            [Resolved]
+            private OsuColour colours { get; set; } = null!;
+
+            [Resolved]
+            private OsuGame? game { get; set; }
+
+            public WebsiteLink(IconUsage icon, LocalisableString text, string url)
+            {
+                this.icon = icon;
+                this.text = text;
+                this.url = url;
+
+                RelativeSizeAxes = Axes.X;
+                Height = 38;
+                Masking = true;
+                CornerRadius = 6;
+                Action = () => game?.OpenUrlExternally(url);
+            }
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                Children = new Drawable[]
+                {
+                    hoverBox = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = colourProvider.Background3,
+                        Alpha = 0,
+                    },
+                    new SpriteIcon
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        X = 12,
+                        Size = new Vector2(15),
+                        Icon = icon,
+                        Colour = colours.PinkLight,
+                    },
+                    new OsuSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        X = 40,
+                        Text = text,
+                        Font = OsuFont.Style.Body,
+                    },
+                    new SpriteIcon
+                    {
+                        Anchor = Anchor.CentreRight,
+                        Origin = Anchor.CentreRight,
+                        X = -12,
+                        Size = new Vector2(10),
+                        Icon = FontAwesome.Solid.ExternalLinkAlt,
+                        Colour = colourProvider.Light4,
+                    },
+                };
+            }
+
+            protected override bool OnHover(HoverEvent e)
+            {
+                hoverBox.FadeIn(150, Easing.OutQuint);
+                return base.OnHover(e);
+            }
+
+            protected override void OnHoverLost(HoverLostEvent e)
+            {
+                hoverBox.FadeOut(300, Easing.OutQuint);
+                base.OnHoverLost(e);
+            }
+        }
 
         private void updateDropdownCurrent(UserStatus? status)
         {

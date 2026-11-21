@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>WinExe</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Description>A free-to-win rhythm game. Rhythm is just a *click* away!</Description>
+    <Description>scosu, a score-focused osu!lazer client for the scosu server.</Description>
     <AssemblyName>scosu</AssemblyName>
     <AssemblyTitle>scosu</AssemblyTitle>
     <Title>scosu</Title>

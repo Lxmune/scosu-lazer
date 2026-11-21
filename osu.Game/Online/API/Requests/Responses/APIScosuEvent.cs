@@ -10,7 +10,7 @@ using Newtonsoft.Json.Converters;
 namespace osu.Game.Online.API.Requests.Responses
 {
     /// <summary>
-    /// A scosu! event: a limited time ranking by ranked score gained, with objectives and profile titles to earn
+    /// A scosu event: a limited time ranking by ranked score gained, with objectives and profile titles to earn
     /// (a scosu server feature, see <see cref="GetScosuEventRequest"/>).
     /// </summary>
     public class APIScosuEvent
@@ -47,7 +47,7 @@ namespace osu.Game.Online.API.Requests.Responses
         public Look Appearance { get; set; } = new Look();
 
         /// <summary>
-        /// Which plays count, one short sentence each ("osu! only", "4★ and more").
+        /// Which plays count, one short sentence each ("standard only", "4★ and more").
         /// </summary>
         [JsonProperty("rules")]
         public List<string> Rules { get; set; } = new List<string>();

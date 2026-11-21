@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Net.Http;
+using System.Text;
 using osu.Framework.IO.Network;
 using osu.Game.Online.API;
 using osu.Game.Online.Rooms;
@@ -28,7 +29,13 @@ namespace osu.Game.Online.Solo
             req.ContentType = "application/json";
             req.Method = HttpMethod.Put;
             req.Timeout = 30000;
-            req.AddRaw(Submission.ScoreJson);
+
+            // scosu: signed like the first attempt (see ScoreSignature).
+            string? signature = ScoreSignature.Sign(Target, Submission.ScoreJson);
+            if (signature != null)
+                req.AddHeader(ScoreSignature.HEADER, signature);
+
+            req.AddRaw(Encoding.UTF8.GetBytes(Submission.ScoreJson));
 
             return req;
         }

@@ -51,7 +51,7 @@ namespace osu.Game.Overlays.Toolbar
             BackgroundContent.Add(stateBackground = new Box
             {
                 RelativeSizeAxes = Axes.Both,
-                Colour = colours.Carmine.Opacity(180),
+                Colour = colours.Pink.Opacity(180),
                 Blending = BlendingParameters.Additive,
                 Depth = float.MaxValue,
                 Alpha = 0,

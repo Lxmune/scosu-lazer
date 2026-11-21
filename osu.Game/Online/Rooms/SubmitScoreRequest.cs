@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Net.Http;
+using System.Text;
 using Newtonsoft.Json;
 using osu.Framework.IO.Network;
 using osu.Game.Online.API;
@@ -30,7 +31,14 @@ namespace osu.Game.Online.Rooms
             req.Method = HttpMethod.Put;
             req.Timeout = 30000;
 
-            req.AddRaw(SerializeScore());
+            string body = SerializeScore();
+
+            // scosu: release builds sign the body (see ScoreSignature); a late retry sends the same body, so it is signed the same.
+            string? signature = ScoreSignature.Sign(Target, body);
+            if (signature != null)
+                req.AddHeader(ScoreSignature.HEADER, signature);
+
+            req.AddRaw(Encoding.UTF8.GetBytes(body));
 
             return req;
         }

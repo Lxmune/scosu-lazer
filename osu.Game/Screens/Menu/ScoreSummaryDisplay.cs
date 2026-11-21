@@ -8,6 +8,7 @@ using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Extensions;
@@ -25,7 +26,7 @@ using osuTK.Graphics;
 namespace osu.Game.Screens.Menu
 {
     /// <summary>
-    /// The ranked score the local user gained today and this week, in the selected ruleset.
+    /// The ranked score the local user gained today and this week, in the selected ruleset, and what it takes to pass the next player.
     /// Hidden while logged out, and when the server can't tell (see <see cref="GetScoreSummaryRequest"/>).
     /// </summary>
     public partial class ScoreSummaryDisplay : VisibilityContainer
@@ -53,9 +54,9 @@ namespace osu.Game.Screens.Menu
         private OsuSpriteText todayDetails = null!;
         private Container graphContainer = null!;
         private LineGraph todayGraph = null!;
-        private OsuSpriteText weekScore = null!;
-        private OsuSpriteText weekDetails = null!;
-        private OsuSpriteText nextRank = null!;
+        private OsuSpriteText week = null!;
+        private FillFlowContainer nextRank = null!;
+        private OsuSpriteText nextRankText = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -81,38 +82,39 @@ namespace osu.Game.Screens.Menu
                     {
                         AutoSizeAxes = Axes.Both,
                         Direction = FillDirection.Vertical,
-                        Padding = new MarginPadding { Horizontal = 15, Vertical = 10 },
+                        Padding = new MarginPadding { Horizontal = 16, Vertical = 12 },
                         Spacing = new Vector2(0, 2),
                         Children = new Drawable[]
                         {
                             new OsuSpriteText
                             {
                                 Text = ScoreSummaryStrings.Today.ToUpper(),
-                                Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                                Colour = colours.Yellow,
+                                Font = OsuFont.GetFont(size: 11, weight: FontWeight.Bold),
+                                Spacing = new Vector2(1, 0),
+                                Colour = colours.PinkLight,
                             },
                             new FillFlowContainer
                             {
                                 AutoSizeAxes = Axes.Both,
                                 Direction = FillDirection.Horizontal,
-                                Spacing = new Vector2(10, 0),
+                                Spacing = new Vector2(12, 0),
                                 Children = new Drawable[]
                                 {
                                     todayScore = new OsuSpriteText
                                     {
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
-                                        Font = OsuFont.GetFont(size: 26, weight: FontWeight.Light, fixedWidth: true),
+                                        Font = OsuFont.GetFont(size: 28, weight: FontWeight.Light, fixedWidth: true),
                                     },
                                     graphContainer = new Container
                                     {
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
-                                        Size = new Vector2(100, 22),
+                                        Size = new Vector2(90, 22),
                                         Child = todayGraph = new LineGraph
                                         {
                                             RelativeSizeAxes = Axes.Both,
-                                            LineColour = colours.Yellow,
+                                            LineColour = colours.PinkLight,
                                             MinValue = 0,
                                         },
                                     },
@@ -121,36 +123,46 @@ namespace osu.Game.Screens.Menu
                             todayDetails = new OsuSpriteText
                             {
                                 Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                                Colour = OsuColour.Gray(0.85f),
                             },
-                            new FillFlowContainer
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Height = 1,
+                                Colour = Color4.White,
+                                Alpha = 0.1f,
+                                Margin = new MarginPadding { Vertical = 6 },
+                            },
+                            week = new OsuSpriteText
+                            {
+                                Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                                Colour = OsuColour.Gray(0.6f),
+                            },
+                            nextRank = new FillFlowContainer
                             {
                                 AutoSizeAxes = Axes.Both,
                                 Direction = FillDirection.Horizontal,
-                                Spacing = new Vector2(5, 0),
-                                Margin = new MarginPadding { Top = 6 },
+                                Spacing = new Vector2(6, 0),
+                                Margin = new MarginPadding { Top = 3 },
+                                Alpha = 0,
                                 Children = new Drawable[]
                                 {
-                                    new OsuSpriteText
+                                    new SpriteIcon
                                     {
-                                        Text = ScoreSummaryStrings.ThisWeek.ToUpper(),
-                                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                                        Colour = colours.Yellow,
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
+                                        Size = new Vector2(9),
+                                        Icon = FontAwesome.Solid.ArrowUp,
+                                        Colour = colours.PinkLight,
                                     },
-                                    weekScore = new OsuSpriteText
+                                    nextRankText = new OsuSpriteText
                                     {
-                                        Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                                    },
-                                    weekDetails = new OsuSpriteText
-                                    {
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
                                         Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                                        Colour = colours.PinkLight,
                                     },
                                 },
-                            },
-                            nextRank = new OsuSpriteText
-                            {
-                                Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
-                                Colour = colours.Yellow,
-                                Margin = new MarginPadding { Top = 2 },
                             },
                         },
                     },
@@ -206,8 +218,7 @@ namespace osu.Game.Screens.Menu
             todayScore.Text = formatGain(summary.Today.RankedScore);
             todayDetails.Text = formatDetails(summary.Today, summary.Rank);
 
-            weekScore.Text = formatGain(summary.Week.RankedScore);
-            weekDetails.Text = formatDetails(summary.Week, summary.Rank);
+            week.Text = formatWeek(summary.Week, summary.Rank);
 
             // Starting from nothing gained, so a single play still draws a line.
             var points = summary.Today.Points;
@@ -222,7 +233,7 @@ namespace osu.Game.Screens.Menu
 
             if (summary.Next is APIScoreSummary.NextRank next)
             {
-                nextRank.Text = ScoreSummaryStrings.ScoreToNextRank(next.RankedScoreNeeded.ToLocalisableString(@"N0"), next.Rank.ToLocalisableString(@"N0"), next.Username);
+                nextRankText.Text = ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(next.RankedScoreNeeded), next.Rank.ToLocalisableString(@"N0"), next.Username);
                 nextRank.Show();
             }
             else
@@ -249,6 +260,20 @@ namespace osu.Game.Screens.Menu
                 return LocalisableString.Interpolate($@"{plays} · #{start.ToLocalisableString(@"N0")} → #{current.ToLocalisableString(@"N0")}");
 
             return LocalisableString.Interpolate($@"{plays} · #{current.ToLocalisableString(@"N0")}");
+        }
+
+        /// <summary>
+        /// "This week +12,345 · 23 plays · #45 → #41": the rank is on the line above, so only a change of it is repeated here.
+        /// </summary>
+        private static LocalisableString formatWeek(APIScoreSummary.Period period, int? rank)
+        {
+            var summary = LocalisableString.Interpolate(
+                $@"{ScoreSummaryStrings.ThisWeek} {formatGain(period.RankedScore)} · {ScoreSummaryStrings.PlayCount(period.PlayCount.ToLocalisableString(@"N0"))}");
+
+            if (rank is int current && period.RankStart is int start && start != current)
+                return LocalisableString.Interpolate($@"{summary} · #{start.ToLocalisableString(@"N0")} → #{current.ToLocalisableString(@"N0")}");
+
+            return summary;
         }
 
         protected override bool OnClick(ClickEvent e)

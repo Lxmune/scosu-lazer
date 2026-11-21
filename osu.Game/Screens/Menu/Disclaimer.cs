@@ -8,6 +8,7 @@ using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Textures;
 using osu.Framework.Screens;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -21,7 +22,8 @@ namespace osu.Game.Screens.Menu
     /// </summary>
     public partial class Disclaimer : StartupScreen
     {
-        private SpriteIcon icon = null!;
+        // scosu: the scosu logo where osu! had its own (trademarked) logo glyph.
+        private Sprite icon = null!;
         private Color4 iconColour;
         private LinkFlowContainer textFlow = null!;
         private LinkFlowContainer headsUpFlow = null!;
@@ -30,7 +32,8 @@ namespace osu.Game.Screens.Menu
         private Drawable? warning;
 
         private const float icon_y = -85;
-        private const float icon_size = 30;
+        // The logo texture has transparent space around the disc (see OsuLogo.SCALE_ADJUST).
+        private const float icon_size = 44;
 
         private readonly OsuScreen nextScreen;
 
@@ -46,15 +49,15 @@ namespace osu.Game.Screens.Menu
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
+        private void load(OsuColour colours, TextureStore textures)
         {
             InternalChildren = new Drawable[]
             {
-                icon = new SpriteIcon
+                icon = new Sprite
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Icon = OsuIcon.Logo,
+                    Texture = textures.Get(@"Menu/scosu-logo"),
                     Size = new Vector2(icon_size),
                     Y = icon_y,
                 },
@@ -120,7 +123,8 @@ namespace osu.Game.Screens.Menu
             textFlow.NewParagraph();
             textFlow.AddText("relax and autopilot have leaderboards of their own.", formatRegular);
 
-            iconColour = colours.Yellow;
+            // The logo has its own colours, so it isn't tinted.
+            iconColour = Color4.White;
 
             headsUpFlow.AddIcon(FontAwesome.Solid.ExclamationTriangle, t =>
             {

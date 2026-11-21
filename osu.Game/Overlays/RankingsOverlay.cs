@@ -31,7 +31,7 @@ namespace osu.Game.Overlays
         private readonly Bindable<RulesetInfo> ruleset = new Bindable<RulesetInfo>();
 
         public RankingsOverlay()
-            : base(OverlayColourScheme.Green)
+            : base(OverlayColourScheme.Purple) // scosu: every in-game web page uses the accent colour (violet)
         {
         }
 

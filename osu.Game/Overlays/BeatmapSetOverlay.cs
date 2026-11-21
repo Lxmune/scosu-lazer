@@ -34,7 +34,7 @@ namespace osu.Game.Overlays
         private (BeatmapSetLookupType type, int id)? lastLookup;
 
         public BeatmapSetOverlay()
-            : base(OverlayColourScheme.Blue)
+            : base(OverlayColourScheme.Purple) // scosu: every in-game web page uses the accent colour (violet)
         {
             Info info;
             CommentsSection comments;

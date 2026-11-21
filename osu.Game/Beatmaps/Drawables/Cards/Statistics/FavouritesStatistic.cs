@@ -3,10 +3,8 @@
 
 using Humanizer;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
-using osu.Game.Resources.Localisation.Web;
 
 namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
 {
@@ -38,7 +36,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
         {
             Icon = current.Value.Favourited ? FontAwesome.Solid.Heart : FontAwesome.Regular.Heart;
             Text = current.Value.FavouriteCount.ToMetric(decimals: 1);
-            TooltipText = BeatmapsStrings.PanelFavourites(current.Value.FavouriteCount.ToLocalisableString(@"N0"));
+            TooltipText = $"Favourites on scosu: {current.Value.FavouriteCount:N0}";
         }
     }
 }

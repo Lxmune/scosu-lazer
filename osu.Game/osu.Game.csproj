@@ -11,6 +11,14 @@
     <PackageIcon>icon.png</PackageIcon>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
+  <!-- scosu: release builds sign score submissions (see osu.Game/Online/Rooms/ScoreSignature.cs). The key comes from the SCOSU_SCORE_SIGNING_KEY
+       environment variable (the release workflow's secret), is built into the assembly as metadata, and is absent in development builds. -->
+  <ItemGroup Condition="'$(SCOSU_SCORE_SIGNING_KEY)' != ''" Label="Score signing">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ScosuScoreSigningKey</_Parameter1>
+      <_Parameter2>$(SCOSU_SCORE_SIGNING_KEY)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
   <ItemGroup Label="Icon">
     <None Include="..\assets\lazer-nuget.png">
       <Pack>True</Pack>

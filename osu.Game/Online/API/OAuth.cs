@@ -5,6 +5,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Threading;
@@ -18,6 +19,7 @@ namespace osu.Game.Online.API
         private readonly string clientId;
         private readonly string clientSecret;
         private readonly string endpoint;
+        private readonly string deviceId;
 
         public readonly Bindable<OAuthToken> Token = new Bindable<OAuthToken>();
 
@@ -27,7 +29,19 @@ namespace osu.Game.Online.API
             set => Token.Value = string.IsNullOrEmpty(value) ? null : OAuthToken.Parse(value);
         }
 
-        internal OAuth(string clientId, string clientSecret, string endpoint)
+        /// <summary>
+        /// The header the install id is sent in with logins and token refreshes. The server only records ids of the shape <see cref="IsValidDeviceId"/> accepts.
+        /// </summary>
+        public const string DEVICE_HEADER = @"X-Scosu-Device";
+
+        /// <summary>
+        /// Makes a new install id: a random UUID in 32 lowercase hexadecimal digits. It is not derived from the computer (no hardware, network or user information).
+        /// </summary>
+        public static string GenerateDeviceId() => Guid.NewGuid().ToString(@"N");
+
+        public static bool IsValidDeviceId(string id) => id?.Length == 32 && id.All(c => c is (>= '0' and <= '9') or (>= 'a' and <= 'f'));
+
+        internal OAuth(string clientId, string clientSecret, string endpoint, string deviceId)
         {
             Debug.Assert(clientId != null);
             Debug.Assert(clientSecret != null);
@@ -36,6 +50,7 @@ namespace osu.Game.Online.API
             this.clientId = clientId;
             this.clientSecret = clientSecret;
             this.endpoint = endpoint;
+            this.deviceId = deviceId;
         }
 
         internal void AuthenticateWithLogin(string username, string password)
@@ -48,7 +63,8 @@ namespace osu.Game.Online.API
                 Url = $@"{endpoint}/oauth/token",
                 Method = HttpMethod.Post,
                 ClientId = clientId,
-                ClientSecret = clientSecret
+                ClientSecret = clientSecret,
+                DeviceId = deviceId
             };
 
             using (accessTokenRequest)
@@ -202,6 +218,7 @@ namespace osu.Game.Online.API
 
             internal string ClientId;
             internal string ClientSecret;
+            internal string DeviceId;
 
             protected override void PrePerform()
             {
@@ -209,6 +226,9 @@ namespace osu.Game.Online.API
                 AddParameter("client_id", ClientId);
                 AddParameter("client_secret", ClientSecret);
                 AddParameter("scope", "*");
+
+                if (IsValidDeviceId(DeviceId))
+                    AddHeader(DEVICE_HEADER, DeviceId);
 
                 base.PrePerform();
             }

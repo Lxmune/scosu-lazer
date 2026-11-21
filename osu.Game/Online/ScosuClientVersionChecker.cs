@@ -79,7 +79,7 @@ namespace osu.Game.Online
             public OutdatedClientNotification()
             {
                 Icon = FontAwesome.Solid.Download;
-                Text = "This version of scosu! is outdated: your plays won't be submitted. Update the game to play online again.";
+                Text = "This version of scosu is outdated: your plays won't be submitted. Update the game to play online again.";
             }
         }
     }

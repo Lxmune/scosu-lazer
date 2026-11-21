@@ -10,7 +10,7 @@ namespace osu.Game.Online
         /// <summary>
         /// The scosu server, used when no custom server is set.
         /// </summary>
-        public const string DEFAULT_SERVER_URL = @"https://lazer.scosu.net";
+        public const string DEFAULT_SERVER_URL = @"https://scosu.net";
 
         /// <param name="serverUrl">
         /// The root URL of the server to connect to, or <see langword="null"/> or empty for <see cref="DEFAULT_SERVER_URL"/>.

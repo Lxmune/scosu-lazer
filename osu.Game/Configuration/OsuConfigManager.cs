@@ -80,6 +80,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.ScosuUsername, string.Empty);
             SetDefault(OsuSetting.ScosuToken, string.Empty);
             SetDefault(OsuSetting.ScosuTokenServer, string.Empty);
+            SetDefault(OsuSetting.ScosuDeviceId, string.Empty);
 
             SetDefault(OsuSetting.AutomaticallyDownloadMissingBeatmaps, true);
 
@@ -183,6 +184,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.Version, string.Empty);
 
             SetDefault(OsuSetting.ShowScosuFirstRunSetup, true);
+            SetDefault(OsuSetting.ScosuSeenWeeklyReport, string.Empty);
             SetDefault(OsuSetting.ShowMobileDisclaimer, RuntimeInfo.IsMobile);
 
             SetDefault(OsuSetting.ScreenshotFormat, ScreenshotFormat.Jpg);
@@ -263,6 +265,7 @@ namespace osu.Game.Configuration
             switch (lookup)
             {
                 case OsuSetting.ScosuToken:
+                case OsuSetting.ScosuDeviceId:
                     return true;
             }
 
@@ -427,6 +430,16 @@ namespace osu.Game.Configuration
         /// The API URL <see cref="ScosuToken"/> was issued by, so a token is never sent to another server.
         /// </summary>
         ScosuTokenServer,
+
+        /// <summary>
+        /// A random id this installation made for itself (see <see cref="Online.API.OAuth.IsValidDeviceId"/>), sent with logins so the server can link accounts played from one install.
+        /// </summary>
+        ScosuDeviceId,
+
+        /// <summary>
+        /// The newest weekly report (its week's Monday, <c>yyyy-MM-dd</c>) the main menu's card was shown for or dismissed.
+        /// </summary>
+        ScosuSeenWeeklyReport,
 
         ShowConvertedBeatmaps,
         Skin,

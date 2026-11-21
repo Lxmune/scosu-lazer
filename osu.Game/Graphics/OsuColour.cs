@@ -314,11 +314,13 @@ namespace osu.Game.Graphics
         public readonly Color4 PurpleDarkAlternative = Color4Extensions.FromHex(@"312436");
         public readonly Color4 PurpleDarker = Color4Extensions.FromHex(@"441188");
 
-        public readonly Color4 PinkLighter = Color4Extensions.FromHex(@"ffddee");
-        public readonly Color4 PinkLight = Color4Extensions.FromHex(@"ff99cc");
-        public readonly Color4 Pink = Color4Extensions.FromHex(@"ff66aa");
-        public readonly Color4 PinkDark = Color4Extensions.FromHex(@"cc5288");
-        public readonly Color4 PinkDarker = Color4Extensions.FromHex(@"bb1177");
+        // scosu: the "Pink" family is the client's brand accent (slider nubs, dropdowns, back buttons, volume, dialogs),
+        // so it carries scosu's violet instead of osu!'s pink. Pink is the website's --color-violet.
+        public readonly Color4 PinkLighter = Color4Extensions.FromHex(@"e4dafd");
+        public readonly Color4 PinkLight = Color4Extensions.FromHex(@"a88bf5");
+        public readonly Color4 Pink = Color4Extensions.FromHex(@"7856ce");
+        public readonly Color4 PinkDark = Color4Extensions.FromHex(@"6448b8");
+        public readonly Color4 PinkDarker = Color4Extensions.FromHex(@"4e3496");
 
         public readonly Color4 BlueLighter = Color4Extensions.FromHex(@"ddffff");
         public readonly Color4 BlueLight = Color4Extensions.FromHex(@"99eeff");

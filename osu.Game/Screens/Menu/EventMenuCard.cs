@@ -27,7 +27,7 @@ using osuTK.Graphics;
 namespace osu.Game.Screens.Menu
 {
     /// <summary>
-    /// The scosu! event's card: its countdown, the local user's rank and objectives. Opens the <see cref="ScosuEventOverlay"/>.
+    /// The scosu event's card: its countdown, the local user's rank and objectives. Opens the <see cref="ScosuEventOverlay"/>.
     /// Hidden while logged out, while there is no event, or when the event's `look.menu_card` is off.
     /// </summary>
     public partial class EventMenuCard : VisibilityContainer

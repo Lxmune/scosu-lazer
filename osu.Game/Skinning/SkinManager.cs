@@ -115,8 +115,19 @@ namespace osu.Game.Skinning
             {
                 foreach (var skin in defaultSkins)
                 {
-                    if (r.Find<SkinInfo>(skin.SkinInfo.ID) == null)
+                    var stored = r.Find<SkinInfo>(skin.SkinInfo.ID);
+
+                    if (stored == null)
+                    {
                         r.Add(skin.SkinInfo.Value);
+                        continue;
+                    }
+
+                    // scosu: the built-in skins were renamed (no osu! branding), so installs that stored the old names take the new ones.
+                    if (stored.Name != skin.SkinInfo.Value.Name)
+                        stored.Name = skin.SkinInfo.Value.Name;
+                    if (stored.Creator != skin.SkinInfo.Value.Creator)
+                        stored.Creator = skin.SkinInfo.Value.Creator;
                 }
             });
 

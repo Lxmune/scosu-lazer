@@ -46,7 +46,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.RankedPlay.Card
                 },
                 new Sprite
                 {
-                    Texture = textures.Get(@"Menu/logo"),
+                    Texture = textures.Get(@"Menu/scosu-logo"),
                     Size = new Vector2(32),
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,

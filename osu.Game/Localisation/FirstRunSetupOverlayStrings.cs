@@ -36,13 +36,13 @@ namespace osu.Game.Localisation
         public static LocalisableString WelcomeTitle => new TranslatableString(getKey(@"welcome_title"), @"Welcome");
 
         /// <summary>
-        /// "Welcome to scosu!
+        /// "Welcome to scosu.
         ///
         /// scosu is a score-only server: rankings and leaderboards go by score, not pp. Leaderboards use the classic (osu!stable) score, and Relax and Autopilot plays have leaderboards of their own. pp only shows on the results of your plays.
         ///
         /// This guide will help you get the important choices out of the way before your first play."
         /// </summary>
-        public static LocalisableString WelcomeDescription => new TranslatableString(getKey(@"scosu_welcome_description"), @"Welcome to scosu!
+        public static LocalisableString WelcomeDescription => new TranslatableString(getKey(@"scosu_welcome_description"), @"Welcome to scosu.
 
 scosu is a score-only server: rankings and leaderboards go by score, not pp. Leaderboards use the classic (osu!stable) score, and Relax and Autopilot plays have leaderboards of their own. pp only shows on the results of your plays.
 
@@ -64,9 +64,9 @@ This guide will help you get the important choices out of the way before your fi
 scosu plays on its own server by default. You can point it to another one in the online settings.");
 
         /// <summary>
-        /// "The size of the osu! user interface can be adjusted to your liking."
+        /// "The size of the scosu user interface can be adjusted to your liking."
         /// </summary>
-        public static LocalisableString UIScaleDescription => new TranslatableString(getKey(@"ui_scale_description"), @"The size of the osu! user interface can be adjusted to your liking.");
+        public static LocalisableString UIScaleDescription => new TranslatableString(getKey(@"ui_scale_description"), @"The size of the scosu user interface can be adjusted to your liking.");
 
         /// <summary>
         /// "Behaviour"

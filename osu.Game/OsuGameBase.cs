@@ -277,9 +277,10 @@ namespace osu.Game
                 VersionHash = $"{Version}-{RuntimeInfo.OS}".ComputeMD5Hash();
             }
 
-            Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
-            // scosu: osu.Game's own Resources folder (such as scosu's logo, Textures/Menu/scosu-logo.png).
+            // scosu: osu.Game's own Resources folder first, so a file there replaces osu!'s file of the same path
+            // (scosu's sounds, textures, tracks and fonts in place of ppy's; see osu.Game/Resources/README.md).
             Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore(typeof(OsuGameBase).Assembly), @"Resources"));
+            Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread));
 
@@ -314,6 +315,8 @@ namespace osu.Game
 
             // Initialise localisation
             frameworkLocale = frameworkConfig.GetBindable<string>(FrameworkSetting.Locale);
+            // scosu: English only. osu!'s translations are ppy's and name osu! throughout.
+            frameworkLocale.Value = Language.en.ToCultureCode();
             frameworkLocale.BindValueChanged(_ => updateLanguage());
 
             localisationParameters = Localisation.CurrentParameters.GetBoundCopy();
@@ -479,15 +482,11 @@ namespace osu.Game
 
         protected virtual void InitialiseFonts()
         {
-            AddFont(Resources, @"Fonts/Torus/Torus-Regular");
-            AddFont(Resources, @"Fonts/Torus/Torus-Light");
-            AddFont(Resources, @"Fonts/Torus/Torus-SemiBold");
-            AddFont(Resources, @"Fonts/Torus/Torus-Bold");
-
-            AddFont(Resources, @"Fonts/Torus-Alternate/Torus-Alternate-Regular");
-            AddFont(Resources, @"Fonts/Torus-Alternate/Torus-Alternate-Light");
-            AddFont(Resources, @"Fonts/Torus-Alternate/Torus-Alternate-SemiBold");
-            AddFont(Resources, @"Fonts/Torus-Alternate/Torus-Alternate-Bold");
+            // scosu: Outfit and Unbounded (OFL) in place of osu!'s Torus, Torus Alternate and Venera (see Resources/Fonts/README.md).
+            AddFont(Resources, @"Fonts/Outfit/Outfit-Regular");
+            AddFont(Resources, @"Fonts/Outfit/Outfit-Light");
+            AddFont(Resources, @"Fonts/Outfit/Outfit-SemiBold");
+            AddFont(Resources, @"Fonts/Outfit/Outfit-Bold");
 
             AddFont(Resources, @"Fonts/Inter/Inter-Regular");
             AddFont(Resources, @"Fonts/Inter/Inter-RegularItalic");
@@ -505,9 +504,9 @@ namespace osu.Game
             AddFont(Resources, @"Fonts/Noto/Noto-Hangul");
             AddFont(Resources, @"Fonts/Noto/Noto-Thai");
 
-            AddFont(Resources, @"Fonts/Venera/Venera-Light");
-            AddFont(Resources, @"Fonts/Venera/Venera-Bold");
-            AddFont(Resources, @"Fonts/Venera/Venera-Black");
+            AddFont(Resources, @"Fonts/Unbounded/Unbounded-Light");
+            AddFont(Resources, @"Fonts/Unbounded/Unbounded-Bold");
+            AddFont(Resources, @"Fonts/Unbounded/Unbounded-Black");
 
             Fonts.AddStore(new OsuIcon.OsuIconStore(Textures));
         }
@@ -516,7 +515,13 @@ namespace osu.Game
         {
             base.LoadComplete();
 
-            var localeMappings = Enum.GetValues<Language>().Select(language =>
+            // scosu: English only (see frameworkLocale in load()).
+            var languages = new List<Language> { Language.en };
+#if DEBUG
+            languages.Add(Language.debug);
+#endif
+
+            var localeMappings = languages.Select(language =>
             {
 #if DEBUG
                 if (language == Language.debug)

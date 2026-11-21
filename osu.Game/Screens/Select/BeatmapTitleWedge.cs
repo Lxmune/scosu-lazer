@@ -66,6 +66,7 @@ namespace osu.Game.Screens.Select
         private Statistic lengthStatistic = null!;
         private Statistic bpmStatistic = null!;
         private StatisticMaximumScore maximumScore = null!;
+        private StatisticHistory history = null!;
 
         [Resolved]
         private ISongSelect? songSelect { get; set; }
@@ -171,7 +172,17 @@ namespace osu.Game.Screens.Select
                         {
                             Shear = -OsuGame.SHEAR,
                             AutoSizeAxes = Axes.Both,
-                            Child = maximumScore = new StatisticMaximumScore(),
+                            Child = new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(0, 2),
+                                Children = new Drawable[]
+                                {
+                                    maximumScore = new StatisticMaximumScore(),
+                                    history = new StatisticHistory(),
+                                },
+                            },
                         }),
                         new ShearAligningWrapper(new Container
                         {
@@ -214,7 +225,11 @@ namespace osu.Game.Screens.Select
         /// <summary>
         /// Looks up again what changes after a play.
         /// </summary>
-        public void Refresh() => maximumScore.Refresh();
+        public void Refresh()
+        {
+            maximumScore.Refresh();
+            history.Refresh();
+        }
 
         protected override void PopIn()
         {

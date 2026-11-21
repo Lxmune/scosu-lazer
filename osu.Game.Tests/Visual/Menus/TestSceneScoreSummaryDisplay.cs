@@ -78,7 +78,8 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddAssert("requested local midnight", () => lastRequest?.Today, () => Is.EqualTo(new DateTimeOffset(DateTime.Today, TimeZoneInfo.Local.GetUtcOffset(DateTime.Today))));
             AddUntilStep("content shown", () => content.Alpha, () => Is.EqualTo(1));
-            AddAssert("next rank shown", () => display.ChildrenOfType<OsuSpriteText>().Any(t => t.Text.ToString().Contains("PlayerY") && t.IsPresent));
+            AddAssert("next place shown in short", () => display.ChildrenOfType<OsuSpriteText>().Any(t => t.IsPresent && t.Text.ToString().Contains("1.2M") && t.Text.ToString().Contains("PlayerY")));
+            AddAssert("week shows only its rank change", () => display.ChildrenOfType<OsuSpriteText>().Any(t => t.IsPresent && t.Text.ToString().Contains("#52 → #41")));
         }
 
         [Test]

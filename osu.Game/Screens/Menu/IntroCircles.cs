@@ -15,7 +15,7 @@ namespace osu.Game.Screens.Menu
 {
     public partial class IntroCircles : IntroScreen
     {
-        protected override string BeatmapHash => "3c8b1fcc9434dbb29e2fb613d3b9eada9d7bb6c125ceb32396c3b53437280c83";
+        protected override string BeatmapHash => "388d98736655b1b383a09d06f8a0ec8a8639eb8c39665035d22456a65b78f959";
 
         protected override string BeatmapFile => "circles.osz";
 

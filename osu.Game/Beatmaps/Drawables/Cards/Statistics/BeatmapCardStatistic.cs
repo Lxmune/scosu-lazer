@@ -33,10 +33,24 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
             set => spriteText.Text = value;
         }
 
+        /// <summary>
+        /// A small dim label shown before the icon, naming the source of this statistic (e.g. "bancho").
+        /// </summary>
+        public string SourceLabel
+        {
+            get => spriteSourceLabel.Text.ToString();
+            set
+            {
+                spriteSourceLabel.Text = value;
+                spriteSourceLabel.Alpha = string.IsNullOrEmpty(value) ? 0 : 1;
+            }
+        }
+
         public LocalisableString TooltipText { get; protected set; }
 
         private readonly SpriteIcon spriteIcon;
         private readonly OsuSpriteText spriteText;
+        private readonly OsuSpriteText spriteSourceLabel;
 
         protected BeatmapCardStatistic()
         {
@@ -49,6 +63,13 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
                 Spacing = new Vector2(4, 0),
                 Children = new Drawable[]
                 {
+                    spriteSourceLabel = new OsuSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Font = OsuFont.Default.With(size: 10, weight: FontWeight.SemiBold),
+                        Alpha = 0,
+                    },
                     spriteIcon = new SpriteIcon
                     {
                         Anchor = Anchor.CentreLeft,
@@ -70,6 +91,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
         private void load(OverlayColourProvider colourProvider)
         {
             spriteIcon.Colour = colourProvider.Content2;
+            spriteSourceLabel.Colour = colourProvider.Foreground1;
         }
 
         #region Tooltip implementation

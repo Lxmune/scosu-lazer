@@ -109,14 +109,14 @@ namespace osu.Game.Graphics
         {
             switch (typeface)
             {
+                // scosu: the typefaces keep osu!'s names (skins store them), but are drawn with
+                // Outfit and Unbounded, which scosu may ship (see Resources/Fonts/README.md).
                 case Typeface.Venera:
-                    return @"Venera";
+                    return @"Unbounded";
 
                 case Typeface.Torus:
-                    return @"Torus";
-
                 case Typeface.TorusAlternate:
-                    return @"Torus-Alternate";
+                    return @"Outfit";
 
                 case Typeface.Inter:
                     return @"Inter";
@@ -134,7 +134,7 @@ namespace osu.Game.Graphics
         public static string GetWeightString(string family, FontWeight weight)
         {
             if ((family == GetFamilyString(Typeface.Torus) || family == GetFamilyString(Typeface.TorusAlternate)) && weight == FontWeight.Medium)
-                // torus doesn't have a medium; fallback to regular.
+                // the font has no medium; fallback to regular.
                 weight = FontWeight.Regular;
 
             return weight.ToString();
@@ -164,10 +164,13 @@ namespace osu.Game.Graphics
 
     public enum Typeface
     {
+        [Description("Unbounded")]
         Venera,
+
+        [Description("Outfit")]
         Torus,
 
-        [Description("Torus (alternate)")]
+        [Description("Outfit (alternate)")]
         TorusAlternate,
         Inter,
     }

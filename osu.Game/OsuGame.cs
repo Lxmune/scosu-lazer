@@ -1241,13 +1241,15 @@ namespace osu.Game
             loadComponentSingleFile(chatOverlay = new ChatOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(new MessageNotifier(), Add, true);
             loadComponentSingleFile(new FirstPlaceLostNotifier(), Add, true);
+            loadComponentSingleFile(new ScosuServerNotifier(), Add, true);
+            loadComponentSingleFile(new SessionSummaryNotifier(), Add, true);
             loadComponentSingleFile(new ScoreSubmissionQueue(), Add, true);
             loadComponentSingleFile(Settings = new SettingsOverlay(), leftFloatingOverlayContent.Add, true);
             loadComponentSingleFile(changelogOverlay = new ChangelogOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(userProfile = new UserProfileOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(beatmapSetOverlay = new BeatmapSetOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(wikiOverlay = new WikiOverlay(), overlayContent.Add, true);
-            // scosu: the scosu! event (shown by the main menu's card and by its page, opened from the card).
+            // scosu: the scosu event (shown by the main menu's card and by its page, opened from the card).
             loadComponentSingleFile(new ScosuEventProvider(), Add, true);
             // scosu: tells the player right away when the server no longer accepts plays from this build.
             loadComponentSingleFile(new ScosuClientVersionChecker(), Add);

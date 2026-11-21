@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -63,13 +63,19 @@ namespace osu.Game.Overlays.Music
                     {
                         new Box
                         {
-                            Colour = colours.Gray3,
+                            Colour = colours.GreyVioletDarker,
                             RelativeSizeAxes = Axes.Both,
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Height = 2,
+                            Colour = colours.Pink.Opacity(0.8f),
                         },
                         list = new Playlist
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Vertical = 10, Right = 10 },
+                            Padding = new MarginPadding { Top = 12, Bottom = 10, Right = 10 },
                         },
                     },
                 },

@@ -29,6 +29,7 @@ using osu.Game.Graphics.Cursor;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
 using osu.Game.Localisation;
+using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Matchmaking;
@@ -69,6 +70,9 @@ namespace osu.Game.Screens.Menu
 
         [Resolved]
         private GameHost host { get; set; }
+
+        [Resolved(canBeNull: true)]
+        private SessionSummaryNotifier sessionSummary { get; set; }
 
         [Resolved]
         private INotificationOverlay notifications { get; set; }
@@ -115,6 +119,7 @@ namespace osu.Game.Screens.Menu
         // private SupporterDisplay supporterDisplay;
         private ScoreSummaryDisplay scoreSummaryDisplay;
         private EventMenuCard eventMenuCard;
+        private WeeklyReportMenuCard weeklyReportCard;
         private FillFlowContainer leftDisplays;
         private FillFlowContainer rightDisplays;
         private OnlinePlayersDisplay onlinePlayersDisplay;
@@ -224,7 +229,7 @@ namespace osu.Game.Screens.Menu
                 //     Anchor = Anchor.TopLeft,
                 //     Origin = Anchor.TopLeft,
                 // },
-                // scosu: in its place, the scosu! event's card (when there is one, here or on the right, see placeEventCard()),
+                // scosu: in its place, the scosu event's card (when there is one, here or on the right, see placeEventCard()),
                 // the ranked score gained today and this week, then the other players online (whose rows have a right-click menu,
                 // hence the menu container).
                 new OsuContextMenuContainer
@@ -259,6 +264,12 @@ namespace osu.Game.Screens.Menu
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
                             Margin = new MarginPadding { Top = 50 },
+                            // The event's card, when it asks to be here, goes first (see placeEventCard()): the weekly report is below it.
+                            Child = weeklyReportCard = new WeeklyReportMenuCard
+                            {
+                                Anchor = Anchor.TopRight,
+                                Origin = Anchor.TopRight,
+                            },
                         },
                     },
                 },
@@ -276,6 +287,7 @@ namespace osu.Game.Screens.Menu
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Hidden;
                         eventMenuCard.Hide();
+                        weeklyReportCard.Hide();
                         scoreSummaryDisplay.Hide();
                         onlinePlayersDisplay.Hide();
                         break;
@@ -284,6 +296,7 @@ namespace osu.Game.Screens.Menu
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Visible;
                         eventMenuCard.Show();
+                        weeklyReportCard.Show();
                         scoreSummaryDisplay.Show();
                         onlinePlayersDisplay.Show();
                         break;
@@ -469,6 +482,9 @@ namespace osu.Game.Screens.Menu
 
             musicController.EnsurePlayingSomething();
 
+            // scosu: a summary of the session so far, after a while of playing.
+            sessionSummary?.MenuResumed();
+
             // Cycle tip on resuming
             menuTipDisplay.ShowNextTip();
 
@@ -479,6 +495,8 @@ namespace osu.Game.Screens.Menu
             // After a play, the score gained (and the event's standing) has likely changed.
             eventMenuCard.Refresh();
             eventMenuCard.Show();
+            weeklyReportCard.Refresh();
+            weeklyReportCard.Show();
             scoreSummaryDisplay.Refresh();
             scoreSummaryDisplay.Show();
             onlinePlayersDisplay.Show();

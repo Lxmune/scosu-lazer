@@ -7,7 +7,7 @@ using osu.Game.Online.API.Requests.Responses;
 namespace osu.Game.Online.API.Requests
 {
     /// <summary>
-    /// Gets the scosu! event currently shown, if any (a scosu server endpoint).
+    /// Gets the scosu event currently shown, if any (a scosu server endpoint).
     /// </summary>
     public class GetScosuEventRequest : APIRequest<GetScosuEventRequest.CurrentEvent>
     {

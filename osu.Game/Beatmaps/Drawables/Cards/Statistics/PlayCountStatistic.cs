@@ -2,9 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using Humanizer;
-using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Resources.Localisation.Web;
+using osu.Game.Online.API.Requests.Responses;
 
 namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
 {
@@ -17,7 +16,7 @@ namespace osu.Game.Beatmaps.Drawables.Cards.Statistics
         {
             Icon = FontAwesome.Solid.PlayCircle;
             Text = onlineInfo.PlayCount.ToMetric(decimals: 1);
-            TooltipText = BeatmapsStrings.PanelPlaycount(onlineInfo.PlayCount.ToLocalisableString(@"N0"));
+            TooltipText = $"Plays on scosu: {onlineInfo.PlayCount:N0}";
         }
     }
 }

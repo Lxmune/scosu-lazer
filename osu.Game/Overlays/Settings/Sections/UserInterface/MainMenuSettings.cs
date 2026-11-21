@@ -33,14 +33,7 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
                     Caption = UserInterfaceStrings.ShowMenuTips,
                     Current = config.GetBindable<bool>(OsuSetting.MenuTips)
                 }),
-                new SettingsItemV2(new FormCheckBox
-                {
-                    Caption = UserInterfaceStrings.InterfaceVoices,
-                    Current = config.GetBindable<bool>(OsuSetting.MenuVoice)
-                })
-                {
-                    Keywords = new[] { "intro", "welcome" },
-                },
+                // scosu: no "Interface voices" setting: the voices are osu!'s own recordings, which scosu doesn't play (see IntroScreen).
                 new SettingsItemV2(new FormCheckBox
                 {
                     Caption = UserInterfaceStrings.OsuMusicTheme,

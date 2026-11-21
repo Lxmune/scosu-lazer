@@ -16,7 +16,7 @@ using osu.Game.Overlays.ScosuEvent;
 namespace osu.Game.Online
 {
     /// <summary>
-    /// The scosu! event, fetched once for the whole game: the main menu's card and the event's page both show it.
+    /// The scosu event, fetched once for the whole game: the main menu's card and the event's page both show it.
     /// </summary>
     /// <remarks>
     /// It is fetched again when the API connects, when <see cref="Refresh"/> is called (after a play, when the page opens),

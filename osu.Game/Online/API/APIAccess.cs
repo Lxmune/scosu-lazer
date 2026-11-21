@@ -95,7 +95,16 @@ namespace osu.Game.Online.API
             Endpoints = endpoints;
             NotificationsClient = setUpNotificationsClient();
 
-            authentication = new OAuth(endpoints.APIClientID, endpoints.APIClientSecret, Endpoints.APIUrl);
+            // scosu: one random id per installation, kept in its settings (see OsuSetting.ScosuDeviceId).
+            string deviceId = config.Get<string>(OsuSetting.ScosuDeviceId);
+
+            if (!OAuth.IsValidDeviceId(deviceId))
+            {
+                deviceId = OAuth.GenerateDeviceId();
+                config.SetValue(OsuSetting.ScosuDeviceId, deviceId);
+            }
+
+            authentication = new OAuth(endpoints.APIClientID, endpoints.APIClientSecret, Endpoints.APIUrl, deviceId);
 
             log = Logger.GetLogger(LoggingTarget.Network);
             log.Add($@"API endpoint root: {Endpoints.APIUrl}");

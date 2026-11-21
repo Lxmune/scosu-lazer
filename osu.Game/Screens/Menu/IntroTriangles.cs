@@ -27,7 +27,7 @@ namespace osu.Game.Screens.Menu
 {
     public partial class IntroTriangles : IntroScreen
     {
-        protected override string BeatmapHash => "a1556d0801b3a6b175dda32ef546f0ec812b400499f575c44fccbe9c67f9b1e5";
+        protected override string BeatmapHash => "9fa88655f7ef0834a37d7e77f2786f358b0652167d9c5a5bec2a80646bb1e052";
 
         protected override string BeatmapFile => "triangles.osz";
 
@@ -206,7 +206,7 @@ namespace osu.Game.Screens.Menu
 
                     using (BeginDelayedSequence(text_4))
                     {
-                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to scosu!");
+                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to scosu");
                         welcomeText.TransformTo(nameof(welcomeText.Spacing), new Vector2(50, 0), 5000);
                     }
 

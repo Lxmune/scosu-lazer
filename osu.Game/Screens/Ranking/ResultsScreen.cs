@@ -86,7 +86,7 @@ namespace osu.Game.Screens.Ranking
         private Sample? popInSample;
 
         [Cached]
-        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Aquamarine);
+        private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
 
         protected ResultsScreen(ScoreInfo? score)
         {

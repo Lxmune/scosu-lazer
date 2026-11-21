@@ -127,7 +127,7 @@ namespace osu.Game.Overlays.Mods
         [Resolved]
         private ScreenFooter? footer { get; set; }
 
-        public ModSelectOverlay(OverlayColourScheme colourScheme = OverlayColourScheme.Green)
+        public ModSelectOverlay(OverlayColourScheme colourScheme = OverlayColourScheme.Purple)
             : base(colourScheme)
         {
         }

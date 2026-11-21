@@ -32,7 +32,7 @@ using osuTK.Graphics;
 namespace osu.Game.Overlays.ScosuEvent
 {
     /// <summary>
-    /// The scosu! event's page: its countdown, the local user's standing and objectives, the ranking by ranked score gained
+    /// The scosu event's page: its countdown, the local user's standing and objectives, the ranking by ranked score gained
     /// and the profile titles it gives (scosu-rust's services/events/).
     /// </summary>
     public partial class ScosuEventOverlay : OnlineOverlay<ScosuEventHeader>

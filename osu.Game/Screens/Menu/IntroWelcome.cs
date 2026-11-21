@@ -11,9 +11,9 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Audio;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API;
 using osu.Game.Skinning;
 using osuTK;
@@ -23,7 +23,7 @@ namespace osu.Game.Screens.Menu
 {
     public partial class IntroWelcome : IntroScreen
     {
-        protected override string BeatmapHash => "64e00d7022195959bfa3109d09c2e2276c8f12f486b91fcf6175583e973b48f2";
+        protected override string BeatmapHash => "70ea38ec0335c9b1d29d3d4b288f799b16d7f9a8280ed6afd45990cf8ee1360e";
         protected override string BeatmapFile => "welcome.osz";
         private const double delay_step_two = 2142;
 
@@ -111,7 +111,7 @@ namespace osu.Game.Screens.Menu
             public LogoVisualisation LogoVisualisation { get; private set; }
 
             [BackgroundDependencyLoader]
-            private void load(TextureStore textures, IAPIProvider api)
+            private void load()
             {
                 Origin = Anchor.Centre;
                 Anchor = Anchor.Centre;
@@ -144,10 +144,12 @@ namespace osu.Game.Screens.Menu
                     },
                 };
 
-                if (api.LocalUser.Value.IsSupporter)
-                    scaleContainer.Add(welcomeText = new SkinnableSprite(@"Intro/Welcome/welcome_text"));
-                else
-                    scaleContainer.Add(welcomeText = new Sprite { Texture = textures.Get(@"Intro/Welcome/welcome_text") });
+                scaleContainer.Add(welcomeText = new OsuSpriteText
+                {
+                    Text = "welcome to scosu",
+                    Font = OsuFont.GetFont(weight: FontWeight.Light, size: 64),
+                    Spacing = new Vector2(4),
+                });
 
                 welcomeText.Anchor = Anchor.Centre;
                 welcomeText.Origin = Anchor.Centre;

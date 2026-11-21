@@ -278,7 +278,18 @@ namespace osu.Game.Beatmaps.Drawables.Cards
             if (nominationsStatistic != null)
                 yield return nominationsStatistic;
 
-            yield return new PlayCountStatistic(BeatmapSet);
+            // bancho's counts come first, labelled on the first statistic of the group.
+            // When they're shown, scosu's own counts get a label of their own.
+            var banchoPlays = BanchoStatistic.CreatePlaysFor(BeatmapSet);
+            var banchoFavourites = BanchoStatistic.CreateFavouritesFor(BeatmapSet, withLabel: banchoPlays == null);
+            bool showsBancho = banchoPlays != null || banchoFavourites != null;
+
+            if (banchoPlays != null)
+                yield return banchoPlays;
+            if (banchoFavourites != null)
+                yield return banchoFavourites;
+
+            yield return new PlayCountStatistic(BeatmapSet) { SourceLabel = showsBancho ? "scosu" : string.Empty };
             yield return new FavouritesStatistic(BeatmapSet) { Current = FavouriteState };
 
             var dateStatistic = BeatmapCardDateStatistic.CreateFor(BeatmapSet);
