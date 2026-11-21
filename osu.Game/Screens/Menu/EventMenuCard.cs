@@ -232,8 +232,9 @@ namespace osu.Game.Screens.Menu
                 Colour = accentText,
             };
 
+            // Looping reads the drawable's clock, which it only has once loaded into the card.
             if (ev.Status == ScosuEventStatus.Live)
-                dot.FadeTo(0.35f, 900, Easing.InOutSine).Then().FadeTo(1f, 900, Easing.InOutSine).Loop();
+                dot.OnLoadComplete += d => d.FadeTo(0.35f, 900, Easing.InOutSine).Then().FadeTo(1f, 900, Easing.InOutSine).Loop();
 
             return new CircularContainer
             {

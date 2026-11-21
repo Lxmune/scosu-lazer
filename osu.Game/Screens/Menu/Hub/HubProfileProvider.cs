@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -10,12 +11,14 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 
 namespace osu.Game.Screens.Menu.Hub
 {
     /// <summary>
     /// The local user's profile, best play and recent plays for the hub's tiles: one request each, shared by every tile that shows part of them.
-    /// Asked for again when the hub opens, but not more often than <see cref="refresh_interval"/> (or when the ruleset or the user changed).
+    /// Asked for again when the hub opens, but not more often than <see cref="refresh_interval"/> (or when the leaderboard or the user changed).
+    /// On the leaderboard the selected ruleset and mods play on: Relax and Autopilot have their own (see <see cref="RelaxLeaderboards"/>).
     /// </summary>
     public partial class HubProfileProvider : Component
     {
@@ -31,6 +34,9 @@ namespace osu.Game.Screens.Menu.Hub
 
         [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; } = null!;
+
+        [Resolved]
+        private IBindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
 
         /// <summary>
         /// Null while logged out, offline or until the first answer.
@@ -65,7 +71,8 @@ namespace osu.Game.Screens.Menu.Hub
             }
 
             long userId = api.LocalUser.Value.Id;
-            bool same = lastRuleset == ruleset.Value.OnlineID && lastUser == userId;
+            var rulesetInfo = ruleset.Value.GetLeaderboardRuleset(mods.Value.Select(m => m.Acronym));
+            bool same = lastRuleset == rulesetInfo.OnlineID && lastUser == userId;
 
             if (same && lastFetch != null && DateTimeOffset.Now - lastFetch < refresh_interval)
                 return;
@@ -78,12 +85,10 @@ namespace osu.Game.Screens.Menu.Hub
             }
 
             lastFetch = DateTimeOffset.Now;
-            lastRuleset = ruleset.Value.OnlineID;
+            lastRuleset = rulesetInfo.OnlineID;
             lastUser = userId;
 
             cancel();
-
-            var rulesetInfo = ruleset.Value;
 
             var userReq = new GetUserRequest(userId, rulesetInfo);
             userReq.Success += u => Schedule(() =>

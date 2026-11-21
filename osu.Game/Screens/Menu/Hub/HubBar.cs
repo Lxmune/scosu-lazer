@@ -107,6 +107,10 @@ namespace osu.Game.Screens.Menu.Hub
             // Tucked below the screen's edge until shown.
             Y = HEIGHT;
             Alpha = 0;
+
+            // Keeps updating while hidden (the countdown, the measured widths and which pieces fit), so that it slides in
+            // already laid out instead of settling its pieces during the first frames.
+            AlwaysPresent = true;
         }
 
         [BackgroundDependencyLoader]
