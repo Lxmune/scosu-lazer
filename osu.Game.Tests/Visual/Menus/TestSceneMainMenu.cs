@@ -96,8 +96,9 @@ namespace osu.Game.Tests.Visual.Menus
         [Test]
         public void TestHub()
         {
-            MenuHubSheet hub() => Game.ChildrenOfType<MenuHubSheet>().Single();
+            MenuHubPage hub() => Game.ChildrenOfType<MenuHubPage>().Single();
             HubBar bar() => Game.ChildrenOfType<HubBar>().Single();
+            HubDock dock() => Game.ChildrenOfType<HubDock>().Single();
             ScoreSummaryDisplay score() => Game.ChildrenOfType<ScoreSummaryDisplay>().Single();
             ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
 
@@ -118,12 +119,14 @@ namespace osu.Game.Tests.Visual.Menus
             AddStep("press tab", () => InputManager.Key(Key.Tab));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddAssert("bar stays", () => bar().State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddUntilStep("corner cards made way", () => score().Parent!.Alpha, () => Is.EqualTo(0));
+            AddAssert("band docked", () => dock().State.Value, () => Is.EqualTo(Visibility.Visible));
+            AddUntilStep("first screen scrolled away", () => score().Parent!.Y, () => Is.EqualTo(-1));
 
             AddStep("press escape", () => InputManager.Key(Key.Escape));
             AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
-            AddUntilStep("corner cards back", () => score().Parent!.Alpha, () => Is.EqualTo(1));
+            AddAssert("band undocked", () => dock().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddUntilStep("first screen back", () => score().Parent!.Y, () => Is.EqualTo(0));
 
             AddStep("press H", () => InputManager.Key(Key.H));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
@@ -133,13 +136,35 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddStep("go back to the logo", () => buttons().State = ButtonSystemState.Initial);
             AddAssert("hub closed with the band", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("band undocked with it", () => dock().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("bar hidden with the band", () => bar().State.Value, () => Is.EqualTo(Visibility.Hidden));
+        }
+
+        [Test]
+        public void TestDockGoesBackUp()
+        {
+            MenuHubPage hub() => Game.ChildrenOfType<MenuHubPage>().Single();
+            HubDock.DockButton backUp() => Game.ChildrenOfType<HubDock.DockButton>().Single(b => b.Item.Text == MenuHubStrings.BackUp);
+            ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
+
+            AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);
+            AddStep("enter menu", () => buttons().State = ButtonSystemState.TopLevel);
+            AddStep("press tab", () => InputManager.Key(Key.Tab));
+            AddUntilStep("dock shown", () => backUp().IsPresent);
+
+            AddStep("click back up", () =>
+            {
+                InputManager.MoveMouseTo(backUp());
+                InputManager.Click(MouseButton.Left);
+            });
+            AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
         }
 
         [Test]
         public void TestHubOpensWithTheWheel()
         {
-            MenuHubSheet hub() => Game.ChildrenOfType<MenuHubSheet>().Single();
+            MenuHubPage hub() => Game.ChildrenOfType<MenuHubPage>().Single();
             ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
 
             AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);

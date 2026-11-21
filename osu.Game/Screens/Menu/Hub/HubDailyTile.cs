@@ -43,6 +43,11 @@ namespace osu.Game.Screens.Menu.Hub
         private GetRoomRequest? request;
         private Room? room;
 
+        /// <summary>
+        /// Today's challenge room, once it has loaded (null when there is no challenge).
+        /// </summary>
+        public Room? Room => room;
+
         public HubDailyTile()
         {
             Eyebrow.Text = MenuHubStrings.DailyChallenge.ToUpper();

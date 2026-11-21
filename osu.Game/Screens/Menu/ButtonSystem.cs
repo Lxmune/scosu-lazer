@@ -53,7 +53,7 @@ namespace osu.Game.Screens.Menu
         public Action<Room>? OnDailyChallenge;
 
         /// <summary>
-        /// scosu: opens or closes the menu's hub (see <see cref="MenuHubSheet"/>).
+        /// scosu: opens or closes the menu's hub (see <see cref="MenuHubPage"/>).
         /// </summary>
         public Action? OnHub;
 

@@ -138,9 +138,19 @@ namespace osu.Game.Screens.Menu.Hub
         public static LocalisableString OnScosuNow => new TranslatableString(getKey(@"on_scosu_now"), @"On scosu now");
 
         /// <summary>
-        /// "Hide"
+        /// "back up"
         /// </summary>
-        public static LocalisableString Hide => new TranslatableString(getKey(@"hide"), @"Hide");
+        public static LocalisableString BackUp => new TranslatableString(getKey(@"back_up"), @"back up");
+
+        /// <summary>
+        /// "multiplayer"
+        /// </summary>
+        public static LocalisableString Multiplayer => new TranslatableString(getKey(@"multiplayer"), @"multiplayer");
+
+        /// <summary>
+        /// "daily"
+        /// </summary>
+        public static LocalisableString Daily => new TranslatableString(getKey(@"daily"), @"daily");
 
         /// <summary>
         /// "starts in {0}"

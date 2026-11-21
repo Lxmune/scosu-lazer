@@ -40,7 +40,7 @@ namespace osu.Game.Screens.Menu.Hub
     /// <summary>
     /// The menu's bar along the bottom of the screen, shown whenever the band is out: today's gain, the event, who is online,
     /// your friends, and the song playing with its controls (the now playing card in the corner is hidden while the hub is open).
-    /// Pieces without data are hidden together with their divider. The hub's sheet slides up from behind it.
+    /// Pieces without data are hidden together with their divider. The hub scrolls in from behind it.
     /// </summary>
     public partial class HubBar : VisibilityContainer
     {

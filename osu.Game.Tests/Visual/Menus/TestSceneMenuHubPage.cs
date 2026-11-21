@@ -26,11 +26,11 @@ using osuTK.Input;
 
 namespace osu.Game.Tests.Visual.Menus
 {
-    public partial class TestSceneMenuHubSheet : OsuManualInputManagerTestScene
+    public partial class TestSceneMenuHubPage : OsuManualInputManagerTestScene
     {
         private DummyAPIAccess dummyAPI => (DummyAPIAccess)API;
 
-        private MenuHubSheet sheet = null!;
+        private MenuHubPage page = null!;
         private TestMetadataClient metadataClient = null!;
         private ScoreSummaryProvider scoreProvider = null!;
         private WeeklyReportProvider reportProvider = null!;
@@ -64,7 +64,7 @@ namespace osu.Game.Tests.Visual.Menus
 
         private bool barShows(string text) => string.Concat(bar.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
 
-        private void createSheet() => AddStep("create sheet", () =>
+        private void createPage() => AddStep("create page", () =>
         {
             metadataClient = new TestMetadataClient();
             scoreProvider = new ScoreSummaryProvider();
@@ -95,16 +95,11 @@ namespace osu.Game.Tests.Visual.Menus
                         RelativeSizeAxes = Axes.Both,
                         Children = new Drawable[]
                         {
-                            // As in the menu: the sheet sits on the bar and is drawn behind it.
-                            new Container
+                            // As in the menu: the page is drawn behind the bar.
+                            page = new MenuHubPage
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Padding = new MarginPadding { Bottom = HubBar.HEIGHT },
-                                Child = sheet = new MenuHubSheet
-                                {
-                                    Available = true,
-                                    OnDailyChallenge = room => openedRoom = room,
-                                },
+                                Available = true,
+                                OnDailyChallenge = room => openedRoom = room,
                             },
                             bar = new HubBar
                             {
@@ -116,7 +111,7 @@ namespace osu.Game.Tests.Visual.Menus
                 },
             };
 
-            sheet.Show();
+            page.Show();
             bar.Show();
         });
 
@@ -242,7 +237,7 @@ namespace osu.Game.Tests.Visual.Menus
                 dummyAPI.LocalUserState.Friends.Add(new APIRelation { TargetID = 3002, TargetUser = new APIUser { Id = 3002, Username = "Two" } });
             });
 
-            createSheet();
+            createPage();
 
             AddStep("friend online", () => metadataClient.FriendPresenceUpdated(3001, new UserPresence { Status = UserStatus.Online }));
             AddStep("daily challenge starts", () => metadataClient.DailyChallengeUpdated(new DailyChallengeInfo { RoomID = 1234 }));
@@ -265,10 +260,10 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("bar shows today", () => barShows("+4,812,330") && barShows("PlayerY"));
             AddUntilStep("bar shows event and friends", () => barShows("Advent Rush 2026") && barShows("starts in") && barShows("1 of 2 online"));
 
-            AddUntilStep("sheet settled", () => sheet.ChildrenOfType<HubDailyTile>().Single().Alpha, () => Is.EqualTo(1));
+            AddUntilStep("page settled", () => page.ChildrenOfType<HubDailyTile>().Single().Alpha, () => Is.EqualTo(1));
             AddStep("click daily challenge", () =>
             {
-                InputManager.MoveMouseTo(sheet.ChildrenOfType<HubDailyTile>().Single());
+                InputManager.MoveMouseTo(page.ChildrenOfType<HubDailyTile>().Single());
                 InputManager.Click(MouseButton.Left);
             });
             AddAssert("challenge opened", () => openedRoom?.RoomID, () => Is.EqualTo(1234));
@@ -279,7 +274,7 @@ namespace osu.Game.Tests.Visual.Menus
         {
             AddStep("log out", () => dummyAPI.Logout());
             AddStep("no answers", () => dummyAPI.HandleRequest = _ => false);
-            createSheet();
+            createPage();
 
             AddUntilStep("score placeholder", () => shows("Log in to see your score"));
             AddUntilStep("event placeholder", () => shows("There is no event right now."));
@@ -291,8 +286,8 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddStep("hide bar", () => bar.Hide());
             AddUntilStep("bar hidden", () => bar.Alpha, () => Is.Zero);
-            AddStep("close sheet", () => sheet.Hide());
-            AddUntilStep("panel invisible when closed", () => sheet.ChildrenOfType<Container>().First(c => c.Y > 0.99f || c.Alpha == 0).Alpha, () => Is.Zero);
+            AddStep("close page", () => page.Hide());
+            AddUntilStep("panel invisible when closed", () => page.ChildrenOfType<Container>().First(c => c.Y > 0.99f || c.Alpha == 0).Alpha, () => Is.Zero);
         }
     }
 }

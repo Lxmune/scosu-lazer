@@ -4,9 +4,9 @@
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -22,35 +22,38 @@ using osuTK.Graphics;
 namespace osu.Game.Screens.Menu
 {
     /// <summary>
-    /// scosu: the main menu's hub, a sheet of tiles (your score, the event, the daily challenge, friends, the weekly report, news)
-    /// and a bar (today's gain, who is online, the song playing) that slides up from the bottom of the screen while the band rises.
-    /// The handle above the sheet opens and closes it (by clicking, or scrolling on it).
+    /// scosu: the main menu's hub, its second screen: "On scosu now" and a grid of tiles (your score, the event, the daily challenge,
+    /// friends, the weekly report, news, then your profile's plays, accuracy, country rank, medals, best and recent plays).
+    /// The menu scrolls down to it (the band, the logo and the corner cards leave at the top while it comes in from below),
+    /// and back up. The hint at the bottom of the first screen opens it (by clicking, or scrolling on it).
     /// </summary>
-    public partial class MenuHubSheet : VisibilityContainer
+    public partial class MenuHubPage : VisibilityContainer
     {
+        /// <summary>
+        /// The height of the "On scosu now" hint at the bottom of the first screen.
+        /// </summary>
         public const float HANDLE_HEIGHT = 48;
 
         /// <summary>
-        /// The share of the screen's height the open sheet takes (not the bar, which MainMenu puts under the sheet).
+        /// How long the menu takes to scroll from one screen to the other.
         /// </summary>
-        public const float SHEET_HEIGHT = 0.46f;
-
-        private const float open_duration = 600;
-        private const float close_duration = 450;
+        public const float SCROLL_DURATION = 700;
 
         /// <summary>
-        /// Below this the tiles stop shrinking and the sheet scrolls instead.
+        /// Below this the tiles stop shrinking and the page scrolls instead.
         /// </summary>
-        private const float min_grid_height = 300;
+        private const float min_grid_height = 520;
 
         private const float cell_gap = 8;
+
+        private const float heading_height = 46;
 
         private const int columns = 6;
         private const int rows = 4;
 
         /// <summary>
-        /// Asks for the sheet to be opened (true) or closed (false), from its handle.
-        /// The menu decides, since opening also moves the band and the cards.
+        /// Asks for the hub to be opened (true) or closed (false), from its hint.
+        /// The menu decides, since opening also scrolls the band and the cards away.
         /// </summary>
         public Action<bool>? RequestState;
 
@@ -59,27 +62,31 @@ namespace osu.Game.Screens.Menu
         /// </summary>
         public Action<Room>? OnDailyChallenge;
 
+        /// <summary>
+        /// Today's daily challenge room, once the daily challenge tile has it.
+        /// </summary>
+        public Room? DailyChallengeRoom => dailyTile.Room;
+
         private readonly Container panel;
         private readonly HubScrollContainer scroll;
         private readonly Container gridHolder;
         private readonly HubTile[] tiles;
+        private readonly HubDailyTile dailyTile;
         private readonly HubNewsTile newsTile;
         private readonly HubProfileProvider profile;
         private readonly HubHandle handle;
 
         private bool available;
 
-        public MenuHubSheet()
+        public MenuHubPage()
         {
             RelativeSizeAxes = Axes.Both;
-            Anchor = Anchor.BottomCentre;
-            Origin = Anchor.BottomCentre;
 
             profile = new HubProfileProvider();
 
-            var dailyTile = new HubDailyTile { OnDailyChallenge = room => OnDailyChallenge?.Invoke(room) };
+            dailyTile = new HubDailyTile { OnDailyChallenge = room => OnDailyChallenge?.Invoke(room) };
 
-            // Six columns by four rows; the sheet shows two rows and scrolls to the other two.
+            // Six columns by four rows, all on the page unless the window is too small for them.
             (HubTile tile, int column, int row, int columns, int rows)[] layout =
             {
                 (new HubScoreTile(profile), 0, 0, 3, 1),
@@ -101,7 +108,7 @@ namespace osu.Game.Screens.Menu
             gridHolder = new Container
             {
                 RelativeSizeAxes = Axes.X,
-                Padding = new MarginPadding(14 - cell_gap / 2),
+                Padding = new MarginPadding(-cell_gap / 2),
             };
 
             foreach (var l in layout)
@@ -126,30 +133,29 @@ namespace osu.Game.Screens.Menu
                 {
                     RelativeSizeAxes = Axes.Both,
                     RelativePositionAxes = Axes.Y,
-                    Height = SHEET_HEIGHT,
-                    Anchor = Anchor.BottomCentre,
-                    Origin = Anchor.BottomCentre,
-                    // Closed until shown: below the sheet's bottom, and invisible, since the bar in front of it is see-through.
+                    // Closed: a screen below, out of sight (and hidden, so that nothing of it shows through the bar).
                     Y = 1,
                     Alpha = 0,
+                    // Under the dock along the top, above the bar along the bottom.
+                    Padding = new MarginPadding { Top = HubDock.HEIGHT + 14, Bottom = HubBar.HEIGHT + 14, Horizontal = 24 },
                     Children = new Drawable[]
                     {
+                        new InputBlocker { RelativeSizeAxes = Axes.Both },
+                        new OsuSpriteText
+                        {
+                            Text = MenuHubStrings.OnScosuNow,
+                            Font = ScosuMenuStyle.Display(24),
+                            Shadow = true,
+                            ShadowColour = Color4.Black.Opacity(0.6f),
+                        },
                         new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Horizontal = 20, Bottom = 8 },
-                            Children = new Drawable[]
+                            Padding = new MarginPadding { Top = heading_height },
+                            Child = scroll = new HubScrollContainer
                             {
-                                new InputBlocker
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Child = ScosuMenuStyle.CreateGlassBackground(),
-                                },
-                                scroll = new HubScrollContainer
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Child = gridHolder,
-                                },
+                                RelativeSizeAxes = Axes.Both,
+                                Child = gridHolder,
                             },
                         },
                     },
@@ -159,10 +165,11 @@ namespace osu.Game.Screens.Menu
                     RelativePositionAxes = Axes.Y,
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
+                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 2 },
                     // Shown once the hub is available (see Available).
                     Alpha = 0,
-                    Action = () => RequestState?.Invoke(State.Value == Visibility.Hidden),
-                    Scrolled = up => RequestState?.Invoke(up),
+                    Action = () => RequestState?.Invoke(true),
+                    Scrolled = up => RequestState?.Invoke(!up),
                 },
             };
 
@@ -171,7 +178,7 @@ namespace osu.Game.Screens.Menu
 
         /// <summary>
         /// Whether the hub can be opened at all: only while the band is out (not on the logo, nor while leaving the menu).
-        /// The handle is hidden otherwise.
+        /// The hint is hidden otherwise.
         /// </summary>
         public bool Available
         {
@@ -186,8 +193,7 @@ namespace osu.Game.Screens.Menu
                 if (!available)
                     Hide();
 
-                handle.FadeTo(available ? 1 : 0, 300, Easing.OutQuint);
-                handle.Enabled.Value = available;
+                updateHandle();
             }
         }
 
@@ -195,40 +201,49 @@ namespace osu.Game.Screens.Menu
         {
             base.Update();
 
-            // The grid fills the sheet, unless the window is too small for the tiles.
-            // Two rows fit in the sheet, the other two are scrolled to.
-            gridHolder.Height = Math.Max(scroll.DrawHeight, min_grid_height) * rows / 2;
+            // The grid fills the page, unless the window is too small for the tiles.
+            gridHolder.Height = Math.Max(scroll.DrawHeight, min_grid_height);
         }
 
         protected override void PopIn()
         {
-            panel.FadeIn(100);
-            panel.MoveToY(0, open_duration, Easing.OutQuint);
-            handle.MoveToY(-SHEET_HEIGHT, open_duration, Easing.OutQuint);
-            handle.Open = true;
+            panel.FadeIn();
+            panel.MoveToY(0, SCROLL_DURATION, Easing.OutQuint);
+            handle.MoveToY(-1, SCROLL_DURATION, Easing.OutQuint);
+            updateHandle();
 
+            scroll.ScrollToStart(false);
             newsTile.RefreshIfStale();
             profile.RefreshIfStale();
 
-            // The tiles settle in after the sheet, one after another.
+            // The tiles settle in as the page arrives, one after another.
             for (int i = 0; i < tiles.Length; i++)
             {
-                tiles[i].FadeOut().MoveToY(20)
-                        .Delay(150 + Math.Min(i, 7) * 70)
-                        .FadeIn(400, Easing.OutQuint).MoveToY(0, 400, Easing.OutQuint);
+                tiles[i].FadeOut().MoveToY(30)
+                        .Delay(120 + Math.Min(i, 9) * 40)
+                        .FadeIn(450, Easing.OutQuint).MoveToY(0, 500, Easing.OutQuint);
             }
         }
 
         protected override void PopOut()
         {
-            // Hidden at the end, so that nothing of the panel shows through the bar once it is tucked behind it.
-            panel.MoveToY(1, close_duration, Easing.OutQuint).Then().FadeOut();
-            handle.MoveToY(0, close_duration, Easing.OutQuint);
-            handle.Open = false;
+            // Hidden at the end, so that nothing of the panel shows through the bar once it is a screen below.
+            panel.MoveToY(1, SCROLL_DURATION, Easing.OutQuint).Then().FadeOut();
+            handle.MoveToY(0, SCROLL_DURATION, Easing.OutQuint);
+            updateHandle();
+        }
+
+        private void updateHandle()
+        {
+            bool shown = available && State.Value == Visibility.Hidden;
+
+            handle.FadeTo(shown ? 1 : 0, shown ? 400 : 200, Easing.OutQuint);
+            handle.Enabled.Value = shown;
         }
 
         /// <summary>
-        /// Only takes the scroll it can use: the menu behind the sheet closes the hub on scrolling up, and opens it on scrolling down.
+        /// Only takes the scroll it can use: the menu behind the page scrolls back up to the band on scrolling up,
+        /// and down to the hub on scrolling down.
         /// </summary>
         private partial class HubScrollContainer : OsuScrollContainer
         {
@@ -247,11 +262,11 @@ namespace osu.Game.Screens.Menu
         }
 
         /// <summary>
-        /// Keeps clicks on the sheet from reaching the menu behind it.
+        /// Keeps clicks on the page from reaching the menu behind it.
         /// </summary>
         private partial class InputBlocker : Container
         {
-            // Scrolling is left to the menu behind the sheet (it opens and closes the hub), see HubScrollContainer.
+            // Scrolling is left to the menu behind the page (it scrolls between the band and the hub), see HubScrollContainer.
             protected override bool OnHover(HoverEvent e) => true;
 
             protected override bool OnMouseDown(MouseDownEvent e) => true;
@@ -260,37 +275,25 @@ namespace osu.Game.Screens.Menu
         }
 
         /// <summary>
-        /// "On scosu now" with a chevron under it, on the menu's background just above the bar: no box around it.
+        /// "On scosu now" with a chevron under it, at the bottom of the first screen just above the bar:
+        /// says there is more below, and leaves with the first screen when the hub opens.
         /// </summary>
         private partial class HubHandle : OsuClickableContainer
         {
             public Action<bool>? Scrolled;
 
             private SpriteIcon chevron = null!;
-            private OsuSpriteText label = null!;
 
-            private bool open;
-
-            public bool Open
+            public HubHandle()
             {
-                set
-                {
-                    open = value;
-
-                    if (!IsLoaded)
-                        return;
-
-                    chevron.RotateTo(open ? 180 : 0, 400, Easing.OutQuint);
-                    label.Text = open ? MenuHubStrings.Hide : MenuHubStrings.OnScosuNow;
-                }
+                // Before load: OsuClickableContainer sets its content up for auto-sizing there.
+                AutoSizeAxes = Axes.X;
+                Height = HANDLE_HEIGHT;
             }
 
             [BackgroundDependencyLoader]
             private void load()
             {
-                AutoSizeAxes = Axes.X;
-                Height = HANDLE_HEIGHT;
-                Margin = new MarginPadding { Bottom = 2 };
 
                 // A dark glow behind the text, so that it reads on a bright background.
                 Masking = true;
@@ -321,10 +324,11 @@ namespace osu.Game.Screens.Menu
                         Origin = Anchor.Centre,
                         Children = new Drawable[]
                         {
-                            label = new OsuSpriteText
+                            new OsuSpriteText
                             {
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.TopCentre,
+                                Text = MenuHubStrings.OnScosuNow,
                                 Font = OsuFont.GetFont(size: 19, weight: FontWeight.SemiBold),
                                 Shadow = true,
                                 ShadowColour = Color4.Black.Opacity(0.85f),
@@ -334,7 +338,7 @@ namespace osu.Game.Screens.Menu
                             {
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.Centre,
-                                Icon = FontAwesome.Solid.ChevronUp,
+                                Icon = FontAwesome.Solid.ChevronDown,
                                 Size = new Vector2(14),
                                 Margin = new MarginPadding { Top = 7 },
                                 Colour = ScosuMenuStyle.VIOLET_INK,
@@ -344,21 +348,12 @@ namespace osu.Game.Screens.Menu
                 };
             }
 
-            private void bob()
-            {
-                // The chevron nudges upward now and then while closed, to say the hub can be pulled up.
-                if (open)
-                    return;
-
-                chevron.MoveToY(-5, 220, Easing.OutQuad).Then().MoveToY(0, 520, Easing.OutBounce);
-            }
-
             protected override void LoadComplete()
             {
                 base.LoadComplete();
-                Open = open;
 
-                Scheduler.AddDelayed(bob, 4000, true);
+                // The chevron nudges downward now and then, to say there is more below.
+                Scheduler.AddDelayed(() => chevron.MoveToY(5, 220, Easing.OutQuad).Then().MoveToY(0, 520, Easing.OutBounce), 4000, true);
             }
 
             protected override bool OnScroll(ScrollEvent e)
