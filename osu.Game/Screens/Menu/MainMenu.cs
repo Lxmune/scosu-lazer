@@ -476,7 +476,7 @@ namespace osu.Game.Screens.Menu
             float dim = SeasonalUIConfig.ENABLED ? 0.84f : 1;
 
             if (Buttons.State is not (ButtonSystemState.Initial or ButtonSystemState.Exit))
-                dim *= hubOpen ? 0.55f : 0.75f;
+                dim *= hubOpen ? 0.4f : 0.75f;
 
             ApplyToBackground(b => b.FadeColour(OsuColour.Gray(dim), hubOpen ? MenuHubPage.SCROLL_DURATION : 500, Easing.OutSine));
         }

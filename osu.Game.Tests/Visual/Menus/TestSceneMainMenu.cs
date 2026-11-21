@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Testing;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
+using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.Menu.Hub;
 using osuTK;
@@ -121,6 +122,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddAssert("bar stays", () => bar().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddAssert("band docked", () => dock().State.Value, () => Is.EqualTo(Visibility.Visible));
+            AddUntilStep("background darker on the hub", () => Game.ChildrenOfType<BackgroundScreenDefault>().Single().Colour.TopLeft.SRGB.R, () => Is.LessThan(0.45f));
             AddUntilStep("first screen scrolled away", () => score().Parent!.Y, () => Is.EqualTo(-1));
 
             AddStep("press escape", () => InputManager.Key(Key.Escape));
@@ -128,6 +130,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
             AddAssert("band undocked", () => dock().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddUntilStep("first screen back", () => score().Parent!.Y, () => Is.EqualTo(0));
+            AddUntilStep("background lighter again", () => Game.ChildrenOfType<BackgroundScreenDefault>().Single().Colour.TopLeft.SRGB.R, () => Is.GreaterThan(0.7f));
 
             AddStep("press H", () => InputManager.Key(Key.H));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));

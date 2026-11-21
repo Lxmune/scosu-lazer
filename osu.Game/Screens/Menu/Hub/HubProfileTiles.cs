@@ -497,11 +497,12 @@ namespace osu.Game.Screens.Menu.Hub
         public HubRecentTile(HubProfileProvider profile)
             : base(profile, MenuHubStrings.RecentPlays, FontAwesome.Solid.History)
         {
-            // The whole height under the eyebrow, scrolled when the plays don't all fit.
+            // Under the eyebrow, scrolled when the plays don't all fit. Its height is a whole number of rows (see UpdateAfterChildren).
             Add(list = new HubScrollContainer
             {
-                RelativeSizeAxes = Axes.Both,
-                Padding = new MarginPadding { Top = list_top, Bottom = 6, Horizontal = 6 },
+                RelativeSizeAxes = Axes.X,
+                Y = list_top,
+                Padding = new MarginPadding { Horizontal = 6 },
                 Alpha = 0,
                 Child = rows = new FillFlowContainer<RecentRow>
                 {
@@ -548,6 +549,15 @@ namespace osu.Game.Screens.Menu.Hub
         {
             list.Hide();
             rows.Clear();
+        }
+
+        protected override void UpdateAfterChildren()
+        {
+            base.UpdateAfterChildren();
+
+            // Only whole rows show: a row cut by the tile's edge would look like it overlaps it.
+            float available = DrawHeight - list_top - 8;
+            list.Height = Math.Max(1, (int)(available / row_height)) * row_height;
         }
 
         private partial class RecentRow : OsuClickableContainer
