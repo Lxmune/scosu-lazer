@@ -446,7 +446,7 @@ namespace osu.Game.Screens.Menu.Hub
             var set = score.Beatmap?.BeatmapSet;
 
             if (set != null)
-                SetBackground(Cover(set), 0.82f);
+                SetBackground(Cover(set), 0.7f);
 
             Body.Add(new TruncatingSpriteText
             {

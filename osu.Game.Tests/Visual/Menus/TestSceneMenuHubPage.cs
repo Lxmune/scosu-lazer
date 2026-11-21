@@ -7,6 +7,7 @@ using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Game.Database;
 using osu.Game.Online;
@@ -248,6 +249,9 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("event shown", () => shows("Advent Rush 2026") && shows("Gain 200M"));
             AddAssert("event tile in the grid", () => this.ChildrenOfType<HubEventTile>().Single().Parent!.Alpha, () => Is.EqualTo(1));
             AddUntilStep("daily challenge shown", () => shows("Innocent Sorrow") && shows("Insane"));
+            // The cover is darkened by an opaque box at the dim's alpha (not by a box that is itself see-through).
+            AddAssert("daily cover dimmed", () => this.ChildrenOfType<HubDailyTile>().Single().ChildrenOfType<Box>()
+                                                      .Any(b => b.Alpha == 0.7f && b.Colour.TopLeft.SRGB.A == 1));
             AddUntilStep("friends shown", () => shows("1 of 2 online"));
             AddUntilStep("report shown", () => shows("Your week is ready"));
             AddUntilStep("news shown", () => shows("Welcome to scosu"));

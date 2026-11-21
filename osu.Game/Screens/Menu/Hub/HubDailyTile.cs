@@ -106,7 +106,7 @@ namespace osu.Game.Screens.Menu.Hub
                 {
                     RelativeSizeAxes = Axes.Both,
                     OnlineInfo = set,
-                }, 0.87f);
+                }, 0.7f);
             }
 
             if (beatmap != null)
