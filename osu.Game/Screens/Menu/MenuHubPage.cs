@@ -7,8 +7,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Effects;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
@@ -32,7 +30,7 @@ namespace osu.Game.Screens.Menu
         /// <summary>
         /// The height of the "On scosu now" hint at the bottom of the first screen.
         /// </summary>
-        public const float HANDLE_HEIGHT = 48;
+        public const float HANDLE_HEIGHT = 36;
 
         /// <summary>
         /// How long the menu takes to scroll from one screen to the other.
@@ -165,7 +163,7 @@ namespace osu.Game.Screens.Menu
                     RelativePositionAxes = Axes.Y,
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
-                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 2 },
+                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 4 },
                     // Shown once the hub is available (see Available).
                     Alpha = 0,
                     Action = () => RequestState?.Invoke(true),
@@ -282,8 +280,6 @@ namespace osu.Game.Screens.Menu
         {
             public Action<bool>? Scrolled;
 
-            private SpriteIcon chevron = null!;
-
             public HubHandle()
             {
                 // Before load: OsuClickableContainer sets its content up for auto-sizing there.
@@ -294,66 +290,36 @@ namespace osu.Game.Screens.Menu
             [BackgroundDependencyLoader]
             private void load()
             {
-
-                // A dark glow behind the text, so that it reads on a bright background.
-                Masking = true;
-                CornerRadius = HANDLE_HEIGHT / 2;
-                EdgeEffect = new EdgeEffectParameters
+                Child = new FillFlowContainer
                 {
-                    Type = EdgeEffectType.Shadow,
-                    Colour = Color4.Black.Opacity(0.35f),
-                    Radius = 18,
-                };
-
-                Children = new Drawable[]
-                {
-                    new Box
+                    AutoSizeAxes = Axes.Both,
+                    Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(0, 2),
+                    // A wider hit area than the text.
+                    Padding = new MarginPadding { Horizontal = 32 },
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.Black,
-                        Alpha = 0.22f,
-                    },
-                    new FillFlowContainer
-                    {
-                        AutoSizeAxes = Axes.Both,
-                        Direction = FillDirection.Vertical,
-                        Spacing = new Vector2(0, 1),
-                        // A wide hit area around the text.
-                        Padding = new MarginPadding { Horizontal = 48 },
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        Children = new Drawable[]
+                        new OsuSpriteText
                         {
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                Text = MenuHubStrings.OnScosuNow,
-                                Font = OsuFont.GetFont(size: 19, weight: FontWeight.SemiBold),
-                                Shadow = true,
-                                ShadowColour = Color4.Black.Opacity(0.85f),
-                                ShadowOffset = new Vector2(0, 0.06f),
-                            },
-                            chevron = new SpriteIcon
-                            {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.Centre,
-                                Icon = FontAwesome.Solid.ChevronDown,
-                                Size = new Vector2(14),
-                                Margin = new MarginPadding { Top = 7 },
-                                Colour = ScosuMenuStyle.VIOLET_INK,
-                            },
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.TopCentre,
+                            Text = MenuHubStrings.OnScosuNow,
+                            Font = OsuFont.GetFont(size: 17, weight: FontWeight.SemiBold),
+                            Shadow = true,
+                        },
+                        new SpriteIcon
+                        {
+                            Anchor = Anchor.TopCentre,
+                            Origin = Anchor.Centre,
+                            Icon = FontAwesome.Solid.ChevronDown,
+                            Size = new Vector2(12),
+                            Margin = new MarginPadding { Top = 6 },
+                            Colour = ScosuMenuStyle.TEXT_DIM,
                         },
                     },
                 };
-            }
-
-            protected override void LoadComplete()
-            {
-                base.LoadComplete();
-
-                // The chevron nudges downward now and then, to say there is more below.
-                Scheduler.AddDelayed(() => chevron.MoveToY(5, 220, Easing.OutQuad).Then().MoveToY(0, 520, Easing.OutBounce), 4000, true);
             }
 
             protected override bool OnScroll(ScrollEvent e)

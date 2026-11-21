@@ -51,6 +51,11 @@ namespace osu.Game.Screens.Menu.Hub
 
             Children = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = ScosuMenuStyle.TILE,
+                },
                 background = new Container { RelativeSizeAxes = Axes.Both },
                 fill = new Box
                 {

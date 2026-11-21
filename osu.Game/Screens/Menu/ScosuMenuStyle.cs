@@ -23,6 +23,11 @@ namespace osu.Game.Screens.Menu
         public static readonly Color4 GLASS = Color4Extensions.FromHex(@"17131f").Opacity(0.72f);
 
         /// <summary>
+        /// A hub tile's base: nearly opaque, since the tiles sit straight on the menu's background.
+        /// </summary>
+        public static readonly Color4 TILE = Color4Extensions.FromHex(@"17131f").Opacity(0.92f);
+
+        /// <summary>
         /// The band's and the hub bar's background, a little denser than <see cref="GLASS"/>.
         /// </summary>
         public static readonly Color4 BAND = Color4Extensions.FromHex(@"120f19").Opacity(0.82f);
