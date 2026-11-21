@@ -42,7 +42,7 @@ namespace osu.Game.Screens.Menu
                     Flow = new FlowContainerWithOrigin
                     {
                         Direction = FillDirection.Horizontal,
-                        Spacing = new Vector2(-ButtonSystem.WEDGE_WIDTH, 0),
+                        Spacing = Vector2.Zero, // scosu: flat tiles sit edge to edge, no wedge overlap
                         Anchor = Anchor.Centre,
                         AutoSizeAxes = Axes.Both,
                     }
@@ -100,7 +100,7 @@ namespace osu.Game.Screens.Menu
             {
                 RelativeSizeAxes = Axes.Both;
                 Size = new Vector2(2, 1);
-                Colour = OsuColour.Gray(50);
+                Colour = ScosuMenuStyle.BAND; // scosu: one dark violet band, no grey
                 Anchor = Anchor.Centre;
                 Origin = Anchor.Centre;
             }

@@ -135,11 +135,22 @@ namespace osu.Game.Tests.Visual.Menus
 
         private void createDisplay() => AddStep("create display", () =>
         {
-            Child = display = new ScoreSummaryDisplay
+            var provider = new ScoreSummaryProvider();
+
+            Child = new DependencyProvidingContainer
             {
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                State = { Value = Visibility.Visible },
+                RelativeSizeAxes = Axes.Both,
+                CachedDependencies = new (Type, object)[] { (typeof(ScoreSummaryProvider), provider) },
+                Children = new Drawable[]
+                {
+                    provider,
+                    display = new ScoreSummaryDisplay
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        State = { Value = Visibility.Visible },
+                    },
+                },
             };
         });
     }

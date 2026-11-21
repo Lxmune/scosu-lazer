@@ -69,11 +69,25 @@ namespace osu.Game.Tests.Visual.Menus
             AddStep("reset server kind", () => dummyAPI.Endpoints.RanksByStableScore = false);
         }
 
-        private void createCard() => AddStep("create card", () => Child = card = new WeeklyReportMenuCard
+        private void createCard() => AddStep("create card", () =>
         {
-            Anchor = Anchor.Centre,
-            Origin = Anchor.Centre,
-            State = { Value = Visibility.Visible },
+            var provider = new WeeklyReportProvider();
+
+            Child = new DependencyProvidingContainer
+            {
+                RelativeSizeAxes = Axes.Both,
+                CachedDependencies = new (Type, object)[] { (typeof(WeeklyReportProvider), provider) },
+                Children = new Drawable[]
+                {
+                    provider,
+                    card = new WeeklyReportMenuCard
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        State = { Value = Visibility.Visible },
+                    },
+                },
+            };
         });
 
         [Test]

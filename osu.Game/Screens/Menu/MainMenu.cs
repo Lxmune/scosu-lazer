@@ -33,6 +33,7 @@ using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Matchmaking;
+using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.SkinEditor;
@@ -93,6 +94,9 @@ namespace osu.Game.Screens.Menu
         [Resolved(canBeNull: true)]
         private IDialogOverlay dialogOverlay { get; set; }
 
+        [Resolved]
+        private SessionStatics sessionStatics { get; set; }
+
         // used to stop kiai fountain samples when navigating to other screens
         IBindable<bool> ISamplePlaybackDisabler.SamplePlaybackDisabled => samplePlaybackDisabled;
         private readonly Bindable<bool> samplePlaybackDisabled = new Bindable<bool>();
@@ -122,6 +126,13 @@ namespace osu.Game.Screens.Menu
         private NowPlayingMenuCard nowPlayingCard;
         private MenuHubSheet hubSheet;
         private bool hubOpen;
+
+        // scosu: shared by the corner cards and the hub's tiles, so that they make one request each.
+        [Cached]
+        private readonly ScoreSummaryProvider scoreSummaryProvider = new ScoreSummaryProvider();
+
+        [Cached]
+        private readonly WeeklyReportProvider weeklyReportProvider = new WeeklyReportProvider();
         private Container logoTarget;
         private OnlineMenuBanner onlineMenuBanner;
         private MenuTipDisplay menuTipDisplay;
@@ -133,6 +144,8 @@ namespace osu.Game.Screens.Menu
         private WeeklyReportMenuCard weeklyReportCard;
         private FillFlowContainer leftDisplays;
         private FillFlowContainer rightDisplays;
+        private FillFlowContainer bottomLeftDisplays;
+        private Container bottomRightDisplays;
         private OnlinePlayersDisplay onlinePlayersDisplay;
 
         private Sample reappearSampleSwoosh;
@@ -164,6 +177,8 @@ namespace osu.Game.Screens.Menu
 
             AddRangeInternal(new[]
             {
+                scoreSummaryProvider,
+                weeklyReportProvider,
                 SeasonalUIConfig.ENABLED ? new MainMenuSeasonalLighting() : Empty(),
                 new ScrollAdjustsVolume(),
                 buttonsContainer = new ParallaxContainer
@@ -189,13 +204,7 @@ namespace osu.Game.Screens.Menu
                             OnQuickPlay = loadQuickPlay,
                             OnRankedPlay = loadRankedPlay,
                             OnPlaylists = () => this.Push(new Playlists()),
-                            OnDailyChallenge = room =>
-                            {
-                                if (statics.Get<bool>(Static.DailyChallengeIntroPlayed))
-                                    this.Push(new DailyChallenge(room));
-                                else
-                                    this.Push(new DailyChallengeIntro(room));
-                            },
+                            OnDailyChallenge = openDailyChallenge,
                             OnExit = e =>
                             {
                                 exitConfirmedViaHoldOrClick = e is MouseEvent;
@@ -255,23 +264,43 @@ namespace osu.Game.Screens.Menu
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
+                        // scosu: the menu at rest has a card in each corner. Today's score top left, the song playing top right
+                        // (with the weekly report under it), the event bottom left (or top right, see placeEventCard()), and the
+                        // players online bottom right. They slide out towards their edges when the hub opens (see setHub()).
                         leftDisplays = new FillFlowContainer
                         {
                             AutoSizeAxes = Axes.Both,
                             Direction = FillDirection.Vertical,
                             Anchor = Anchor.TopLeft,
                             Origin = Anchor.TopLeft,
-                            Children = new Drawable[]
+                            Child = scoreSummaryDisplay = new ScoreSummaryDisplay
                             {
-                                eventMenuCard = new EventMenuCard(),
-                                scoreSummaryDisplay = new ScoreSummaryDisplay
-                                {
-                                    Margin = new MarginPadding(10),
-                                },
-                                onlinePlayersDisplay = new OnlinePlayersDisplay
-                                {
-                                    Margin = new MarginPadding { Horizontal = 10 },
-                                },
+                                Margin = new MarginPadding(10),
+                            },
+                        },
+                        bottomLeftDisplays = new FillFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            Anchor = Anchor.BottomLeft,
+                            Origin = Anchor.BottomLeft,
+                            Margin = new MarginPadding { Bottom = 10 },
+                            Child = eventMenuCard = new EventMenuCard
+                            {
+                                Anchor = Anchor.BottomLeft,
+                                Origin = Anchor.BottomLeft,
+                            },
+                        },
+                        bottomRightDisplays = new Container
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Anchor = Anchor.BottomRight,
+                            Origin = Anchor.BottomRight,
+                            Margin = new MarginPadding(10),
+                            Child = onlinePlayersDisplay = new OnlinePlayersDisplay
+                            {
+                                Anchor = Anchor.BottomRight,
+                                Origin = Anchor.BottomRight,
                             },
                         },
                         rightDisplays = new FillFlowContainer
@@ -296,10 +325,11 @@ namespace osu.Game.Screens.Menu
                                 },
                             },
                         },
-                        // The hub: the cards move into it while it's open (see setHub()).
+                        // The hub: a sheet of tiles that slides up from the bottom (see setHub()).
                         hubSheet = new MenuHubSheet
                         {
                             RequestState = setHub,
+                            OnDailyChallenge = openDailyChallenge,
                         },
                     },
                 },
@@ -363,12 +393,11 @@ namespace osu.Game.Screens.Menu
         /// </summary>
         private void placeEventCard(ScosuEventMenuPosition position)
         {
-            // In the hub, the card has its own column; it goes back to its side when the hub closes.
-            if (hubOpen)
-                return;
-
-            // Above the score summary on the left; on the right, below the song playing.
-            moveCard(eventMenuCard, position == ScosuEventMenuPosition.TopRight ? rightDisplays : leftDisplays, -1);
+            // On the right, below the song playing (and above the weekly report); otherwise in the bottom left corner.
+            if (position == ScosuEventMenuPosition.TopRight)
+                moveCard(eventMenuCard, rightDisplays, Anchor.TopRight, -1);
+            else
+                moveCard(eventMenuCard, bottomLeftDisplays, Anchor.BottomLeft, 0);
         }
 
         /// <summary>
@@ -377,8 +406,9 @@ namespace osu.Game.Screens.Menu
         private bool bandIsOut => Buttons.State is ButtonSystemState.TopLevel or ButtonSystemState.Play or ButtonSystemState.Multi or ButtonSystemState.Edit;
 
         /// <summary>
-        /// scosu: opens or closes the hub. The band rises to make room for its sheet, the song playing (top right) makes way,
-        /// and the cards move from the corners into the sheet's columns, and back.
+        /// scosu: opens or closes the hub. The band rises to make room for its sheet, which slides up from the bottom;
+        /// the corner cards slide out towards their edges (the song playing, top right, upwards), and come back when it closes.
+        /// The hub's tiles show the same things (and more), from the same providers.
         /// </summary>
         private void setHub(bool open)
         {
@@ -396,10 +426,10 @@ namespace osu.Game.Screens.Menu
                 bottomElementsFlow.FadeOut(hub_transition_duration / 2, Easing.OutQuint);
                 buttonsContainer.MoveToY(-hub_band_rise, hub_transition_duration, Easing.OutQuint);
 
-                moveCard(scoreSummaryDisplay, hubSheet.Columns[0], 0);
-                moveCard(onlinePlayersDisplay, hubSheet.Columns[0], 1);
-                moveCard(eventMenuCard, hubSheet.Columns[1], 0);
-                moveCard(weeklyReportCard, hubSheet.Columns[2], 0);
+                slideCorner(leftDisplays, new Vector2(-corner_slide, 0), false);
+                slideCorner(rightDisplays, new Vector2(0, -corner_slide), false);
+                slideCorner(bottomLeftDisplays, new Vector2(-corner_slide, 0), false);
+                slideCorner(bottomRightDisplays, new Vector2(corner_slide, 0), false);
 
                 hubSheet.Show();
             }
@@ -410,14 +440,10 @@ namespace osu.Game.Screens.Menu
                 buttonsContainer.MoveToY(0, hub_transition_duration, Easing.OutQuint);
                 bottomElementsFlow.FadeIn(hub_transition_duration, Easing.OutQuint);
 
-                moveCard(scoreSummaryDisplay, leftDisplays, 0);
-                moveCard(onlinePlayersDisplay, leftDisplays, 1);
-                moveCard(weeklyReportCard, rightDisplays, 1);
-                placeEventCard(eventMenuCard.MenuPosition.Value);
-
-                // Corner cards come back with a short fade rather than jumping out of the closing sheet.
-                leftDisplays.FadeInFromZero(hub_transition_duration, Easing.OutQuint);
-                rightDisplays.FadeInFromZero(hub_transition_duration, Easing.OutQuint);
+                slideCorner(leftDisplays, Vector2.Zero, true);
+                slideCorner(rightDisplays, Vector2.Zero, true);
+                slideCorner(bottomLeftDisplays, Vector2.Zero, true);
+                slideCorner(bottomRightDisplays, Vector2.Zero, true);
 
                 if (bandIsOut)
                     nowPlayingCard.Show();
@@ -425,15 +451,27 @@ namespace osu.Game.Screens.Menu
         }
 
         /// <summary>
-        /// Moves a card into a column (the flows lay out by position: lowest first), facing the column's side of the screen.
+        /// How far the corner cards slide out while the hub is open.
         /// </summary>
-        private void moveCard(Drawable card, FillFlowContainer target, float layoutPosition)
+        private const float corner_slide = 60;
+
+        private void slideCorner(Drawable corner, Vector2 offset, bool visible)
+        {
+            corner.MoveTo(offset, hub_transition_duration, Easing.OutQuint);
+            // Once faded out, a corner takes no input (it would sit under the hub's sheet otherwise).
+            corner.FadeTo(visible ? 1 : 0, visible ? hub_transition_duration : hub_transition_duration / 2, Easing.OutQuint);
+        }
+
+        /// <summary>
+        /// Moves a card into a corner's column (the flows lay out by position: lowest first), facing that corner.
+        /// </summary>
+        private void moveCard(Drawable card, FillFlowContainer target, Anchor anchor, float layoutPosition)
         {
             if (card.Parent != target)
             {
                 ((FillFlowContainer)card.Parent)?.Remove(card, false);
 
-                card.Anchor = card.Origin = target == rightDisplays ? Anchor.TopRight : Anchor.TopLeft;
+                card.Anchor = card.Origin = anchor;
                 target.Add(card);
             }
 
@@ -709,6 +747,17 @@ namespace osu.Game.Screens.Menu
         }
 
         private void loadSongSelect() => this.Push(new SoloSongSelect());
+
+        /// <summary>
+        /// Opens the daily challenge (from the band's button or the hub's tile), with its intro the first time.
+        /// </summary>
+        private void openDailyChallenge(Room room)
+        {
+            if (sessionStatics.Get<bool>(Static.DailyChallengeIntroPlayed))
+                this.Push(new DailyChallenge(room));
+            else
+                this.Push(new DailyChallengeIntro(room));
+        }
 
         private void loadQuickPlay() => this.Push(new OnlinePlay.Matchmaking.Intro.ScreenIntro(MatchmakingPoolType.QuickPlay));
 

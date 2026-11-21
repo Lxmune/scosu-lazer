@@ -110,13 +110,13 @@ namespace osu.Game.Tests.Visual.Menus
             AddStep("press tab", () => InputManager.Key(Key.Tab));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddAssert("song playing made way", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Hidden));
-            AddAssert("score card in the hub", () => score().Parent == hub().Columns[0]);
+            AddUntilStep("corner cards made way", () => score().Parent!.Alpha, () => Is.EqualTo(0));
 
             AddStep("press escape", () => InputManager.Key(Key.Escape));
             AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
             AddAssert("song playing back", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddAssert("score card back in its corner", () => score().Parent != hub().Columns[0]);
+            AddUntilStep("corner cards back", () => score().Parent!.Alpha, () => Is.EqualTo(1));
 
             AddStep("press H", () => InputManager.Key(Key.H));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));

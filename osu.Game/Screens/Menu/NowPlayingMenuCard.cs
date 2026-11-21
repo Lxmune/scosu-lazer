@@ -16,7 +16,6 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Menu
 {
@@ -24,10 +23,9 @@ namespace osu.Game.Screens.Menu
     /// scosu: the main menu's top-right card, the song playing with its cover and controls.
     /// It stays on screen, unlike the <see cref="SongTicker"/> it replaces, and makes way for the hub.
     /// </summary>
-    public partial class NowPlayingMenuCard : VisibilityContainer
+    public partial class NowPlayingMenuCard : CornerCard
     {
         private const float transition_duration = 500;
-        private const float card_width = 300;
         private const float cover_size = 44;
 
         [Resolved]
@@ -43,31 +41,22 @@ namespace osu.Game.Screens.Menu
         private IconButton playPauseButton = null!;
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
+        private void load()
         {
             AutoSizeAxes = Axes.Both;
 
-            InternalChild = content = new Container
+            InternalChild = Margined = content = new Container
             {
-                Width = card_width,
+                Width = CARD_WIDTH,
                 AutoSizeAxes = Axes.Y,
-                Margin = new MarginPadding { Horizontal = 10, Top = 10 },
-                Masking = true,
-                CornerExponent = 2.5f,
-                CornerRadius = 15,
                 Children = new Drawable[]
                 {
-                    new Box
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.Black,
-                        Alpha = 0.4f,
-                    },
+                    ScosuMenuStyle.CreateGlassBackground(),
                     new GridContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Padding = new MarginPadding(12),
+                        Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING - 4),
                         ColumnDimensions = new[]
                         {
                             new Dimension(GridSizeMode.AutoSize),
@@ -83,11 +72,11 @@ namespace osu.Game.Screens.Menu
                                 {
                                     Size = new Vector2(cover_size),
                                     Masking = true,
-                                    CornerRadius = 8,
+                                    CornerRadius = 6,
                                     Child = new Box
                                     {
                                         RelativeSizeAxes = Axes.Both,
-                                        Colour = colours.Purple.Opacity(0.5f),
+                                        Colour = ScosuMenuStyle.VIOLET.Opacity(0.35f),
                                     },
                                 },
                                 new FillFlowContainer
@@ -103,13 +92,13 @@ namespace osu.Game.Screens.Menu
                                         title = new TruncatingSpriteText
                                         {
                                             RelativeSizeAxes = Axes.X,
-                                            Font = OsuFont.GetFont(size: 15, weight: FontWeight.SemiBold),
+                                            Font = ScosuMenuStyle.Body(15, FontWeight.SemiBold),
                                         },
                                         artist = new TruncatingSpriteText
                                         {
                                             RelativeSizeAxes = Axes.X,
-                                            Font = OsuFont.GetFont(size: 12),
-                                            Colour = colours.Gray9,
+                                            Font = ScosuMenuStyle.Body(12),
+                                            Colour = ScosuMenuStyle.TEXT_DIM,
                                         },
                                     },
                                 },

@@ -7,10 +7,13 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input.Events;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Database;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
@@ -28,13 +31,16 @@ using osuTK.Graphics;
 namespace osu.Game.Screens.Menu
 {
     /// <summary>
-    /// The other players online, shown while the main menu is open and someone besides the local user is.
+    /// The other players online, shown while the main menu is open and someone besides the local user is:
+    /// a small "N online" chip, which opens the list of them (growing away from the screen's edge) when clicked.
     /// Each one opens their profile on click, and has the usual player menu (message, spectate, invite…) on right click.
     /// </summary>
-    public partial class OnlinePlayersDisplay : VisibilityContainer
+    public partial class OnlinePlayersDisplay : CornerCard
     {
         private const float transition_duration = 500;
         private const float width = 280;
+
+        private static readonly Color4 dot_colour = Color4Extensions.FromHex(@"6ee39a");
 
         /// <summary>
         /// How many players are listed; the others are counted under the list.
@@ -67,92 +73,150 @@ namespace osu.Game.Screens.Menu
 
         private IDisposable? presenceWatch;
 
-        private Container content = null!;
+        private FillFlowContainer content = null!;
+        private Container panel = null!;
+        private Drawable chip = null!;
+        private OsuSpriteText chipText = null!;
         private OsuSpriteText countText = null!;
         private FillFlowContainer<PlayerRow> list = null!;
         private OsuSpriteText moreText = null!;
+
+        private bool expanded;
+
+        // Clicking anywhere else takes the focus away, which closes the list.
+        public override bool AcceptsFocus => expanded;
 
         [BackgroundDependencyLoader]
         private void load()
         {
             AutoSizeAxes = Axes.Both;
 
-            InternalChild = content = new Container
+            InternalChild = Margined = content = new FillFlowContainer
             {
-                Width = width,
-                AutoSizeAxes = Axes.Y,
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(0, 6),
                 Alpha = 0,
-                Masking = true,
-                CornerExponent = 2.5f,
-                CornerRadius = 15,
-                Children = new Drawable[]
+                Children = new[]
                 {
-                    new Box
+                    panel = new Container
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.Black,
-                        Alpha = 0.4f,
-                    },
-                    new FillFlowContainer
-                    {
-                        RelativeSizeAxes = Axes.X,
+                        Width = width,
                         AutoSizeAxes = Axes.Y,
-                        Direction = FillDirection.Vertical,
-                        Padding = new MarginPadding { Horizontal = 10, Vertical = 10 },
-                        Spacing = new Vector2(0, 4),
+                        Alpha = 0,
                         Children = new Drawable[]
                         {
-                            new ShowAllButton(showAll)
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Child = new FillFlowContainer
-                                {
-                                    AutoSizeAxes = Axes.Both,
-                                    Direction = FillDirection.Horizontal,
-                                    Spacing = new Vector2(6, 0),
-                                    Padding = new MarginPadding { Horizontal = 5, Bottom = 2 },
-                                    Children = new Drawable[]
-                                    {
-                                        new Circle
-                                        {
-                                            Anchor = Anchor.CentreLeft,
-                                            Origin = Anchor.CentreLeft,
-                                            Size = new Vector2(7),
-                                            Colour = colours.Lime1,
-                                        },
-                                        countText = new OsuSpriteText
-                                        {
-                                            Anchor = Anchor.CentreLeft,
-                                            Origin = Anchor.CentreLeft,
-                                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                                            Colour = colours.Lime1,
-                                        },
-                                    },
-                                },
-                            },
-                            list = new FillFlowContainer<PlayerRow>
+                            ScosuMenuStyle.CreateGlassBackground(),
+                            new FillFlowContainer
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
+                                Padding = new MarginPadding(10),
                                 Spacing = new Vector2(0, 4),
-                            },
-                            new ShowAllButton(showAll)
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Child = moreText = new OsuSpriteText
+                                Children = new Drawable[]
                                 {
-                                    Margin = new MarginPadding { Horizontal = 5, Top = 2 },
-                                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
-                                    Colour = colours.Yellow,
+                                    new ShowAllButton(showAll)
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Child = new FillFlowContainer
+                                        {
+                                            AutoSizeAxes = Axes.Both,
+                                            Direction = FillDirection.Horizontal,
+                                            Spacing = new Vector2(6, 0),
+                                            Padding = new MarginPadding { Horizontal = 5, Bottom = 2 },
+                                            Children = new Drawable[]
+                                            {
+                                                new Circle
+                                                {
+                                                    Anchor = Anchor.CentreLeft,
+                                                    Origin = Anchor.CentreLeft,
+                                                    Size = new Vector2(7),
+                                                    Colour = dot_colour,
+                                                },
+                                                countText = new OsuSpriteText
+                                                {
+                                                    Anchor = Anchor.CentreLeft,
+                                                    Origin = Anchor.CentreLeft,
+                                                    Font = ScosuMenuStyle.Eyebrow,
+                                                    Spacing = new Vector2(1.5f, 0),
+                                                    Colour = dot_colour,
+                                                },
+                                            },
+                                        },
+                                    },
+                                    list = new FillFlowContainer<PlayerRow>
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Vertical,
+                                        Spacing = new Vector2(0, 4),
+                                    },
+                                    new ShowAllButton(showAll)
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Child = moreText = new OsuSpriteText
+                                        {
+                                            Margin = new MarginPadding { Horizontal = 5, Top = 2 },
+                                            Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
+                                            Colour = ScosuMenuStyle.VIOLET_INK,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    chip = new ChipButton(toggle)
+                    {
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = ScosuMenuStyle.GLASS,
+                            },
+                            new FillFlowContainer
+                            {
+                                AutoSizeAxes = Axes.Both,
+                                Direction = FillDirection.Horizontal,
+                                Spacing = new Vector2(6, 0),
+                                Padding = new MarginPadding { Horizontal = 11, Vertical = 5 },
+                                Children = new Drawable[]
+                                {
+                                    new Circle
+                                    {
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
+                                        Size = new Vector2(7),
+                                        Colour = dot_colour,
+                                    },
+                                    chipText = new OsuSpriteText
+                                    {
+                                        Anchor = Anchor.CentreLeft,
+                                        Origin = Anchor.CentreLeft,
+                                        Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
+                                    },
                                 },
                             },
                         },
                     },
                 },
             };
+        }
+
+        protected override void OnAnchorApplied(Anchor anchor)
+        {
+            bool bottom = (anchor & Anchor.y2) != 0;
+            bool left = (anchor & Anchor.x0) != 0;
+
+            // The list opens away from the screen's edge, and lines up with the chip on the side of the corner.
+            var side = left ? Anchor.TopLeft : Anchor.TopRight;
+            panel.Anchor = panel.Origin = chip.Anchor = chip.Origin = side;
+
+            content.SetLayoutPosition(panel, bottom ? -1 : 1);
+            content.SetLayoutPosition(chip, 0);
         }
 
         protected override void LoadComplete()
@@ -240,6 +304,7 @@ namespace osu.Game.Screens.Menu
                 list.SetLayoutPosition(list.Single(r => r.User.Equals(shown[i])), i);
 
             countText.Text = OnlinePlayersStrings.OnlineCount(users.Count.ToLocalisableString(@"N0")).ToUpper();
+            chipText.Text = OnlinePlayersStrings.OnlineCount(users.Count.ToLocalisableString(@"N0"));
 
             int hidden = users.Count - shown.Length;
             moreText.Text = hidden > 0 ? OnlinePlayersStrings.AndMore(hidden.ToLocalisableString(@"N0")) : OnlinePlayersStrings.ShowAll;
@@ -247,7 +312,42 @@ namespace osu.Game.Screens.Menu
             if (users.Count > 0)
                 content.FadeIn(transition_duration, Easing.OutQuint);
             else
+            {
+                expanded = false;
                 content.FadeOut(transition_duration, Easing.OutQuint);
+            }
+
+            updatePanel();
+        }
+
+        private void toggle() => setExpanded(!expanded);
+
+        private void setExpanded(bool value)
+        {
+            if (expanded == value)
+                return;
+
+            expanded = value;
+
+            // Taking focus is what lets a click elsewhere close the list again.
+            if (expanded)
+                GetContainingFocusManager()?.ChangeFocus(this);
+
+            updatePanel();
+        }
+
+        private void updatePanel()
+        {
+            if (expanded)
+                panel.FadeIn(200, Easing.OutQuint);
+            else
+                panel.FadeOut(200, Easing.OutQuint);
+        }
+
+        protected override void OnFocusLost(FocusLostEvent e)
+        {
+            base.OnFocusLost(e);
+            setExpanded(false);
         }
 
         private void showAll()
@@ -261,7 +361,11 @@ namespace osu.Game.Screens.Menu
 
         protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
 
-        protected override void PopOut() => this.FadeOut(transition_duration, Easing.OutQuint);
+        protected override void PopOut()
+        {
+            setExpanded(false);
+            this.FadeOut(transition_duration, Easing.OutQuint);
+        }
 
         protected override void Dispose(bool isDisposing)
         {
@@ -280,6 +384,22 @@ namespace osu.Game.Screens.Menu
             {
                 Action = action;
                 TooltipText = OnlinePlayersStrings.ShowAll;
+            }
+        }
+
+        /// <summary>
+        /// The pill at rest: a green dot and the number of players online.
+        /// </summary>
+        private partial class ChipButton : OsuClickableContainer
+        {
+            public ChipButton(Action action)
+            {
+                Action = action;
+                AutoSizeAxes = Axes.Both;
+                Masking = true;
+                CornerRadius = 99;
+                BorderThickness = 1.5f;
+                BorderColour = ScosuMenuStyle.OUTLINE;
             }
         }
 

@@ -30,11 +30,11 @@ namespace osu.Game.Screens.Menu
     /// The scosu event's card: its countdown, the local user's rank and objectives. Opens the <see cref="ScosuEventOverlay"/>.
     /// Hidden while logged out, while there is no event, or when the event's `look.menu_card` is off.
     /// </summary>
-    public partial class EventMenuCard : VisibilityContainer
+    public partial class EventMenuCard : CornerCard
     {
         private const float transition_duration = 500;
-        private const float card_width = 300;
-        private const float inner_width = card_width - 30;
+        private const float bar_width = 4;
+        private const float inner_width = CARD_WIDTH - ScosuMenuStyle.CARD_PADDING * 2 - bar_width;
 
         /// <summary>
         /// Where the event wants its card (the main menu moves it there).
@@ -59,7 +59,11 @@ namespace osu.Game.Screens.Menu
 
         private Container content = null!;
         private Box? background;
-        private OsuSpriteText countdown = null!;
+        private Drawable countBoxes = null!;
+        private OsuSpriteText days = null!;
+        private OsuSpriteText hours = null!;
+        private OsuSpriteText minutes = null!;
+        private OsuSpriteText endedOn = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -67,15 +71,11 @@ namespace osu.Game.Screens.Menu
             AutoSizeAxes = Axes.Both;
 
             // The margin is on the content, so that a hidden card leaves no gap in the menu's column.
-            InternalChild = content = new Container
+            InternalChild = Margined = content = new Container
             {
-                Width = card_width,
+                Width = CARD_WIDTH,
                 AutoSizeAxes = Axes.Y,
                 Alpha = 0,
-                Margin = new MarginPadding { Horizontal = 10, Top = 10 },
-                Masking = true,
-                CornerExponent = 2.5f,
-                CornerRadius = 15,
             };
         }
 
@@ -113,85 +113,84 @@ namespace osu.Game.Screens.Menu
 
             content.Children = new Drawable[]
             {
-                background = new Box
+                ScosuMenuStyle.CreateGlassBackground(),
+                // The picture, hover light and accent bar are clipped to the card's rounded corners.
+                new Container
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black,
-                    Alpha = 0.4f,
+                    Masking = true,
+                    CornerRadius = ScosuMenuStyle.CORNER_RADIUS,
+                    CornerExponent = 2.5f,
+                    Children = new[]
+                    {
+                        ev.Appearance.MenuImageUrl is string image ? EventDisplay.Picture(image, ev.Appearance.MenuDim) : Empty(),
+                        background = new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = ScosuMenuStyle.FILL,
+                            Alpha = 0,
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Y,
+                            Width = bar_width,
+                            Colour = accent,
+                        },
+                    },
                 },
                 new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
                     Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(0, 8),
+                    Padding = new MarginPadding
+                    {
+                        Left = ScosuMenuStyle.CARD_PADDING + bar_width,
+                        Vertical = ScosuMenuStyle.CARD_PADDING,
+                        Right = ScosuMenuStyle.CARD_PADDING,
+                    },
                     Children = new Drawable[]
                     {
-                        createHeader(ev, accentText),
-                        new FillFlowContainer
+                        new OsuSpriteText
+                        {
+                            Text = LocalisableString.Interpolate($@"{ScosuEventStrings.Label.ToUpper()} · {EventDisplay.StatusText(ev.Status).ToUpper()}"),
+                            Font = ScosuMenuStyle.Eyebrow,
+                            Spacing = new Vector2(1.5f, 0),
+                            Colour = accentText,
+                        },
+                        new OsuTextFlowContainer(t => t.Font = ScosuMenuStyle.Display(18))
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                            Spacing = new Vector2(0, 6),
-                            Padding = new MarginPadding { Horizontal = 15, Top = 8, Bottom = 12 },
+                            Text = ev.Title,
+                        },
+                        createCountdown(),
+                        createStanding(ev),
+                        createObjectives(ev, accent),
+                        new FillFlowContainer
+                        {
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Horizontal,
+                            Spacing = new Vector2(4, 0),
+                            Colour = accentText,
                             Children = new Drawable[]
                             {
-                                new FillFlowContainer
+                                new OsuSpriteText
                                 {
-                                    AutoSizeAxes = Axes.Both,
-                                    Direction = FillDirection.Horizontal,
-                                    Spacing = new Vector2(8, 0),
-                                    Children = new Drawable[]
-                                    {
-                                        heading(EventDisplay.CountdownLabel(ev).ToUpper()).With(d =>
-                                        {
-                                            d.Anchor = Anchor.BottomLeft;
-                                            d.Origin = Anchor.BottomLeft;
-                                            d.Margin = new MarginPadding { Bottom = 5 };
-                                        }),
-                                        countdown = new OsuSpriteText
-                                        {
-                                            Anchor = Anchor.BottomLeft,
-                                            Origin = Anchor.BottomLeft,
-                                            Font = OsuFont.GetFont(size: 26, weight: FontWeight.Light, fixedWidth: true),
-                                        },
-                                    },
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Text = ScosuEventStrings.Open,
+                                    Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
                                 },
-                                new Box
+                                new SpriteIcon
                                 {
-                                    RelativeSizeAxes = Axes.X,
-                                    Height = 1,
-                                    Colour = Color4.White,
-                                    Alpha = 0.12f,
-                                    Margin = new MarginPadding { Vertical = 2 },
-                                },
-                                createStanding(ev),
-                                createObjectives(ev, accent),
-                                new FillFlowContainer
-                                {
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
-                                    AutoSizeAxes = Axes.Both,
-                                    Direction = FillDirection.Horizontal,
-                                    Spacing = new Vector2(4, 0),
-                                    Colour = accentText,
-                                    Children = new Drawable[]
-                                    {
-                                        new OsuSpriteText
-                                        {
-                                            Anchor = Anchor.CentreLeft,
-                                            Origin = Anchor.CentreLeft,
-                                            Text = ScosuEventStrings.Open,
-                                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
-                                        },
-                                        new SpriteIcon
-                                        {
-                                            Anchor = Anchor.CentreLeft,
-                                            Origin = Anchor.CentreLeft,
-                                            Icon = FontAwesome.Solid.ChevronRight,
-                                            Size = new Vector2(9),
-                                        },
-                                    },
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Icon = FontAwesome.Solid.ChevronRight,
+                                    Size = new Vector2(9),
                                 },
                             },
                         },
@@ -205,57 +204,82 @@ namespace osu.Game.Screens.Menu
             content.FadeIn(transition_duration, Easing.OutQuint);
         }
 
-        private Drawable createHeader(APIScosuEvent ev, Color4 accentText)
+        /// <summary>
+        /// The days, hours and minutes left in boxes, or the day the event ended on.
+        /// </summary>
+        private Drawable createCountdown() => new FillFlowContainer
         {
-            var header = new Container
+            AutoSizeAxes = Axes.Both,
+            Direction = FillDirection.Horizontal,
+            Spacing = new Vector2(6, 0),
+            Children = new Drawable[]
             {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
-            };
-
-            if (ev.Appearance.MenuImageUrl is string image)
-                header.Add(EventDisplay.Picture(image, ev.Appearance.MenuDim));
-
-            header.Add(new FillFlowContainer
-            {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
-                Direction = FillDirection.Vertical,
-                Spacing = new Vector2(0, 4),
-                Padding = new MarginPadding { Horizontal = 15, Top = 12, Bottom = 10 },
-                Children = new Drawable[]
+                countBoxes = new FillFlowContainer
                 {
-                    new Container
+                    AutoSizeAxes = Axes.Both,
+                    Direction = FillDirection.Horizontal,
+                    Spacing = new Vector2(6, 0),
+                    Children = new[]
                     {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y,
-                        Children = new Drawable[]
-                        {
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.CentreLeft,
-                                Origin = Anchor.CentreLeft,
-                                Text = ScosuEventStrings.Label.ToUpper(),
-                                Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                                Colour = accentText,
-                            },
-                            EventDisplay.StatusPill(ev).With(d =>
-                            {
-                                d.Anchor = Anchor.CentreRight;
-                                d.Origin = Anchor.CentreRight;
-                            }),
-                        },
-                    },
-                    new OsuTextFlowContainer(t => t.Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold))
-                    {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y,
-                        Text = ev.Title,
+                        countBox(ScosuEventStrings.Days, out days),
+                        countBox(ScosuEventStrings.Hours, out hours),
+                        countBox(ScosuEventStrings.Minutes, out minutes),
                     },
                 },
-            });
+                endedOn = new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Font = ScosuMenuStyle.Display(18),
+                    Alpha = 0,
+                },
+            },
+        };
 
-            return header;
+        private static Drawable countBox(LocalisableString label, out OsuSpriteText number)
+        {
+            number = new OsuSpriteText
+            {
+                Anchor = Anchor.TopCentre,
+                Origin = Anchor.TopCentre,
+                Font = ScosuMenuStyle.Display(20),
+            };
+
+            return new Container
+            {
+                AutoSizeAxes = Axes.Y,
+                Width = 54,
+                Masking = true,
+                CornerRadius = 6,
+                Children = new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = ScosuMenuStyle.FILL,
+                    },
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Padding = new MarginPadding { Vertical = 5 },
+                        Children = new Drawable[]
+                        {
+                            number,
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Text = label.ToUpper(),
+                                Font = OsuFont.GetFont(size: 10, weight: FontWeight.SemiBold),
+                                Spacing = new Vector2(0.8f, 0),
+                                Colour = ScosuMenuStyle.TEXT_DIM,
+                            },
+                        },
+                    },
+                },
+            };
         }
 
         private Drawable createStanding(APIScosuEvent ev)
@@ -275,7 +299,7 @@ namespace osu.Game.Screens.Menu
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
                             Text = LocalisableString.Interpolate($@"#{position.ToLocalisableString(@"N0")}"),
-                            Font = OsuFont.GetFont(size: 18),
+                            Font = ScosuMenuStyle.Display(16),
                         },
                         new OsuSpriteText
                         {
@@ -283,7 +307,7 @@ namespace osu.Game.Screens.Menu
                             Origin = Anchor.BottomLeft,
                             Text = ScosuEventStrings.Of(ev.PlayerCount.ToLocalisableString(@"N0")),
                             Font = OsuFont.GetFont(size: 12),
-                            Colour = colours.GrayC,
+                            Colour = ScosuMenuStyle.TEXT_DIM,
                             Margin = new MarginPadding { Bottom = 2 },
                         },
                     },
@@ -291,7 +315,7 @@ namespace osu.Game.Screens.Menu
                 : new OsuSpriteText
                 {
                     Text = ScosuEventStrings.NotRanked,
-                    Font = OsuFont.GetFont(size: 14),
+                    Font = ScosuMenuStyle.Body(14),
                     Margin = new MarginPadding { Top = 3 },
                 };
 
@@ -379,7 +403,7 @@ namespace osu.Game.Screens.Menu
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
                         Text = nextText,
-                        Colour = colours.GrayC,
+                        Colour = ScosuMenuStyle.TEXT_DIM,
                     },
                 },
             };
@@ -395,8 +419,8 @@ namespace osu.Game.Screens.Menu
         private OsuSpriteText heading(LocalisableString text) => new OsuSpriteText
         {
             Text = text,
-            Font = OsuFont.GetFont(size: 11, weight: FontWeight.Bold),
-            Colour = colours.Yellow,
+            Font = OsuFont.GetFont(size: 11, weight: FontWeight.SemiBold),
+            Colour = ScosuMenuStyle.TEXT_DIM,
         };
 
         private void updateCountdown()
@@ -406,12 +430,20 @@ namespace osu.Game.Screens.Menu
 
             if (EventDisplay.CountdownTarget(shown) is not DateTimeOffset target)
             {
-                countdown.Text = EventDisplay.Day(shown.EndsAt);
+                countBoxes.Alpha = 0;
+                endedOn.Alpha = 1;
+                endedOn.Text = ScosuEventStrings.EndedOn(EventDisplay.Day(shown.EndsAt));
                 return;
             }
 
             var left = target - DateTimeOffset.Now;
-            countdown.Text = EventDisplay.ShortCountdown(left);
+
+            if (left < TimeSpan.Zero)
+                left = TimeSpan.Zero;
+
+            days.Text = ((int)left.TotalDays).ToString(@"0");
+            hours.Text = left.Hours.ToString(@"00");
+            minutes.Text = left.Minutes.ToString(@"00");
 
             // The event just started or ended: the provider fetches what comes next.
             if (left <= TimeSpan.Zero)
@@ -420,13 +452,13 @@ namespace osu.Game.Screens.Menu
 
         protected override bool OnHover(HoverEvent e)
         {
-            background?.FadeTo(0.55f, 200, Easing.OutQuint);
+            background?.FadeTo(1f, 200, Easing.OutQuint);
             return base.OnHover(e);
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            background?.FadeTo(0.4f, 200, Easing.OutQuint);
+            background?.FadeTo(0f, 200, Easing.OutQuint);
             base.OnHoverLost(e);
         }
 

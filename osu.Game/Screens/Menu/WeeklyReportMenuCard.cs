@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -29,13 +30,15 @@ namespace osu.Game.Screens.Menu
     /// Hidden while logged out, on servers without reports, when there is no recent report, and once the report is opened or dismissed
     /// (see <see cref="OsuSetting.ScosuSeenWeeklyReport"/>).
     /// </summary>
-    public partial class WeeklyReportMenuCard : VisibilityContainer
+    public partial class WeeklyReportMenuCard : CornerCard
     {
         private const float transition_duration = 500;
-        private const float card_width = 300;
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private WeeklyReportProvider provider { get; set; } = null!;
 
         [Resolved]
         private OsuConfigManager config { get; set; } = null!;
@@ -46,10 +49,9 @@ namespace osu.Game.Screens.Menu
         [Resolved]
         private OsuGame? game { get; set; }
 
-        private readonly IBindable<APIState> apiState = new Bindable<APIState>();
+        private readonly IBindable<IReadOnlyList<APIWeeklyReport>?> reports = new Bindable<IReadOnlyList<APIWeeklyReport>?>();
         private readonly Bindable<string> seenWeek = new Bindable<string>();
 
-        private GetWeeklyReportsRequest? request;
         private APIWeeklyReport? shown;
 
         private Container content = null!;
@@ -60,16 +62,11 @@ namespace osu.Game.Screens.Menu
         {
             AutoSizeAxes = Axes.Both;
 
-            // The margin is on the content, so that a hidden card leaves no gap in the menu's column.
-            InternalChild = content = new Container
+            InternalChild = Margined = content = new Container
             {
-                Width = card_width,
+                Width = CARD_WIDTH,
                 AutoSizeAxes = Axes.Y,
                 Alpha = 0,
-                Margin = new MarginPadding { Horizontal = 10, Top = 10 },
-                Masking = true,
-                CornerExponent = 2.5f,
-                CornerRadius = 15,
             };
 
             config.BindWith(OsuSetting.ScosuSeenWeeklyReport, seenWeek);
@@ -79,45 +76,18 @@ namespace osu.Game.Screens.Menu
         {
             base.LoadComplete();
 
-            // The API's state changes on its own thread.
-            apiState.BindTo(api.State);
-            apiState.BindValueChanged(_ => Schedule(Refresh));
-            seenWeek.BindValueChanged(_ => Scheduler.AddOnce(Refresh));
-            Refresh();
+            reports.BindTo(provider.Reports);
+            reports.BindValueChanged(_ => Scheduler.AddOnce(update));
+            seenWeek.BindValueChanged(_ => Scheduler.AddOnce(update));
+            update();
         }
 
         /// <summary>
         /// Fetches the reports again, e.g. after a play.
         /// </summary>
-        public void Refresh() => Scheduler.AddOnce(fetch);
+        public void Refresh() => provider.Refresh();
 
-        private void fetch()
-        {
-            request?.Cancel();
-            request = null;
-
-            // Only scosu servers have reports.
-            if (!api.Endpoints.RanksByStableScore || apiState.Value != APIState.Online)
-            {
-                display(null);
-                return;
-            }
-
-            var req = request = new GetWeeklyReportsRequest(api.LocalUser.Value.Id);
-
-            req.Success += reports =>
-            {
-                if (req == request)
-                    display(ScosuMenuFormatting.FindUnseenReport(reports, seenWeek.Value, DateTimeOffset.UtcNow));
-            };
-            req.Failure += _ =>
-            {
-                if (req == request)
-                    display(null);
-            };
-
-            api.Queue(req);
-        }
+        private void update() => display(reports.Value == null ? null : ScosuMenuFormatting.FindUnseenReport(reports.Value, seenWeek.Value, DateTimeOffset.UtcNow));
 
         private void display(APIWeeklyReport? report)
         {
@@ -138,11 +108,12 @@ namespace osu.Game.Screens.Menu
 
             content.Children = new Drawable[]
             {
+                ScosuMenuStyle.CreateGlassBackground(),
                 background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black,
-                    Alpha = 0.4f,
+                    Colour = ScosuMenuStyle.FILL,
+                    Alpha = 0,
                 },
                 new FillFlowContainer
                 {
@@ -150,19 +121,20 @@ namespace osu.Game.Screens.Menu
                     AutoSizeAxes = Axes.Y,
                     Direction = FillDirection.Vertical,
                     Spacing = new Vector2(0, 4),
-                    Padding = new MarginPadding { Horizontal = 15, Vertical = 12 },
+                    Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING),
                     Children = new Drawable[]
                     {
                         new OsuSpriteText
                         {
                             Text = ScosuMenuStrings.WeeklyReportLabel.ToUpper(),
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                            Colour = colours.Yellow,
+                            Font = ScosuMenuStyle.Eyebrow,
+                            Spacing = new Vector2(1.5f, 0),
+                            Colour = ScosuMenuStyle.VIOLET,
                         },
                         new OsuSpriteText
                         {
                             Text = ScosuMenuStrings.WeeklyReportTitle,
-                            Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
+                            Font = ScosuMenuStyle.Display(20),
                         },
                         new FillFlowContainer
                         {
@@ -174,7 +146,7 @@ namespace osu.Game.Screens.Menu
                             ChildrenEnumerable = highlights.Select(h => new OsuSpriteText
                             {
                                 Text = ScosuMenuFormatting.HighlightText(h),
-                                Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold),
+                                Font = ScosuMenuStyle.Body(14, FontWeight.SemiBold),
                                 Colour = h.Change == @"worse" ? colours.Orange1 : Color4.White,
                             }),
                         },
@@ -186,7 +158,7 @@ namespace osu.Game.Screens.Menu
                             Direction = FillDirection.Horizontal,
                             Spacing = new Vector2(4, 0),
                             Margin = new MarginPadding { Top = 4 },
-                            Colour = colours.Yellow,
+                            Colour = ScosuMenuStyle.VIOLET_INK,
                             Children = new Drawable[]
                             {
                                 new OsuSpriteText
@@ -194,7 +166,7 @@ namespace osu.Game.Screens.Menu
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
                                     Text = ScosuMenuStrings.OpenReport,
-                                    Font = OsuFont.GetFont(size: 12, weight: FontWeight.SemiBold),
+                                    Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
                                 },
                                 new SpriteIcon
                                 {
@@ -235,13 +207,13 @@ namespace osu.Game.Screens.Menu
 
         protected override bool OnHover(HoverEvent e)
         {
-            background.FadeTo(0.55f, 200, Easing.OutQuint);
+            background.FadeTo(1f, 200, Easing.OutQuint);
             return base.OnHover(e);
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            background.FadeTo(0.4f, 200, Easing.OutQuint);
+            background.FadeTo(0f, 200, Easing.OutQuint);
             base.OnHoverLost(e);
         }
 
@@ -260,14 +232,6 @@ namespace osu.Game.Screens.Menu
         protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
 
         protected override void PopOut() => this.FadeOut(transition_duration, Easing.OutQuint);
-
-        protected override void Dispose(bool isDisposing)
-        {
-            request?.Cancel();
-            request = null;
-
-            base.Dispose(isDisposing);
-        }
 
         private partial class DismissButton : OsuClickableContainer
         {
