@@ -123,6 +123,7 @@ namespace osu.Game.Screens.Menu
         private ParallaxContainer buttonsContainer;
         private MenuHubPage hubPage;
         private HubDock hubDock;
+        private HubHint hubHint;
         private bool hubOpen;
 
         // scosu: shared by the corner cards and the hub's tiles, so that they make one request each.
@@ -227,7 +228,7 @@ namespace osu.Game.Screens.Menu
                     Origin = Anchor.BottomCentre,
                     Spacing = new Vector2(5),
                     // Above the bar and the hub's hint.
-                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + MenuHubPage.HANDLE_HEIGHT + 20 },
+                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + HubHint.HEIGHT + 20 },
                     Children = new Drawable[]
                     {
                         menuTipDisplay = new MenuTipDisplay
@@ -305,7 +306,6 @@ namespace osu.Game.Screens.Menu
                         // The hub: the menu's second screen, a grid of tiles that scrolls in from below (see setHub()).
                         hubPage = new MenuHubPage
                         {
-                            RequestState = setHub,
                             OnDailyChallenge = openDailyChallenge,
                         },
                         // The bar along the bottom (today's score, the event, players and friends online, the song playing),
@@ -314,6 +314,17 @@ namespace osu.Game.Screens.Menu
                         {
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
+                        },
+                        // "On scosu now" at the bottom of the first screen, above the bar (and in front of its shadow): opens the hub, and scrolls away with the band.
+                        hubHint = new HubHint
+                        {
+                            Anchor = Anchor.BottomCentre,
+                            Origin = Anchor.BottomCentre,
+                            RelativePositionAxes = Axes.Y,
+                            Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 4 },
+                            Alpha = 0,
+                            Action = () => setHub(true),
+                            Scrolled = up => setHub(!up),
                         },
                         // The band, docked along the top while the hub is open.
                         hubDock = new HubDock(new[]
@@ -341,20 +352,18 @@ namespace osu.Game.Screens.Menu
                 holdToExitGameOverlay?.CreateProxy() ?? Empty()
             });
 
-            float baseDim = SeasonalUIConfig.ENABLED ? 0.84f : 1;
-
             Buttons.StateChanged += state =>
             {
                 // The hub closes with the band (back to the logo, or leaving the menu).
                 if (!bandIsOut)
                     setHub(false);
-                hubPage.Available = bandIsOut;
+                updateHint();
 
                 switch (state)
                 {
                     case ButtonSystemState.Initial:
                     case ButtonSystemState.Exit:
-                        ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
+                        updateBackgroundDim();
                         onlineMenuBanner.State.Value = Visibility.Hidden;
                         eventMenuCard.Hide();
                         weeklyReportCard.Hide();
@@ -363,7 +372,7 @@ namespace osu.Game.Screens.Menu
                         break;
 
                     default:
-                        ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
+                        updateBackgroundDim();
                         onlineMenuBanner.State.Value = Visibility.Visible;
                         eventMenuCard.Show();
                         weeklyReportCard.Show();
@@ -422,12 +431,25 @@ namespace osu.Game.Screens.Menu
 
             float y = open ? -1 : 0;
 
-            foreach (var drawable in new Drawable[] { buttonsContainer, leftDisplays, rightDisplays, bottomLeftDisplays, bottomElementsFlow })
+            foreach (var drawable in new Drawable[] { buttonsContainer, leftDisplays, rightDisplays, bottomLeftDisplays, bottomElementsFlow, hubHint })
                 drawable.MoveToY(y, MenuHubPage.SCROLL_DURATION, Easing.OutQuint);
 
             ApplyToBackground(b => b.MoveToY(open ? -hub_background_parallax : 0, MenuHubPage.SCROLL_DURATION, Easing.OutQuint));
+            updateBackgroundDim();
 
             hubPage.State.Value = hubDock.State.Value = open ? Visibility.Visible : Visibility.Hidden;
+            updateHint();
+        }
+
+        /// <summary>
+        /// The hint shows while the hub can be opened: the band is out and the hub closed.
+        /// </summary>
+        private void updateHint()
+        {
+            bool shown = bandIsOut && !hubOpen;
+
+            hubHint.FadeTo(shown ? 1 : 0, shown ? 400 : 200, Easing.OutQuint);
+            hubHint.Enabled.Value = shown;
         }
 
         /// <summary>
@@ -444,6 +466,19 @@ namespace osu.Game.Screens.Menu
             }
 
             target.SetLayoutPosition(card, layoutPosition);
+        }
+
+        /// <summary>
+        /// Full brightness on the logo, a little darker with the band out, and darker again on the hub, so that its tiles read.
+        /// </summary>
+        private void updateBackgroundDim()
+        {
+            float dim = SeasonalUIConfig.ENABLED ? 0.84f : 1;
+
+            if (Buttons.State is not (ButtonSystemState.Initial or ButtonSystemState.Exit))
+                dim *= hubOpen ? 0.55f : 0.75f;
+
+            ApplyToBackground(b => b.FadeColour(OsuColour.Gray(dim), hubOpen ? MenuHubPage.SCROLL_DURATION : 500, Easing.OutSine));
         }
 
         private void editBeatmap()

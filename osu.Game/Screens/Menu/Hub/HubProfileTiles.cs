@@ -11,6 +11,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -162,10 +163,14 @@ namespace osu.Game.Screens.Menu.Hub
     }
 
     /// <summary>
-    /// Hit accuracy, with a ring behind it and the counts of the best grades.
+    /// The user's accuracy: the figure, a bar split by their SS, S and A grades (with the counts under it), and a ring gauge
+    /// with the grade that accuracy is worth in its middle. Opens the profile.
     /// </summary>
     public partial class HubAccuracyTile : HubProfileTile
     {
+        private const float ring_size = 86;
+        private const float ring_stroke = 7;
+
         public HubAccuracyTile(HubProfileProvider profile)
             : base(profile, MenuHubStrings.Accuracy, FontAwesome.Solid.Bullseye)
         {
@@ -174,72 +179,163 @@ namespace osu.Game.Screens.Menu.Hub
         protected override void Display()
         {
             double accuracy = User.Statistics?.Accuracy ?? 0;
+            var grades = User.Statistics?.GradesCount ?? default;
+
+            (string letter, int count, ScoreRank rank)[] parts =
+            {
+                (@"SS", grades.SS + (grades.SSPlus ?? 0), ScoreRank.X),
+                (@"S", grades.S + (grades.SPlus ?? 0), ScoreRank.S),
+                (@"A", grades.A, ScoreRank.A),
+            };
+
+            var tier = rankFor(accuracy);
 
             SetBackground(new Container
             {
                 Anchor = Anchor.CentreRight,
                 Origin = Anchor.CentreRight,
-                Size = new Vector2(120),
-                X = -20,
+                Size = new Vector2(ring_size),
+                X = -18,
                 Children = new Drawable[]
                 {
-                    new CircularProgress { RelativeSizeAxes = Axes.Both, InnerRadius = 0.1f, Progress = 1, Colour = Color4.White.Opacity(0.06f) },
-                    new CircularProgress { RelativeSizeAxes = Axes.Both, InnerRadius = 0.1f, Progress = Math.Clamp(accuracy / 100, 0, 1), Colour = ScosuMenuStyle.VIOLET.Opacity(0.6f) },
+                    new CircularProgress
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        InnerRadius = ring_stroke / ring_size,
+                        Progress = 1,
+                        Colour = Color4.White.Opacity(0.07f),
+                    },
+                    new CircularProgress
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        InnerRadius = ring_stroke / ring_size,
+                        RoundedCaps = true,
+                        Progress = Math.Clamp(accuracy / 100, 0, 1),
+                        Colour = ColourInfo.GradientVertical(ScosuMenuStyle.VIOLET, ScosuMenuStyle.ICE),
+                    },
+                    new FillFlowContainer
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Text = RankLetter(tier),
+                                Font = ScosuMenuStyle.Display(26),
+                                Colour = OsuColour.ForRank(tier),
+                            },
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Text = MenuHubStrings.AverageGrade,
+                                Font = ScosuMenuStyle.Body(9, FontWeight.SemiBold),
+                                Colour = ScosuMenuStyle.TEXT_DIM,
+                            },
+                        },
+                    },
                 },
             }, 0);
 
             Body.Add(Big(accuracy.ToString(@"0.00", CultureInfo.InvariantCulture) + @"%"));
 
-            var grades = User.Statistics?.GradesCount ?? default;
+            int total = parts.Sum(p => p.count);
 
-            Body.Add(new FillFlowContainer
+            // Clear of the ring on the right.
+            var breakdown = new FillFlowContainer
+            {
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(0, 7),
+                Margin = new MarginPadding { Top = 4 },
+                Padding = new MarginPadding { Right = ring_size + 36 },
+            };
+
+            var bar = new FillFlowContainer
+            {
+                RelativeSizeAxes = Axes.X,
+                Height = 5,
+                Direction = FillDirection.Horizontal,
+                Masking = true,
+                CornerRadius = 2.5f,
+            };
+
+            if (total > 0)
+            {
+                foreach (var part in parts.Where(p => p.count > 0))
+                {
+                    bar.Add(new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Width = (float)part.count / total,
+                        Colour = OsuColour.ForRank(part.rank),
+                    });
+                }
+            }
+            else
+                bar.Add(new Box { RelativeSizeAxes = Axes.Both, Colour = Color4.White.Opacity(0.1f) });
+
+            breakdown.Add(bar);
+            breakdown.Add(new FillFlowContainer
             {
                 AutoSizeAxes = Axes.Both,
                 Direction = FillDirection.Horizontal,
-                Spacing = new Vector2(8, 0),
-                Margin = new MarginPadding { Top = 6 },
-                Children = new Drawable[]
-                {
-                    badge(@"SS", grades.SS + (grades.SSPlus ?? 0), ScoreRank.X),
-                    badge(@"S", grades.S + (grades.SPlus ?? 0), ScoreRank.S),
-                    badge(@"A", grades.A, ScoreRank.A),
-                },
+                Spacing = new Vector2(14, 0),
+                ChildrenEnumerable = parts.Select(p => legend(p.letter, p.count, p.rank)),
             });
+
+            Body.Add(breakdown);
 
             OpenProfile();
         }
 
-        private static Drawable badge(string letter, int count, ScoreRank rank) => new CircularContainer
+        /// <summary>
+        /// The grade a play with this accuracy would get (osu!'s thresholds, ignoring misses).
+        /// </summary>
+        private static ScoreRank rankFor(double accuracy) => accuracy switch
+        {
+            >= 100 => ScoreRank.X,
+            > 95 => ScoreRank.S,
+            > 90 => ScoreRank.A,
+            > 80 => ScoreRank.B,
+            > 70 => ScoreRank.C,
+            _ => ScoreRank.D,
+        };
+
+        private static Drawable legend(string letter, int count, ScoreRank rank) => new FillFlowContainer
         {
             AutoSizeAxes = Axes.Both,
-            Masking = true,
+            Direction = FillDirection.Horizontal,
+            Spacing = new Vector2(5, 0),
             Children = new Drawable[]
             {
-                new Box
+                new Circle
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = ScosuMenuStyle.FILL,
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Size = new Vector2(6),
+                    Colour = OsuColour.ForRank(rank),
                 },
-                new FillFlowContainer
+                new OsuSpriteText
                 {
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Horizontal,
-                    Spacing = new Vector2(5, 0),
-                    Padding = new MarginPadding { Horizontal = 9, Vertical = 3 },
-                    Children = new Drawable[]
-                    {
-                        new OsuSpriteText
-                        {
-                            Text = letter,
-                            Font = OsuFont.GetFont(size: 12, weight: FontWeight.Bold),
-                            Colour = OsuColour.ForRank(rank),
-                        },
-                        new OsuSpriteText
-                        {
-                            Text = count.ToString(@"N0"),
-                            Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
-                        },
-                    },
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = letter,
+                    Font = OsuFont.GetFont(size: 11, weight: FontWeight.Bold),
+                    Colour = OsuColour.ForRank(rank),
+                },
+                new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Text = count.ToString(@"N0"),
+                    Font = ScosuMenuStyle.Body(11, FontWeight.SemiBold),
                 },
             },
         };
@@ -388,14 +484,34 @@ namespace osu.Game.Screens.Menu.Hub
     /// </summary>
     public partial class HubRecentTile : HubProfileTile
     {
-        private const float row_height = 40;
-        private const float row_spacing = 2;
+        private const float row_height = 34;
 
-        private FillFlowContainer<RecentRow>? rows;
+        /// <summary>
+        /// Where the list starts: under the eyebrow.
+        /// </summary>
+        private const float list_top = 30;
+
+        private readonly HubScrollContainer list;
+        private readonly FillFlowContainer<RecentRow> rows;
 
         public HubRecentTile(HubProfileProvider profile)
             : base(profile, MenuHubStrings.RecentPlays, FontAwesome.Solid.History)
         {
+            // The whole height under the eyebrow, scrolled when the plays don't all fit.
+            Add(list = new HubScrollContainer
+            {
+                RelativeSizeAxes = Axes.Both,
+                Padding = new MarginPadding { Top = list_top, Bottom = 6, Horizontal = 6 },
+                Alpha = 0,
+                Child = rows = new FillFlowContainer<RecentRow>
+                {
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y,
+                    Direction = FillDirection.Vertical,
+                    // Clear of the scrollbar.
+                    Padding = new MarginPadding { Right = 8 },
+                },
+            });
         }
 
         protected override void BindSources() => Profile.Recent.BindValueChanged(_ => Refresh());
@@ -412,43 +528,26 @@ namespace osu.Game.Screens.Menu.Hub
             if (scores[0].Beatmap?.BeatmapSet is APIBeatmapSet cover)
                 SetBackground(Cover(cover), 0.85f);
 
-            Body.Add(rows = new FillFlowContainer<RecentRow>
-            {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
-                Direction = FillDirection.Vertical,
-                Spacing = new Vector2(0, row_spacing),
-                // The rows' hover highlight reaches a little past the tile's text.
-                Margin = new MarginPadding { Horizontal = -8 },
-                ChildrenEnumerable = scores.Select(score => new RecentRow(score, row_height) { Action = () => Game?.ShowBeatmap(score.BeatmapID) }),
-            });
+            rows.ChildrenEnumerable = scores.Select(score => new RecentRow(score, row_height) { Action = () => Game?.ShowBeatmap(score.BeatmapID) });
+            list.ScrollToStart(false);
+            list.Show();
 
             if (scores.Length > 1)
             {
                 double average = scores.Average(s => s.Accuracy) * 100;
-                SetFoot(FontAwesome.Solid.Bullseye, MenuHubStrings.RecentAverage($@"{average:0.00}%", scores.Length.ToString(CultureInfo.CurrentCulture)));
+                SetEyebrowDetail(MenuHubStrings.RecentAverage($@"{average:0.00}%", scores.Length.ToString(CultureInfo.CurrentCulture)));
             }
-            else
-                SetFoot(null, default);
+
+            SetFoot(null, default);
 
             // The rows open their own beatmaps.
             SetAction(null);
         }
 
-        protected override void UpdateAfterChildren()
+        protected override void OnPlaceholderShown()
         {
-            base.UpdateAfterChildren();
-
-            if (rows == null || rows.Count == 0)
-                return;
-
-            // Only whole rows: as many as fit between the eyebrow and the foot.
-            float top = ToLocalSpace(rows.ScreenSpaceDrawQuad.TopLeft).Y;
-            float available = DrawHeight - top - 34;
-            int fit = Math.Max(1, (int)((available + row_spacing) / (row_height + row_spacing)));
-
-            for (int i = 0; i < rows.Count; i++)
-                rows[i].Alpha = i < fit ? 1 : 0;
+            list.Hide();
+            rows.Clear();
         }
 
         private partial class RecentRow : OsuClickableContainer
@@ -498,8 +597,8 @@ namespace osu.Game.Screens.Menu.Hub
                         Padding = new MarginPadding { Horizontal = 8 },
                         ColumnDimensions = new[]
                         {
-                            new Dimension(GridSizeMode.Absolute, 38),
-                            new Dimension(GridSizeMode.Absolute, 64),
+                            new Dimension(GridSizeMode.Absolute, 36),
+                            new Dimension(GridSizeMode.Absolute, 54),
                             new Dimension(),
                             new Dimension(GridSizeMode.AutoSize),
                             new Dimension(GridSizeMode.AutoSize),
@@ -513,16 +612,16 @@ namespace osu.Game.Screens.Menu.Hub
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Size = new Vector2(32, 16),
+                                    Size = new Vector2(30, 15),
                                     Child = new DrawableRank(score.Rank),
                                 },
                                 new Container
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Size = new Vector2(52, 32),
+                                    Size = new Vector2(44, 26),
                                     Masking = true,
-                                    CornerRadius = 6,
+                                    CornerRadius = 5,
                                     Children = new Drawable[]
                                     {
                                         new Box
@@ -547,7 +646,7 @@ namespace osu.Game.Screens.Menu.Hub
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Text = set != null ? new RomanisableString(set.TitleUnicode, set.Title) : $@"#{score.BeatmapID}",
-                                            Font = ScosuMenuStyle.Body(14, FontWeight.SemiBold),
+                                            Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
                                             // A failed play is dimmer.
                                             Colour = score.Rank != ScoreRank.F ? Color4.White : ScosuMenuStyle.TEXT_DIM,
                                         },

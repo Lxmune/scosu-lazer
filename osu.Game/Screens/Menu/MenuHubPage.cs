@@ -2,16 +2,19 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Rooms;
 using osu.Game.Screens.Menu.Hub;
 using osuTK;
@@ -23,15 +26,10 @@ namespace osu.Game.Screens.Menu
     /// scosu: the main menu's hub, its second screen: "On scosu now" and a grid of tiles (your score, the event, the daily challenge,
     /// friends, the weekly report, news, then your profile's plays, accuracy, country rank, medals, best and recent plays).
     /// The menu scrolls down to it (the band, the logo and the corner cards leave at the top while it comes in from below),
-    /// and back up. The hint at the bottom of the first screen opens it (by clicking, or scrolling on it).
+    /// and back up (see MainMenu.setHub()).
     /// </summary>
     public partial class MenuHubPage : VisibilityContainer
     {
-        /// <summary>
-        /// The height of the "On scosu now" hint at the bottom of the first screen.
-        /// </summary>
-        public const float HANDLE_HEIGHT = 36;
-
         /// <summary>
         /// How long the menu takes to scroll from one screen to the other.
         /// </summary>
@@ -50,12 +48,6 @@ namespace osu.Game.Screens.Menu
         private const int rows = 4;
 
         /// <summary>
-        /// Asks for the hub to be opened (true) or closed (false), from its hint.
-        /// The menu decides, since opening also scrolls the band and the cards away.
-        /// </summary>
-        public Action<bool>? RequestState;
-
-        /// <summary>
         /// Called when the daily challenge tile is clicked, with the challenge's room.
         /// </summary>
         public Action<Room>? OnDailyChallenge;
@@ -70,11 +62,16 @@ namespace osu.Game.Screens.Menu
         private readonly Container gridHolder;
         private readonly HubTile[] tiles;
         private readonly HubDailyTile dailyTile;
+        private readonly HubEventTile eventTile;
+        private readonly Dictionary<HubTile, Container> cells = new Dictionary<HubTile, Container>();
+        private readonly (HubTile tile, int column, int row, int columns, int rows)[] withEvent;
+        private readonly (HubTile tile, int column, int row, int columns, int rows)[] withoutEvent;
+        private readonly IBindable<APIScosuEvent?> currentEvent = new Bindable<APIScosuEvent?>();
+
+        [Resolved]
+        private ScosuEventProvider? eventProvider { get; set; }
         private readonly HubNewsTile newsTile;
         private readonly HubProfileProvider profile;
-        private readonly HubHandle handle;
-
-        private bool available;
 
         public MenuHubPage()
         {
@@ -84,24 +81,54 @@ namespace osu.Game.Screens.Menu
 
             dailyTile = new HubDailyTile { OnDailyChallenge = room => OnDailyChallenge?.Invoke(room) };
 
+            eventTile = new HubEventTile();
+
+            var score = new HubScoreTile(profile);
+            var friends = new HubFriendsTile();
+            var report = new HubReportTile();
+            newsTile = new HubNewsTile();
+            var plays = new HubPlaysTile(profile);
+            var accuracy = new HubAccuracyTile(profile);
+            var country = new HubCountryTile(profile);
+            var medals = new HubMedalsTile(profile);
+            var best = new HubBestTile(profile);
+            var recent = new HubRecentTile(profile);
+
             // Six columns by four rows, all on the page unless the window is too small for them.
-            (HubTile tile, int column, int row, int columns, int rows)[] layout =
+            // With an event, its tile takes a 2×2 block in the middle of the first two rows.
+            withEvent = new (HubTile, int, int, int, int)[]
             {
-                (new HubScoreTile(profile), 0, 0, 3, 1),
-                (new HubEventTile(), 3, 0, 2, 2),
+                (score, 0, 0, 3, 1),
+                (eventTile, 3, 0, 2, 2),
                 (dailyTile, 5, 0, 1, 1),
-                (new HubFriendsTile(), 0, 1, 1, 1),
-                (new HubReportTile(), 1, 1, 2, 1),
-                (newsTile = new HubNewsTile(), 5, 1, 1, 1),
-                (new HubPlaysTile(profile), 0, 2, 2, 1),
-                (new HubAccuracyTile(profile), 2, 2, 2, 1),
-                (new HubCountryTile(profile), 4, 2, 1, 1),
-                (new HubMedalsTile(profile), 5, 2, 1, 1),
-                (new HubBestTile(profile), 0, 3, 2, 1),
-                (new HubRecentTile(profile), 2, 3, 4, 1),
+                (friends, 0, 1, 1, 1),
+                (report, 1, 1, 2, 1),
+                (newsTile, 5, 1, 1, 1),
+                (plays, 0, 2, 2, 1),
+                (accuracy, 2, 2, 2, 1),
+                (country, 4, 2, 1, 1),
+                (medals, 5, 2, 1, 1),
+                (best, 0, 3, 2, 1),
+                (recent, 2, 3, 4, 1),
             };
 
-            tiles = layout.Select(l => l.tile).ToArray();
+            // Without one, its tile is gone and the others close up: the plays get wider, and the recent plays the whole last row.
+            withoutEvent = new (HubTile, int, int, int, int)[]
+            {
+                (score, 0, 0, 3, 1),
+                (dailyTile, 3, 0, 1, 1),
+                (newsTile, 4, 0, 2, 1),
+                (friends, 0, 1, 1, 1),
+                (report, 1, 1, 2, 1),
+                (plays, 3, 1, 3, 1),
+                (accuracy, 0, 2, 2, 1),
+                (country, 2, 2, 1, 1),
+                (medals, 3, 2, 1, 1),
+                (best, 4, 2, 2, 1),
+                (recent, 0, 3, 6, 1),
+            };
+
+            tiles = withEvent.Select(l => l.tile).ToArray();
 
             gridHolder = new Container
             {
@@ -109,20 +136,22 @@ namespace osu.Game.Screens.Menu
                 Padding = new MarginPadding(-cell_gap / 2),
             };
 
-            foreach (var l in layout)
+            foreach (var tile in tiles)
             {
-                gridHolder.Add(new Container
+                var cell = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
                     RelativePositionAxes = Axes.Both,
-                    X = (float)l.column / columns,
-                    Y = (float)l.row / rows,
-                    Width = (float)l.columns / columns,
-                    Height = (float)l.rows / rows,
                     Padding = new MarginPadding(cell_gap / 2),
-                    Child = l.tile,
-                });
+                    Child = tile,
+                };
+
+                cells[tile] = cell;
+                gridHolder.Add(cell);
             }
+
+            // Laid out without the event until the event provider says there is one.
+            applyLayout(false, false);
 
             InternalChildren = new Drawable[]
             {
@@ -158,40 +187,44 @@ namespace osu.Game.Screens.Menu
                         },
                     },
                 },
-                handle = new HubHandle
-                {
-                    RelativePositionAxes = Axes.Y,
-                    Anchor = Anchor.BottomCentre,
-                    Origin = Anchor.BottomCentre,
-                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 4 },
-                    // Shown once the hub is available (see Available).
-                    Alpha = 0,
-                    Action = () => RequestState?.Invoke(true),
-                    Scrolled = up => RequestState?.Invoke(!up),
-                },
             };
+        }
 
-            handle.Enabled.Value = false;
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            if (eventProvider != null)
+                currentEvent.BindTo(eventProvider.Event);
+
+            currentEvent.BindValueChanged(e => applyLayout(e.NewValue != null, true), true);
         }
 
         /// <summary>
-        /// Whether the hub can be opened at all: only while the band is out (not on the logo, nor while leaving the menu).
-        /// The hint is hidden otherwise.
+        /// Places the tiles for whether there is an event: they glide to their new places when the event starts or ends
+        /// while the hub is open.
         /// </summary>
-        public bool Available
+        private void applyLayout(bool hasEvent, bool animate)
         {
-            get => available;
-            set
+            var layout = hasEvent ? withEvent : withoutEvent;
+            double duration = animate && State.Value == Visibility.Visible ? 500 : 0;
+
+            foreach (var (tile, cell) in cells)
             {
-                if (available == value)
-                    return;
+                int index = Array.FindIndex(layout, l => l.tile == tile);
 
-                available = value;
+                if (index < 0)
+                {
+                    // Out of the layout: hidden, so it takes no input either.
+                    cell.FadeOut(duration / 2, Easing.OutQuint);
+                    continue;
+                }
 
-                if (!available)
-                    Hide();
+                var l = layout[index];
 
-                updateHandle();
+                cell.FadeIn(duration, Easing.OutQuint);
+                cell.MoveTo(new Vector2((float)l.column / columns, (float)l.row / rows), duration, Easing.OutQuint);
+                cell.ResizeTo(new Vector2((float)l.columns / columns, (float)l.rows / rows), duration, Easing.OutQuint);
             }
         }
 
@@ -207,8 +240,6 @@ namespace osu.Game.Screens.Menu
         {
             panel.FadeIn();
             panel.MoveToY(0, SCROLL_DURATION, Easing.OutQuint);
-            handle.MoveToY(-1, SCROLL_DURATION, Easing.OutQuint);
-            updateHandle();
 
             scroll.ScrollToStart(false);
             newsTile.RefreshIfStale();
@@ -227,36 +258,6 @@ namespace osu.Game.Screens.Menu
         {
             // Hidden at the end, so that nothing of the panel shows through the bar once it is a screen below.
             panel.MoveToY(1, SCROLL_DURATION, Easing.OutQuint).Then().FadeOut();
-            handle.MoveToY(0, SCROLL_DURATION, Easing.OutQuint);
-            updateHandle();
-        }
-
-        private void updateHandle()
-        {
-            bool shown = available && State.Value == Visibility.Hidden;
-
-            handle.FadeTo(shown ? 1 : 0, shown ? 400 : 200, Easing.OutQuint);
-            handle.Enabled.Value = shown;
-        }
-
-        /// <summary>
-        /// Only takes the scroll it can use: the menu behind the page scrolls back up to the band on scrolling up,
-        /// and down to the hub on scrolling down.
-        /// </summary>
-        private partial class HubScrollContainer : OsuScrollContainer
-        {
-            protected override bool OnScroll(ScrollEvent e)
-            {
-                if (ScrollContent.DrawHeight <= DisplayableContent + 0.5f)
-                    return false;
-
-                bool up = e.ScrollDelta.Y > 0;
-
-                if (up ? Current <= 0 : IsScrolledToEnd())
-                    return false;
-
-                return base.OnScroll(e);
-            }
         }
 
         /// <summary>
@@ -270,63 +271,6 @@ namespace osu.Game.Screens.Menu
             protected override bool OnMouseDown(MouseDownEvent e) => true;
 
             protected override bool OnClick(ClickEvent e) => true;
-        }
-
-        /// <summary>
-        /// "On scosu now" with a chevron under it, at the bottom of the first screen just above the bar:
-        /// says there is more below, and leaves with the first screen when the hub opens.
-        /// </summary>
-        private partial class HubHandle : OsuClickableContainer
-        {
-            public Action<bool>? Scrolled;
-
-            public HubHandle()
-            {
-                // Before load: OsuClickableContainer sets its content up for auto-sizing there.
-                AutoSizeAxes = Axes.X;
-                Height = HANDLE_HEIGHT;
-            }
-
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                Child = new FillFlowContainer
-                {
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(0, 2),
-                    // A wider hit area than the text.
-                    Padding = new MarginPadding { Horizontal = 32 },
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Children = new Drawable[]
-                    {
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Text = MenuHubStrings.OnScosuNow,
-                            Font = OsuFont.GetFont(size: 17, weight: FontWeight.SemiBold),
-                            Shadow = true,
-                        },
-                        new SpriteIcon
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.Centre,
-                            Icon = FontAwesome.Solid.ChevronDown,
-                            Size = new Vector2(12),
-                            Margin = new MarginPadding { Top = 6 },
-                            Colour = ScosuMenuStyle.TEXT_DIM,
-                        },
-                    },
-                };
-            }
-
-            protected override bool OnScroll(ScrollEvent e)
-            {
-                Scrolled?.Invoke(e.ScrollDelta.Y > 0);
-                return true;
-            }
         }
     }
 }

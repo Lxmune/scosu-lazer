@@ -5,6 +5,7 @@
 
 using System;
 using System.Threading;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -15,6 +16,8 @@ using osu.Game.Overlays.News.Sidebar;
 
 namespace osu.Game.Overlays
 {
+    // scosu: cached for its cards and sidebar, which open posts in it.
+    [Cached]
     public partial class NewsOverlay : OnlineOverlay<NewsHeader>
     {
         private readonly Bindable<string> article = new Bindable<string>();
@@ -24,6 +27,8 @@ namespace osu.Game.Overlays
         private readonly Container content;
 
         private GetNewsRequest request;
+
+        private GetNewsPostRequest postRequest;
 
         private Cursor lastCursor;
 
@@ -177,18 +182,40 @@ namespace osu.Game.Overlays
             API.PerformAsync(request);
         }
 
+        // scosu: posts are shown in the game, from the server's Markdown (osu! opens them in the browser).
         private void loadArticle(string article)
         {
-            // This is not yet implemented nor called from anywhere.
             beginLoading(true);
 
             Header.SetArticle(article);
-            LoadDisplay(Empty());
+
+            var req = postRequest = new GetNewsPostRequest(article);
+
+            req.Success += post => Schedule(() =>
+            {
+                if (req != postRequest)
+                    return;
+
+                if (post.SidebarMetadata != null)
+                    sidebar.Metadata.Value = post.SidebarMetadata;
+
+                LoadDisplay(new ArticleDisplay(post));
+            });
+
+            // A post that is gone (or a server without the endpoint): back to the front page.
+            req.Failure += _ => Schedule(() =>
+            {
+                if (req == postRequest)
+                    ShowFrontPage();
+            });
+
+            API.PerformAsync(req);
         }
 
         private void beginLoading(bool showLoadingOverlay)
         {
             request?.Cancel();
+            postRequest?.Cancel();
             cancellationToken?.Cancel();
 
             if (showLoadingOverlay)
@@ -198,6 +225,7 @@ namespace osu.Game.Overlays
         protected override void Dispose(bool isDisposing)
         {
             request?.Cancel();
+            postRequest?.Cancel();
             cancellationToken?.Cancel();
             base.Dispose(isDisposing);
         }

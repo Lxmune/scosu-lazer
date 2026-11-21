@@ -2,12 +2,14 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osuTK;
@@ -38,6 +40,7 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly Container hoverOutline;
         private readonly Drawable foot;
         private readonly SpriteIcon footIcon;
+        private readonly OsuSpriteText eyebrowDetail;
         private readonly OsuSpriteText footText;
 
         protected HubTile(Color4? accent = null)
@@ -113,11 +116,26 @@ namespace osu.Game.Screens.Menu.Hub
                             Spacing = new Vector2(0, 6),
                             Children = new Drawable[]
                             {
-                                Eyebrow = new OsuSpriteText
+                                new Container
                                 {
-                                    Font = ScosuMenuStyle.Eyebrow,
-                                    Colour = accent ?? ScosuMenuStyle.VIOLET,
-                                    Spacing = new Vector2(1.2f, 0),
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Children = new Drawable[]
+                                    {
+                                        Eyebrow = new OsuSpriteText
+                                        {
+                                            Font = ScosuMenuStyle.Eyebrow,
+                                            Colour = accent ?? ScosuMenuStyle.VIOLET,
+                                            Spacing = new Vector2(1.2f, 0),
+                                        },
+                                        eyebrowDetail = new OsuSpriteText
+                                        {
+                                            Anchor = Anchor.CentreRight,
+                                            Origin = Anchor.CentreRight,
+                                            Font = ScosuMenuStyle.Body(11, FontWeight.SemiBold),
+                                            Colour = ScosuMenuStyle.TEXT_DIM,
+                                        },
+                                    },
                                 },
                                 Body = new FillFlowContainer
                                 {
@@ -218,6 +236,11 @@ namespace osu.Game.Screens.Menu.Hub
         }
 
         /// <summary>
+        /// A short dim line to the right of the eyebrow (e.g. a summary of what the tile lists); empty text hides it.
+        /// </summary>
+        protected void SetEyebrowDetail(LocalisableString text) => eyebrowDetail.Text = text;
+
+        /// <summary>
         /// Starts a tile's content afresh: no placeholder, no body, no background.
         /// </summary>
         protected void ShowContent()
@@ -225,6 +248,14 @@ namespace osu.Game.Screens.Menu.Hub
             placeholder.Hide();
             Body.Clear();
             SetBackground(null);
+            SetEyebrowDetail(default);
+        }
+
+        /// <summary>
+        /// Called once the placeholder replaces the tile's content, for a tile to hide content it keeps outside of <see cref="Body"/>.
+        /// </summary>
+        protected virtual void OnPlaceholderShown()
+        {
         }
 
         /// <summary>
@@ -244,7 +275,7 @@ namespace osu.Game.Screens.Menu.Hub
                 background.Add(new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = ScosuMenuStyle.BAND,
+                    Colour = ScosuMenuStyle.TILE.Opacity(1),
                     Alpha = dim,
                 });
             }
@@ -263,7 +294,9 @@ namespace osu.Game.Screens.Menu.Hub
             placeholder.Show();
 
             SetFoot(null, default);
+            SetEyebrowDetail(default);
             SetAction(null);
+            OnPlaceholderShown();
         }
 
         private void setHovered(bool hovered)

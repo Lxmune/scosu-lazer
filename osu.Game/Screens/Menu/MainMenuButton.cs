@@ -242,7 +242,8 @@ namespace osu.Game.Screens.Menu
                 i => i.ScaleTo(HOVER_SCALE, duration, Easing.Out)
             ).Then(
                 i => i.MoveToY(0, duration, Easing.In),
-                i => i.ScaleTo(new Vector2(HOVER_SCALE, HOVER_SCALE * BOUNCE_COMPRESSION), duration, Easing.In)
+                // scosu: the icon keeps its proportions (osu! squashes it on the way down).
+                i => i.ScaleTo(HOVER_SCALE, duration, Easing.In)
             );
 
             rightward = !rightward;
@@ -256,7 +257,7 @@ namespace osu.Game.Screens.Menu
 
             icon.ClearTransforms();
             icon.RotateTo(rightward ? -BOUNCE_ROTATION : BOUNCE_ROTATION, duration, Easing.InOutSine);
-            icon.ScaleTo(new Vector2(HOVER_SCALE, HOVER_SCALE * BOUNCE_COMPRESSION), duration, Easing.Out);
+            icon.ScaleTo(HOVER_SCALE, duration, Easing.Out);
 
             sampleHover?.Play();
 

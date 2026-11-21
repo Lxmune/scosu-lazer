@@ -3,6 +3,7 @@
 
 using System.Linq;
 using NUnit.Framework;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Testing;
 using osu.Game.Online.API.Requests.Responses;
@@ -138,6 +139,27 @@ namespace osu.Game.Tests.Visual.Menus
             AddAssert("hub closed with the band", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("band undocked with it", () => dock().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("bar hidden with the band", () => bar().State.Value, () => Is.EqualTo(Visibility.Hidden));
+        }
+
+        [Test]
+        public void TestHintOpensTheHub()
+        {
+            MenuHubPage hub() => Game.ChildrenOfType<MenuHubPage>().Single();
+            ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
+
+            AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);
+            AddStep("enter menu", () => buttons().State = ButtonSystemState.TopLevel);
+            AddUntilStep("hint shown", () => hint().Alpha, () => Is.EqualTo(1));
+
+            AddStep("click the hint", () =>
+            {
+                // On the text itself: the hint's margin (which keeps it above the bar) isn't part of it.
+                InputManager.MoveMouseTo(hint().ScreenSpaceDrawQuad.Centre);
+                InputManager.Click(MouseButton.Left);
+            });
+            AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
+
+            HubHint hint() => Game.ChildrenOfType<HubHint>().Single();
         }
 
         [Test]

@@ -6,12 +6,15 @@
 using System;
 using System.Linq;
 using NUnit.Framework;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Testing;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
+using osu.Game.Overlays.News;
+using osu.Game.Overlays.News.Displays;
 
 namespace osu.Game.Tests.Visual.Online
 {
@@ -30,6 +33,67 @@ namespace osu.Game.Tests.Visual.Online
             setUpNewsResponse(responseExample);
             AddStep("Show", () => overlay.Show());
             AddStep("Show article", () => overlay.ShowArticle("article"));
+        }
+
+        [Test]
+        public void TestArticleShownInGame()
+        {
+            AddStep("set up responses", () => dummyAPI.HandleRequest = request =>
+            {
+                switch (request)
+                {
+                    case GetNewsRequest list:
+                        list.TriggerSuccess(new GetNewsResponse
+                        {
+                            NewsPosts = new[] { new APINewsPost { Title = "Welcome to scosu", Slug = "welcome", PublishedAt = DateTimeOffset.Now } },
+                        });
+                        return true;
+
+                    case GetNewsPostRequest post:
+                        post.TriggerSuccess(new GetNewsPostResponse
+                        {
+                            Title = "Welcome to scosu",
+                            Slug = "welcome",
+                            Author = "scosu",
+                            PublishedAt = DateTimeOffset.Now,
+                            Markdown = "Hello **world**, here is where to start.",
+                        });
+                        return true;
+                }
+
+                return false;
+            });
+
+            AddStep("show", () => overlay.Show());
+            AddUntilStep("card shown", () => overlay.ChildrenOfType<NewsCard>().Any());
+
+            // The card opens the post in the game, not in the browser.
+            AddStep("click the card", () => overlay.ChildrenOfType<NewsCard>().First().TriggerClick());
+            AddUntilStep("post shown", () => overlay.ChildrenOfType<ArticleDisplay>().Any());
+            // The Markdown is drawn a word per sprite.
+            AddUntilStep("its text rendered", () => string.Join(" ", overlay.ChildrenOfType<ArticleDisplay>().Single().ChildrenOfType<SpriteText>().Select(t => t.Text.ToString().Trim())).Contains("here is where to start"));
+        }
+
+        [Test]
+        public void TestMissingArticleGoesToFrontPage()
+        {
+            AddStep("set up responses", () => dummyAPI.HandleRequest = request =>
+            {
+                switch (request)
+                {
+                    case GetNewsRequest list:
+                        list.TriggerSuccess(responseExample);
+                        return true;
+
+                    case GetNewsPostRequest post:
+                        post.TriggerFailure(new InvalidOperationException("not found"));
+                        return true;
+                }
+
+                return false;
+            });
+            AddStep("show missing article", () => overlay.ShowArticle("missing"));
+            AddUntilStep("front page shown", () => overlay.ChildrenOfType<NewsCard>().Any());
         }
 
         [Test]

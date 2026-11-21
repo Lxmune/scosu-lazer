@@ -101,7 +101,6 @@ namespace osu.Game.Tests.Visual.Menus
                             // As in the menu: the page is drawn behind the bar.
                             page = new MenuHubPage
                             {
-                                Available = true,
                                 OnDailyChallenge = room => openedRoom = room,
                             },
                             bar = new HubBar
@@ -247,6 +246,7 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddUntilStep("score shown", () => shows("+4,812,330") && shows("#41"));
             AddUntilStep("event shown", () => shows("Advent Rush 2026") && shows("Gain 200M"));
+            AddAssert("event tile in the grid", () => this.ChildrenOfType<HubEventTile>().Single().Parent!.Alpha, () => Is.EqualTo(1));
             AddUntilStep("daily challenge shown", () => shows("Innocent Sorrow") && shows("Insane"));
             AddUntilStep("friends shown", () => shows("1 of 2 online"));
             AddUntilStep("report shown", () => shows("Your week is ready"));
@@ -279,7 +279,7 @@ namespace osu.Game.Tests.Visual.Menus
             createPage();
 
             AddUntilStep("score placeholder", () => shows("Log in to see your score"));
-            AddUntilStep("event placeholder", () => shows("There is no event right now."));
+            AddUntilStep("no event tile without an event", () => this.ChildrenOfType<HubEventTile>().Single().Parent!.Alpha, () => Is.Zero);
             AddUntilStep("daily challenge placeholder", () => shows("No daily challenge today"));
             AddUntilStep("friends placeholder", () => shows("Log in to see your friends"));
             AddUntilStep("report placeholder", () => shows("Log in to see your weekly report"));
