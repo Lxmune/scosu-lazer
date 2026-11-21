@@ -62,6 +62,9 @@ namespace osu.Game.Tests.Visual.Menus
         // Text flows split their text into one sprite per word, so the sprites are joined back before looking.
         private bool shows(string text) => string.Concat(this.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
 
+        private bool tileShows<T>(string text) where T : HubTile
+            => string.Concat(this.ChildrenOfType<T>().Single().ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
+
         private bool barShows(string text) => string.Concat(bar.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
 
         private void createPage() => AddStep("create page", () =>
@@ -243,7 +246,6 @@ namespace osu.Game.Tests.Visual.Menus
             AddStep("daily challenge starts", () => metadataClient.DailyChallengeUpdated(new DailyChallengeInfo { RoomID = 1234 }));
 
             AddUntilStep("score shown", () => shows("+4,812,330") && shows("#41"));
-            AddUntilStep("next rank shown", () => shows("PlayerY"));
             AddUntilStep("event shown", () => shows("Advent Rush 2026") && shows("Gain 200M"));
             AddUntilStep("daily challenge shown", () => shows("Innocent Sorrow") && shows("Insane"));
             AddUntilStep("friends shown", () => shows("1 of 2 online"));
@@ -255,7 +257,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("country rank shown", () => shows("#12"));
             AddUntilStep("medals shown", () => shows("Latest:"));
             AddUntilStep("best play shown", () => shows("Best Song") && shows("346pp"));
-            AddUntilStep("recent plays shown", () => shows("1.2M"));
+            AddUntilStep("recent plays shown", () => tileShows<HubRecentTile>("Best Song") && tileShows<HubRecentTile>("98.76%") && tileShows<HubRecentTile>("346pp"));
 
             AddUntilStep("bar shows today", () => barShows("+4,812,330") && barShows("PlayerY"));
             AddUntilStep("bar shows event and friends", () => barShows("Advent Rush 2026") && barShows("starts in") && barShows("1 of 2 online"));

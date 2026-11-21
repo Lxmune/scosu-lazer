@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -14,12 +15,15 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Leaderboards;
 using osu.Game.Scoring;
 using osu.Game.Users.Drawables;
 using osuTK;
@@ -365,8 +369,9 @@ namespace osu.Game.Screens.Menu.Hub
             string value = score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : score.TotalScore.ToString(@"N0");
             string mods = score.Mods.Length > 0 ? @" · " + string.Join(@",", score.Mods.Select(m => m.Acronym)) : string.Empty;
 
-            Body.Add(new OsuSpriteText
+            Body.Add(new TruncatingSpriteText
             {
+                RelativeSizeAxes = Axes.X,
                 Text = $@"{value} · {score.Accuracy * 100:0.00}%{mods}",
                 Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
                 Colour = ScosuMenuStyle.VIOLET,
@@ -378,10 +383,16 @@ namespace osu.Game.Screens.Menu.Hub
     }
 
     /// <summary>
-    /// The user's last plays, each with its grade, beatmap and score.
+    /// The user's last plays, newest first: each with its grade, cover, beatmap, difficulty and mods, accuracy, pp (or score)
+    /// and when it was set. Each opens its beatmap. As many as fit are shown, with their average accuracy at the foot.
     /// </summary>
     public partial class HubRecentTile : HubProfileTile
     {
+        private const float row_height = 40;
+        private const float row_spacing = 2;
+
+        private FillFlowContainer<RecentRow>? rows;
+
         public HubRecentTile(HubProfileProvider profile)
             : base(profile, MenuHubStrings.RecentPlays, FontAwesome.Solid.History)
         {
@@ -395,52 +406,208 @@ namespace osu.Game.Screens.Menu.Hub
 
         protected override void Display()
         {
-            var scores = Profile.Recent.Value!;
+            var scores = Profile.Recent.Value!.Take(HubProfileProvider.RECENT_COUNT).ToArray();
 
+            // The latest play's cover, faint, behind the list.
             if (scores[0].Beatmap?.BeatmapSet is APIBeatmapSet cover)
-                SetBackground(Cover(cover), 0.7f);
+                SetBackground(Cover(cover), 0.85f);
 
-            foreach (var score in scores.Take(HubProfileProvider.RECENT_COUNT))
+            Body.Add(rows = new FillFlowContainer<RecentRow>
             {
-                var set = score.Beatmap?.BeatmapSet;
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(0, row_spacing),
+                // The rows' hover highlight reaches a little past the tile's text.
+                Margin = new MarginPadding { Horizontal = -8 },
+                ChildrenEnumerable = scores.Select(score => new RecentRow(score, row_height) { Action = () => Game?.ShowBeatmap(score.BeatmapID) }),
+            });
 
-                Body.Add(new Container
-                {
-                    RelativeSizeAxes = Axes.X,
-                    Height = 22,
-                    Children = new Drawable[]
-                    {
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Text = RankLetter(score.Rank),
-                            Font = OsuFont.GetFont(size: 15, weight: FontWeight.Bold),
-                            Colour = OsuColour.ForRank(score.Rank),
-                        },
-                        new TruncatingSpriteText
-                        {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            RelativeSizeAxes = Axes.X,
-                            Padding = new MarginPadding { Left = 34, Right = 90 },
-                            Text = set != null ? new RomanisableString(set.TitleUnicode, set.Title) : $@"#{score.BeatmapID}",
-                            Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
-                        },
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.CentreRight,
-                            Origin = Anchor.CentreRight,
-                            Text = ScosuMenuFormatting.CompactScore(score.TotalScore),
-                            Font = ScosuMenuStyle.Body(13),
-                            Colour = ScosuMenuStyle.TEXT_DIM,
-                        },
-                    },
-                });
+            if (scores.Length > 1)
+            {
+                double average = scores.Average(s => s.Accuracy) * 100;
+                SetFoot(FontAwesome.Solid.Bullseye, MenuHubStrings.RecentAverage($@"{average:0.00}%", scores.Length.ToString(CultureInfo.CurrentCulture)));
+            }
+            else
+                SetFoot(null, default);
+
+            // The rows open their own beatmaps.
+            SetAction(null);
+        }
+
+        protected override void UpdateAfterChildren()
+        {
+            base.UpdateAfterChildren();
+
+            if (rows == null || rows.Count == 0)
+                return;
+
+            // Only whole rows: as many as fit between the eyebrow and the foot.
+            float top = ToLocalSpace(rows.ScreenSpaceDrawQuad.TopLeft).Y;
+            float available = DrawHeight - top - 34;
+            int fit = Math.Max(1, (int)((available + row_spacing) / (row_height + row_spacing)));
+
+            for (int i = 0; i < rows.Count; i++)
+                rows[i].Alpha = i < fit ? 1 : 0;
+        }
+
+        private partial class RecentRow : OsuClickableContainer
+        {
+            private readonly SoloScoreInfo score;
+            private Box hover = null!;
+
+            public RecentRow(SoloScoreInfo score, float height)
+            {
+                this.score = score;
+
+                RelativeSizeAxes = Axes.X;
+                Height = height;
             }
 
-            int first = scores[0].BeatmapID;
-            SetAction(() => Game?.ShowBeatmap(first));
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                var beatmap = score.Beatmap;
+                var set = beatmap?.BeatmapSet;
+
+                var details = new List<string>();
+
+                if (!string.IsNullOrEmpty(beatmap?.DifficultyName))
+                    details.Add(beatmap.DifficultyName);
+                if (beatmap?.StarRating > 0)
+                    details.Add($@"{beatmap.StarRating:0.00}★");
+                if (score.Mods.Length > 0)
+                    details.Add(string.Join(@",", score.Mods.Select(m => m.Acronym)));
+
+                string value = score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : ScosuMenuFormatting.CompactScore(score.TotalScore);
+
+                Masking = true;
+                CornerRadius = 8;
+
+                Children = new Drawable[]
+                {
+                    hover = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.White,
+                        Alpha = 0,
+                    },
+                    new GridContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Padding = new MarginPadding { Horizontal = 8 },
+                        ColumnDimensions = new[]
+                        {
+                            new Dimension(GridSizeMode.Absolute, 38),
+                            new Dimension(GridSizeMode.Absolute, 64),
+                            new Dimension(),
+                            new Dimension(GridSizeMode.AutoSize),
+                            new Dimension(GridSizeMode.AutoSize),
+                            new Dimension(GridSizeMode.AutoSize),
+                        },
+                        Content = new[]
+                        {
+                            new Drawable[]
+                            {
+                                new Container
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(32, 16),
+                                    Child = new DrawableRank(score.Rank),
+                                },
+                                new Container
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(52, 32),
+                                    Masking = true,
+                                    CornerRadius = 6,
+                                    Children = new Drawable[]
+                                    {
+                                        new Box
+                                        {
+                                            RelativeSizeAxes = Axes.Both,
+                                            Colour = ScosuMenuStyle.VIOLET.Opacity(0.25f),
+                                        },
+                                        set != null ? Cover(set) : Empty(),
+                                    },
+                                },
+                                new FillFlowContainer
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    RelativeSizeAxes = Axes.X,
+                                    AutoSizeAxes = Axes.Y,
+                                    Direction = FillDirection.Vertical,
+                                    Padding = new MarginPadding { Right = 12 },
+                                    Children = new Drawable[]
+                                    {
+                                        new TruncatingSpriteText
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                            Text = set != null ? new RomanisableString(set.TitleUnicode, set.Title) : $@"#{score.BeatmapID}",
+                                            Font = ScosuMenuStyle.Body(14, FontWeight.SemiBold),
+                                            // A failed play is dimmer.
+                                            Colour = score.Rank != ScoreRank.F ? Color4.White : ScosuMenuStyle.TEXT_DIM,
+                                        },
+                                        new TruncatingSpriteText
+                                        {
+                                            RelativeSizeAxes = Axes.X,
+                                            Text = string.Join(@" · ", details),
+                                            Font = ScosuMenuStyle.Body(11),
+                                            Colour = ScosuMenuStyle.TEXT_DIM,
+                                        },
+                                    },
+                                },
+                                column($@"{score.Accuracy * 100:0.00}%", ScosuMenuStyle.Body(13, FontWeight.SemiBold), Color4.White, 62),
+                                column(value, ScosuMenuStyle.Body(13, FontWeight.Bold), ScosuMenuStyle.VIOLET, 66),
+                                new Container
+                                {
+                                    Anchor = Anchor.CentreRight,
+                                    Origin = Anchor.CentreRight,
+                                    Width = 84,
+                                    AutoSizeAxes = Axes.Y,
+                                    Child = new DrawableDate(score.EndedAt, 11, false)
+                                    {
+                                        Anchor = Anchor.CentreRight,
+                                        Origin = Anchor.CentreRight,
+                                        Colour = ScosuMenuStyle.TEXT_DIM,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                };
+            }
+
+            private static Drawable column(string text, FontUsage font, Color4 colour, float width) => new Container
+            {
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                Width = width,
+                AutoSizeAxes = Axes.Y,
+                Child = new OsuSpriteText
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Text = text,
+                    Font = font,
+                    Colour = colour,
+                },
+            };
+
+            protected override bool OnHover(HoverEvent e)
+            {
+                hover.FadeTo(0.07f, 150, Easing.OutQuint);
+                return base.OnHover(e);
+            }
+
+            protected override void OnHoverLost(HoverLostEvent e)
+            {
+                hover.FadeOut(300, Easing.OutQuint);
+                base.OnHoverLost(e);
+            }
         }
     }
 }

@@ -97,8 +97,8 @@ namespace osu.Game.Screens.Menu
                 (new HubAccuracyTile(profile), 2, 2, 2, 1),
                 (new HubCountryTile(profile), 4, 2, 1, 1),
                 (new HubMedalsTile(profile), 5, 2, 1, 1),
-                (new HubBestTile(profile), 0, 3, 3, 1),
-                (new HubRecentTile(profile), 3, 3, 3, 1),
+                (new HubBestTile(profile), 0, 3, 2, 1),
+                (new HubRecentTile(profile), 2, 3, 4, 1),
             };
 
             tiles = layout.Select(l => l.tile).ToArray();

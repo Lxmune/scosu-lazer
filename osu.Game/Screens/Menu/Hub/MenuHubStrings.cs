@@ -267,6 +267,11 @@ namespace osu.Game.Screens.Menu.Hub
         /// </summary>
         public static LocalisableString LatestMedal(string date) => new TranslatableString(getKey(@"latest_medal"), @"Latest: {0}", date);
 
+        /// <summary>
+        /// "Average {0} over your last {1} plays"
+        /// </summary>
+        public static LocalisableString RecentAverage(string accuracy, string count) => new TranslatableString(getKey(@"recent_average"), @"Average {0} over your last {1} plays", accuracy, count);
+
         private static string getKey(string key) => $@"{prefix}:{key}";
     }
 }

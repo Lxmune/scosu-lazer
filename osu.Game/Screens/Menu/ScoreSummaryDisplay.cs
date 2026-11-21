@@ -51,8 +51,6 @@ namespace osu.Game.Screens.Menu
         private OsuSpriteText todayDetails = null!;
         private CornerAreaGraph todayGraph = null!;
         private OsuSpriteText week = null!;
-        private Container nextRank = null!;
-        private OsuSpriteText nextRankText = null!;
 
         private long shownGain;
         private bool hasShown;
@@ -136,46 +134,6 @@ namespace osu.Game.Screens.Menu
                                     },
                                 },
                             },
-                            // The foot: what it takes to pass the next player, on a violet band.
-                            nextRank = new Container
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Alpha = 0,
-                                Children = new Drawable[]
-                                {
-                                    new Box
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Colour = ScosuMenuStyle.VIOLET.Opacity(0.2f),
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        AutoSizeAxes = Axes.Both,
-                                        Direction = FillDirection.Horizontal,
-                                        Spacing = new Vector2(6, 0),
-                                        Padding = new MarginPadding { Horizontal = ScosuMenuStyle.CARD_PADDING, Vertical = 9 },
-                                        Children = new Drawable[]
-                                        {
-                                            new SpriteIcon
-                                            {
-                                                Anchor = Anchor.CentreLeft,
-                                                Origin = Anchor.CentreLeft,
-                                                Size = new Vector2(9),
-                                                Icon = FontAwesome.Solid.ArrowUp,
-                                                Colour = ScosuMenuStyle.VIOLET_INK,
-                                            },
-                                            nextRankText = new OsuSpriteText
-                                            {
-                                                Anchor = Anchor.CentreLeft,
-                                                Origin = Anchor.CentreLeft,
-                                                Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
-                                                Colour = ScosuMenuStyle.VIOLET_INK,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
                         },
                     },
                 },
@@ -224,13 +182,7 @@ namespace osu.Game.Screens.Menu
             // Starting from nothing gained, so a single play still draws an area.
             todayGraph.SetValues(summary.Today.Points.Select(p => (float)p.RankedScore).Prepend(0).ToArray());
 
-            if (summary.Next is APIScoreSummary.NextRank next)
-            {
-                nextRankText.Text = ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(next.RankedScoreNeeded), next.Rank.ToLocalisableString(@"N0"), next.Username);
-                nextRank.Show();
-            }
-            else
-                nextRank.Hide();
+            // What it takes to pass the next player is in the menu's bar, on both of its screens.
 
             content.FadeIn(transition_duration, Easing.OutQuint);
         }

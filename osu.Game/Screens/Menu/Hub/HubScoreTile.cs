@@ -87,10 +87,8 @@ namespace osu.Game.Screens.Menu.Hub
                 },
             });
 
-            if (s.Next is APIScoreSummary.NextRank next)
-                SetFoot(FontAwesome.Solid.ArrowUp, ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(next.RankedScoreNeeded), next.Rank.ToLocalisableString(@"N0"), next.Username), ScosuMenuStyle.VIOLET);
-            else
-                SetFoot(null, default);
+            // What it takes to pass the next player is in the bar under the hub.
+            SetFoot(null, default);
 
             SetAction(() => game?.ShowUser(api.LocalUser.Value));
         }
