@@ -1,9 +1,11 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -29,7 +31,7 @@ namespace osu.Game.Screens.Menu
     /// The ranked score the local user gained today and this week, in the selected ruleset, and what it takes to pass the next player.
     /// Hidden while logged out, and when the server can't tell (see <see cref="GetScoreSummaryRequest"/>).
     /// </summary>
-    public partial class ScoreSummaryDisplay : CornerCard
+    public partial class ScoreSummaryDisplay : CornerInfoCard
     {
         private const float transition_duration = 500;
 
@@ -47,11 +49,26 @@ namespace osu.Game.Screens.Menu
         private Container content = null!;
         private OsuSpriteText todayScore = null!;
         private OsuSpriteText todayDetails = null!;
-        private Container graphContainer = null!;
-        private LineGraph todayGraph = null!;
+        private CornerAreaGraph todayGraph = null!;
         private OsuSpriteText week = null!;
-        private FillFlowContainer nextRank = null!;
+        private Container nextRank = null!;
         private OsuSpriteText nextRankText = null!;
+
+        private long shownGain;
+        private bool hasShown;
+
+        /// <summary>
+        /// The gain as drawn, which counts up to the real one when it changes.
+        /// </summary>
+        public double DisplayedGain
+        {
+            get => shownGain;
+            set
+            {
+                shownGain = (long)Math.Round(value);
+                todayScore.Text = formatGain(shownGain);
+            }
+        }
 
         [BackgroundDependencyLoader]
         private void load()
@@ -63,91 +80,99 @@ namespace osu.Game.Screens.Menu
                 Width = CARD_WIDTH,
                 AutoSizeAxes = Axes.Y,
                 Alpha = 0,
-                Children = new Drawable[]
+                Children = new[]
                 {
-                    ScosuMenuStyle.CreateGlassBackground(),
+                    CreateSurface(todayGraph = new CornerAreaGraph(ScosuMenuStyle.VIOLET)
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        Height = 80,
+                        Anchor = Anchor.BottomLeft,
+                        Origin = Anchor.BottomLeft,
+                    }),
                     new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
                         Direction = FillDirection.Vertical,
-                        Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING),
-                        Spacing = new Vector2(0, 4),
                         Children = new Drawable[]
                         {
-                            new OsuSpriteText
-                            {
-                                Text = ScoreSummaryStrings.Today.ToUpper(),
-                                Font = ScosuMenuStyle.Eyebrow,
-                                Spacing = new Vector2(1.5f, 0),
-                                Colour = ScosuMenuStyle.VIOLET,
-                            },
                             new FillFlowContainer
                             {
-                                AutoSizeAxes = Axes.Both,
-                                Direction = FillDirection.Horizontal,
-                                Spacing = new Vector2(12, 0),
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING),
+                                Spacing = new Vector2(0, 4),
                                 Children = new Drawable[]
                                 {
+                                    new OsuSpriteText
+                                    {
+                                        Text = ScoreSummaryStrings.Today.ToUpper(),
+                                        Font = ScosuMenuStyle.Eyebrow,
+                                        Spacing = new Vector2(1.5f, 0),
+                                        Colour = ScosuMenuStyle.VIOLET,
+                                    },
                                     todayScore = new OsuSpriteText
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Font = ScosuMenuStyle.Display(30),
+                                        Font = ScosuMenuStyle.Display(36),
+                                        Text = formatGain(0),
                                     },
-                                    graphContainer = new Container
+                                    todayDetails = new OsuSpriteText
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Size = new Vector2(64, 22),
-                                        Child = todayGraph = new LineGraph
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            LineColour = ScosuMenuStyle.VIOLET,
-                                            MinValue = 0,
-                                        },
+                                        Font = ScosuMenuStyle.Body(13),
+                                        Colour = ScosuMenuStyle.TEXT_DIM,
+                                    },
+                                    new Box
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        Height = 1,
+                                        Colour = ScosuMenuStyle.OUTLINE,
+                                        Margin = new MarginPadding { Vertical = 4 },
+                                    },
+                                    week = new OsuSpriteText
+                                    {
+                                        Font = ScosuMenuStyle.Body(13),
+                                        Colour = ScosuMenuStyle.TEXT_DIM,
                                     },
                                 },
                             },
-                            todayDetails = new OsuSpriteText
-                            {
-                                Font = ScosuMenuStyle.Body(13),
-                                Colour = ScosuMenuStyle.TEXT_DIM,
-                            },
-                            new Box
+                            // The foot: what it takes to pass the next player, on a violet band.
+                            nextRank = new Container
                             {
                                 RelativeSizeAxes = Axes.X,
-                                Height = 1,
-                                Colour = ScosuMenuStyle.OUTLINE,
-                                Margin = new MarginPadding { Vertical = 4 },
-                            },
-                            week = new OsuSpriteText
-                            {
-                                Font = ScosuMenuStyle.Body(13),
-                                Colour = ScosuMenuStyle.TEXT_DIM,
-                            },
-                            nextRank = new FillFlowContainer
-                            {
-                                AutoSizeAxes = Axes.Both,
-                                Direction = FillDirection.Horizontal,
-                                Spacing = new Vector2(6, 0),
+                                AutoSizeAxes = Axes.Y,
                                 Alpha = 0,
                                 Children = new Drawable[]
                                 {
-                                    new SpriteIcon
+                                    new Box
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Size = new Vector2(9),
-                                        Icon = FontAwesome.Solid.ArrowUp,
-                                        Colour = ScosuMenuStyle.VIOLET_INK,
+                                        RelativeSizeAxes = Axes.Both,
+                                        Colour = ScosuMenuStyle.VIOLET.Opacity(0.2f),
                                     },
-                                    nextRankText = new OsuSpriteText
+                                    new FillFlowContainer
                                     {
-                                        Anchor = Anchor.CentreLeft,
-                                        Origin = Anchor.CentreLeft,
-                                        Font = ScosuMenuStyle.Body(13),
-                                        Colour = ScosuMenuStyle.VIOLET_INK,
+                                        AutoSizeAxes = Axes.Both,
+                                        Direction = FillDirection.Horizontal,
+                                        Spacing = new Vector2(6, 0),
+                                        Padding = new MarginPadding { Horizontal = ScosuMenuStyle.CARD_PADDING, Vertical = 9 },
+                                        Children = new Drawable[]
+                                        {
+                                            new SpriteIcon
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Size = new Vector2(9),
+                                                Icon = FontAwesome.Solid.ArrowUp,
+                                                Colour = ScosuMenuStyle.VIOLET_INK,
+                                            },
+                                            nextRankText = new OsuSpriteText
+                                            {
+                                                Anchor = Anchor.CentreLeft,
+                                                Origin = Anchor.CentreLeft,
+                                                Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
+                                                Colour = ScosuMenuStyle.VIOLET_INK,
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -178,21 +203,26 @@ namespace osu.Game.Screens.Menu
 
         private void display(APIScoreSummary summary)
         {
-            todayScore.Text = formatGain(summary.Today.RankedScore);
+            // Count up from what is shown (from nothing when the card just appeared), and shimmer when it is a new value.
+            long gain = summary.Today.RankedScore;
+
+            if (!hasShown)
+                DisplayedGain = 0;
+
+            if (gain != shownGain)
+            {
+                this.TransformTo(nameof(DisplayedGain), (double)gain, 800, Easing.OutQuint);
+                todayScore.FlashColour(ScosuMenuStyle.VIOLET_INK, 900, Easing.OutQuint);
+            }
+
+            hasShown = true;
+
             todayDetails.Text = formatDetails(summary.Today, summary.Rank);
 
             week.Text = formatWeek(summary.Week, summary.Rank);
 
-            // Starting from nothing gained, so a single play still draws a line.
-            var points = summary.Today.Points;
-
-            if (points.Count > 0)
-            {
-                todayGraph.Values = points.Select(p => (float)p.RankedScore).Prepend(0);
-                graphContainer.Show();
-            }
-            else
-                graphContainer.Hide();
+            // Starting from nothing gained, so a single play still draws an area.
+            todayGraph.SetValues(summary.Today.Points.Select(p => (float)p.RankedScore).Prepend(0).ToArray());
 
             if (summary.Next is APIScoreSummary.NextRank next)
             {
@@ -205,7 +235,11 @@ namespace osu.Game.Screens.Menu
             content.FadeIn(transition_duration, Easing.OutQuint);
         }
 
-        private void hideContent() => content.FadeOut(transition_duration, Easing.OutQuint);
+        private void hideContent()
+        {
+            hasShown = false;
+            content.FadeOut(transition_duration, Easing.OutQuint);
+        }
 
         private static LocalisableString formatGain(long rankedScore) => LocalisableString.Interpolate($@"+{rankedScore.ToLocalisableString(@"N0")}");
 
@@ -247,9 +281,5 @@ namespace osu.Game.Screens.Menu
             game?.ShowUser(api.LocalUser.Value);
             return true;
         }
-
-        protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
-
-        protected override void PopOut() => this.FadeOut(transition_duration, Easing.OutQuint);
     }
 }

@@ -2,9 +2,12 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
@@ -25,7 +28,7 @@ namespace osu.Game.Screens.Menu
     /// </summary>
     public partial class MenuHubSheet : VisibilityContainer
     {
-        public const float HANDLE_HEIGHT = 30;
+        public const float HANDLE_HEIGHT = 48;
 
         /// <summary>
         /// The share of the screen's height the open sheet takes (not the bar, which MainMenu puts under the sheet).
@@ -41,6 +44,9 @@ namespace osu.Game.Screens.Menu
         private const float min_grid_height = 300;
 
         private const float cell_gap = 8;
+
+        private const int columns = 6;
+        private const int rows = 4;
 
         /// <summary>
         /// Asks for the sheet to be opened (true) or closed (false), from its handle.
@@ -58,7 +64,7 @@ namespace osu.Game.Screens.Menu
         private readonly Container gridHolder;
         private readonly HubTile[] tiles;
         private readonly HubNewsTile newsTile;
-        private readonly HubScoreTile scoreTile;
+        private readonly HubProfileProvider profile;
         private readonly HubHandle handle;
 
         private bool available;
@@ -69,28 +75,28 @@ namespace osu.Game.Screens.Menu
             Anchor = Anchor.BottomCentre;
             Origin = Anchor.BottomCentre;
 
+            profile = new HubProfileProvider();
+
             var dailyTile = new HubDailyTile { OnDailyChallenge = room => OnDailyChallenge?.Invoke(room) };
 
-            tiles = new HubTile[]
+            // Six columns by four rows; the sheet shows two rows and scrolls to the other two.
+            (HubTile tile, int column, int row, int columns, int rows)[] layout =
             {
-                scoreTile = new HubScoreTile(),
-                new HubEventTile(),
-                dailyTile,
-                new HubFriendsTile(),
-                new HubReportTile(),
-                newsTile = new HubNewsTile(),
+                (new HubScoreTile(profile), 0, 0, 3, 1),
+                (new HubEventTile(), 3, 0, 2, 2),
+                (dailyTile, 5, 0, 1, 1),
+                (new HubFriendsTile(), 0, 1, 1, 1),
+                (new HubReportTile(), 1, 1, 2, 1),
+                (newsTile = new HubNewsTile(), 5, 1, 1, 1),
+                (new HubPlaysTile(profile), 0, 2, 2, 1),
+                (new HubAccuracyTile(profile), 2, 2, 2, 1),
+                (new HubCountryTile(profile), 4, 2, 1, 1),
+                (new HubMedalsTile(profile), 5, 2, 1, 1),
+                (new HubBestTile(profile), 0, 3, 3, 1),
+                (new HubRecentTile(profile), 3, 3, 3, 1),
             };
 
-            // Four columns by two rows: the score takes two columns, the event two rows.
-            (int column, int row, int columns, int rows)[] cells =
-            {
-                (0, 0, 2, 1),
-                (2, 0, 1, 2),
-                (3, 0, 1, 1),
-                (0, 1, 1, 1),
-                (1, 1, 1, 1),
-                (3, 1, 1, 1),
-            };
+            tiles = layout.Select(l => l.tile).ToArray();
 
             gridHolder = new Container
             {
@@ -98,23 +104,24 @@ namespace osu.Game.Screens.Menu
                 Padding = new MarginPadding(14 - cell_gap / 2),
             };
 
-            for (int i = 0; i < tiles.Length; i++)
+            foreach (var l in layout)
             {
                 gridHolder.Add(new Container
                 {
                     RelativeSizeAxes = Axes.Both,
                     RelativePositionAxes = Axes.Both,
-                    X = cells[i].column / 4f,
-                    Y = cells[i].row / 2f,
-                    Width = cells[i].columns / 4f,
-                    Height = cells[i].rows / 2f,
+                    X = (float)l.column / columns,
+                    Y = (float)l.row / rows,
+                    Width = (float)l.columns / columns,
+                    Height = (float)l.rows / rows,
                     Padding = new MarginPadding(cell_gap / 2),
-                    Child = tiles[i],
+                    Child = l.tile,
                 });
             }
 
             InternalChildren = new Drawable[]
             {
+                profile,
                 panel = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -189,7 +196,8 @@ namespace osu.Game.Screens.Menu
             base.Update();
 
             // The grid fills the sheet, unless the window is too small for the tiles.
-            gridHolder.Height = Math.Max(scroll.DrawHeight, min_grid_height);
+            // Two rows fit in the sheet, the other two are scrolled to.
+            gridHolder.Height = Math.Max(scroll.DrawHeight, min_grid_height) * rows / 2;
         }
 
         protected override void PopIn()
@@ -200,13 +208,13 @@ namespace osu.Game.Screens.Menu
             handle.Open = true;
 
             newsTile.RefreshIfStale();
-            scoreTile.RefreshIfStale();
+            profile.RefreshIfStale();
 
             // The tiles settle in after the sheet, one after another.
             for (int i = 0; i < tiles.Length; i++)
             {
                 tiles[i].FadeOut().MoveToY(20)
-                        .Delay(150 + i * 70)
+                        .Delay(150 + Math.Min(i, 7) * 70)
                         .FadeIn(400, Easing.OutQuint).MoveToY(0, 400, Easing.OutQuint);
             }
         }
@@ -282,43 +290,75 @@ namespace osu.Game.Screens.Menu
             {
                 AutoSizeAxes = Axes.X;
                 Height = HANDLE_HEIGHT;
-                Margin = new MarginPadding { Bottom = 4 };
+                Margin = new MarginPadding { Bottom = 2 };
 
-                Child = new FillFlowContainer
+                // A dark glow behind the text, so that it reads on a bright background.
+                Masking = true;
+                CornerRadius = HANDLE_HEIGHT / 2;
+                EdgeEffect = new EdgeEffectParameters
                 {
-                    AutoSizeAxes = Axes.Both,
-                    RelativeSizeAxes = Axes.None,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(0, 2),
-                    Padding = new MarginPadding { Horizontal = 28 },
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Children = new Drawable[]
+                    Type = EdgeEffectType.Shadow,
+                    Colour = Color4.Black.Opacity(0.35f),
+                    Radius = 18,
+                };
+
+                Children = new Drawable[]
+                {
+                    new Box
                     {
-                        label = new OsuSpriteText
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.Black,
+                        Alpha = 0.22f,
+                    },
+                    new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Vertical,
+                        Spacing = new Vector2(0, 1),
+                        // A wide hit area around the text.
+                        Padding = new MarginPadding { Horizontal = 48 },
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Children = new Drawable[]
                         {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Font = OsuFont.GetFont(size: 14, weight: FontWeight.SemiBold),
-                            Shadow = true,
-                        },
-                        chevron = new SpriteIcon
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.Centre,
-                            Icon = FontAwesome.Solid.ChevronUp,
-                            Size = new Vector2(10),
-                            Margin = new MarginPadding { Top = 5 },
-                            Colour = ScosuMenuStyle.TEXT_DIM,
+                            label = new OsuSpriteText
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Font = OsuFont.GetFont(size: 19, weight: FontWeight.SemiBold),
+                                Shadow = true,
+                                ShadowColour = Color4.Black.Opacity(0.85f),
+                                ShadowOffset = new Vector2(0, 0.06f),
+                            },
+                            chevron = new SpriteIcon
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.Centre,
+                                Icon = FontAwesome.Solid.ChevronUp,
+                                Size = new Vector2(14),
+                                Margin = new MarginPadding { Top = 7 },
+                                Colour = ScosuMenuStyle.VIOLET_INK,
+                            },
                         },
                     },
                 };
+            }
+
+            private void bob()
+            {
+                // The chevron nudges upward now and then while closed, to say the hub can be pulled up.
+                if (open)
+                    return;
+
+                chevron.MoveToY(-5, 220, Easing.OutQuad).Then().MoveToY(0, 520, Easing.OutBounce);
             }
 
             protected override void LoadComplete()
             {
                 base.LoadComplete();
                 Open = open;
+
+                Scheduler.AddDelayed(bob, 4000, true);
             }
 
             protected override bool OnScroll(ScrollEvent e)

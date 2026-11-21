@@ -93,6 +93,29 @@ namespace osu.Game.Screens.Menu
 
         private readonly ButtonArea buttonArea;
 
+        protected override void Update()
+        {
+            base.Update();
+
+            // scosu: the violet of the primary tile continues behind the logo, from the facade's centre to the tile,
+            // so no dark band shows around the right half of the round logo. Everything is read from the layout each frame,
+            // so it follows the logo's beat scaling (the facade is resized with it) and the tile's own expand animation.
+            var primaries = buttonsTopLevel.Take(1).Concat(buttonsPlay.Take(1)).ToList();
+            float alpha = primaries.Count == 0 ? 0 : primaries.Max(b => b.State == ButtonState.Expanded || b.Alpha > 0 ? b.Alpha : 0);
+            var active = primaries.OrderByDescending(b => b.Alpha).FirstOrDefault();
+
+            if (active == null || alpha <= 0)
+            {
+                buttonArea.SetPrimaryExtension(0, 0, 0);
+                return;
+            }
+
+            var space = buttonArea.Flow.Parent!;
+            float left = space.ToLocalSpace(logoTrackingContainer.LogoFacade.ScreenSpaceDrawQuad.Centre).X;
+            float right = space.ToLocalSpace(active.ScreenSpaceDrawQuad.TopLeft).X + 2; // small overlap hides any seam
+            buttonArea.SetPrimaryExtension(left, right, alpha);
+        }
+
         private readonly MainMenuButton backButton;
 
         private readonly List<MainMenuButton> buttonsTopLevel = new List<MainMenuButton>();
@@ -134,6 +157,7 @@ namespace osu.Game.Screens.Menu
                     }
                 })
                 {
+                    IsQuiet = true, // scosu
                     VisibleStateMin = ButtonSystemState.Play,
                     VisibleStateMax = ButtonSystemState.Edit,
                 },

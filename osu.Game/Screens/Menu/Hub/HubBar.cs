@@ -8,7 +8,11 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Effects;
+using osu.Framework.Utils;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
@@ -29,6 +33,7 @@ using osu.Game.Overlays.Dashboard;
 using osu.Game.Overlays.ScosuEvent;
 using osu.Game.Users;
 using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.Menu.Hub
 {
@@ -42,9 +47,9 @@ namespace osu.Game.Screens.Menu.Hub
         public const float HEIGHT = 58;
 
         private const float transition_duration = 500;
-        private const float now_playing_width = 380;
+        private const float now_playing_width = 450;
         private const float cover_size = 40;
-        private const float item_spacing = 32;
+        private const float item_spacing = 30;
         private const float side_padding = 24;
 
         [Resolved]
@@ -89,10 +94,18 @@ namespace osu.Game.Screens.Menu.Hub
         private OnlinePlayersDisplay? onlineDisplay;
         private FillFlowContainer itemFlow = null!;
 
-        private Container cover = null!;
-        private OsuSpriteText title = null!;
-        private OsuSpriteText artist = null!;
+        private Container songHost = null!;
+        private Container progressRow = null!;
+        private SongView? songView;
+        private TrackChangeDirection pendingDirection = TrackChangeDirection.None;
+        private bool? shownPlaying;
         private IconButton playPauseButton = null!;
+        private ProgressBar progress = null!;
+        private OsuSpriteText elapsedText = null!;
+        private OsuSpriteText totalText = null!;
+        private int shownElapsed = -1;
+        private int shownTotal = -1;
+        private double? lastSeekTime;
 
         public HubBar()
         {
@@ -120,9 +133,9 @@ namespace osu.Game.Screens.Menu.Hub
                 };
             }
 
-            today = new Item(todayLine = new Line(null));
+            today = new Item(todayLine = new Line(FontAwesome.Solid.Trophy));
             next = new Item(nextLine = new Line(FontAwesome.Solid.ArrowUp) { Colour = ScosuMenuStyle.VIOLET });
-            eventItem = new Item(eventLine = new Line(null) { Colour = ScosuMenuStyle.ICE });
+            eventItem = new Item(eventLine = new Line(FontAwesome.Solid.CalendarAlt) { Colour = ScosuMenuStyle.ICE });
             online = new Item(new Container
             {
                 Anchor = Anchor.CentreLeft,
@@ -131,23 +144,31 @@ namespace osu.Game.Screens.Menu.Hub
                 Height = HEIGHT,
                 Child = (Drawable?)onlineDisplay ?? Empty(),
             });
-            friendsItem = new Item(new OsuClickableContainer
-            {
-                Anchor = Anchor.CentreLeft,
-                Origin = Anchor.CentreLeft,
-                AutoSizeAxes = Axes.Both,
-                Action = openFriends,
-                Child = friendsLine = new Line(null),
-            });
+            friendsItem = new Item(new BarButton(openFriends, friendsLine = new Line(FontAwesome.Solid.UserFriends)));
 
             items = new[] { today, next, eventItem, online, friendsItem };
 
             InternalChildren = new Drawable[]
             {
+                // A soft shadow upward, so that the bar reads over a bright background.
+                new Box
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = 24,
+                    Anchor = Anchor.TopLeft,
+                    Origin = Anchor.BottomLeft,
+                    Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black.Opacity(0.28f)),
+                },
                 new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = ScosuMenuStyle.BAND,
+                    Colour = Color4Extensions.FromHex(@"120f19").Opacity(0.96f),
+                },
+                new Box
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = 1,
+                    Colour = Color4.White.Opacity(0.08f),
                 },
                 itemFlow = new FillFlowContainer
                 {
@@ -159,78 +180,112 @@ namespace osu.Game.Screens.Menu.Hub
                     Padding = new MarginPadding { Left = side_padding },
                     Children = items,
                 },
-                new FillFlowContainer
+                new Container
                 {
                     Anchor = Anchor.CentreRight,
                     Origin = Anchor.CentreRight,
-                    AutoSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.Y,
                     Width = now_playing_width,
-                    Padding = new MarginPadding { Right = 16 },
-                    Direction = FillDirection.Horizontal,
-                    Spacing = new Vector2(12, 0),
+                    Padding = new MarginPadding { Right = 14 },
                     Children = new Drawable[]
                     {
-                        cover = new Container
+                        songHost = new Container { RelativeSizeAxes = Axes.Both },
+                        progressRow = new Container
                         {
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
-                            Size = new Vector2(cover_size),
-                            Masking = true,
-                            CornerRadius = 8,
-                            Child = new Box
+                            RelativeSizeAxes = Axes.X,
+                            Height = 14,
+                            Y = 19,
+                            Padding = new MarginPadding { Left = cover_size + 14, Right = 3 * 32 + 10 },
+                            Children = new Drawable[]
                             {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = ScosuMenuStyle.VIOLET.Opacity(0.4f),
+                                elapsedText = new OsuSpriteText
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Font = ScosuMenuStyle.Body(10, FontWeight.SemiBold),
+                                    Colour = ScosuMenuStyle.TEXT_DIM,
+                                    Text = @"0:00",
+                                },
+                                new Container
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Padding = new MarginPadding { Horizontal = 34 },
+                                    Child = progress = new SeekBar
+                                    {
+                                        Anchor = Anchor.Centre,
+                                        Origin = Anchor.Centre,
+                                        OnSeek = onSeek,
+                                        OnCommit = onCommit,
+                                    },
+                                },
+                                totalText = new OsuSpriteText
+                                {
+                                    Anchor = Anchor.CentreRight,
+                                    Origin = Anchor.CentreRight,
+                                    Font = ScosuMenuStyle.Body(10, FontWeight.SemiBold),
+                                    Colour = ScosuMenuStyle.TEXT_DIM,
+                                    Text = @"0:00",
+                                },
                             },
                         },
                         new FillFlowContainer
                         {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Width = now_playing_width - 16 - cover_size - 3 * 30 - 4 * 12,
-                            AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
+                            Anchor = Anchor.CentreRight,
+                            Origin = Anchor.CentreRight,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Horizontal,
+                            Spacing = new Vector2(2, 0),
                             Children = new Drawable[]
                             {
-                                title = new TruncatingSpriteText
+                                new IconButton
                                 {
-                                    RelativeSizeAxes = Axes.X,
-                                    Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(30),
+                                    Icon = FontAwesome.Solid.StepBackward,
+                                    IconScale = new Vector2(0.65f),
+                                    Action = () => musicController.PreviousTrack(),
                                 },
-                                artist = new TruncatingSpriteText
+                                playPauseButton = new IconButton
                                 {
-                                    RelativeSizeAxes = Axes.X,
-                                    Font = ScosuMenuStyle.Body(12),
-                                    Colour = ScosuMenuStyle.TEXT_DIM,
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(36),
+                                    IconScale = new Vector2(0.8f),
+                                    Action = () => musicController.TogglePause(),
+                                },
+                                new IconButton
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Size = new Vector2(30),
+                                    Icon = FontAwesome.Solid.StepForward,
+                                    IconScale = new Vector2(0.65f),
+                                    Action = () => musicController.NextTrack(),
                                 },
                             },
-                        },
-                        new IconButton
-                        {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Icon = FontAwesome.Solid.StepBackward,
-                            IconScale = new Vector2(0.6f),
-                            Action = () => musicController.PreviousTrack(),
-                        },
-                        playPauseButton = new IconButton
-                        {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            IconScale = new Vector2(0.7f),
-                            Action = () => musicController.TogglePause(),
-                        },
-                        new IconButton
-                        {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
-                            Icon = FontAwesome.Solid.StepForward,
-                            IconScale = new Vector2(0.6f),
-                            Action = () => musicController.NextTrack(),
                         },
                     },
                 },
             };
+        }
+
+        private void onSeek(double position)
+        {
+            // Dragging seeks now and then rather than on every frame, which the audio thread wouldn't keep up with.
+            if (!musicController.IsPlaying || lastSeekTime == null || Time.Current - lastSeekTime > 200)
+            {
+                musicController.SeekTo(position);
+                lastSeekTime = Time.Current;
+            }
+        }
+
+        private void onCommit(double position)
+        {
+            musicController.SeekTo(position);
+            lastSeekTime = null;
         }
 
         protected override void LoadComplete()
@@ -256,6 +311,7 @@ namespace osu.Game.Screens.Menu.Hub
             presences.BindCollectionChanged((_, _) => updateOnline(), true);
             friendPresences.BindCollectionChanged((_, _) => updateFriends());
             friends.BindCollectionChanged((_, _) => updateFriends(), true);
+            musicController.TrackChanged += onTrackChanged;
             beatmap.BindValueChanged(b => Scheduler.AddOnce(() => displayBeatmap(b.NewValue)), true);
 
             // The online list only watches presence while it is shown, so it follows the bar.
@@ -278,10 +334,51 @@ namespace osu.Game.Screens.Menu.Hub
             base.Update();
 
             // The track can be paused from anywhere (the toolbar, media keys), so the icon follows it.
-            playPauseButton.Icon = musicController.IsPlaying ? FontAwesome.Solid.Pause : FontAwesome.Solid.Play;
+            bool playing = musicController.IsPlaying;
+
+            if (shownPlaying != playing)
+            {
+                playPauseButton.Icon = playing ? FontAwesome.Solid.Pause : FontAwesome.Solid.Play;
+
+                // A quick squeeze, so that the swap isn't a flicker.
+                if (shownPlaying != null)
+                    playPauseButton.ScaleTo(0.7f, 70, Easing.OutQuint).Then().ScaleTo(1, 250, Easing.OutBack);
+
+                shownPlaying = playing;
+            }
 
             layoutItems();
+            updateProgress();
         }
+
+        private void updateProgress()
+        {
+            var track = musicController.CurrentTrack;
+
+            if (!progress.Seeking)
+            {
+                progress.EndTime = Math.Max(track.Length, 1);
+                progress.CurrentTime = track.CurrentTime;
+            }
+
+            // Only touched when the second changes.
+            int elapsed = (int)(progress.Current.Value / 1000);
+            int total = (int)(track.Length / 1000);
+
+            if (elapsed != shownElapsed)
+            {
+                shownElapsed = elapsed;
+                elapsedText.Text = formatTime(elapsed);
+            }
+
+            if (total != shownTotal)
+            {
+                shownTotal = total;
+                totalText.Text = formatTime(total);
+            }
+        }
+
+        private static string formatTime(int seconds) => $@"{Math.Max(seconds, 0) / 60}:{Math.Max(seconds, 0) % 60:00}";
 
         /// <summary>
         /// Drops the least important pieces while the window is too narrow for all of them (so they never run into the song),
@@ -328,17 +425,17 @@ namespace osu.Game.Screens.Menu.Hub
                 return;
             }
 
-            var line = LocalisableString.Interpolate($@"{ScoreSummaryStrings.Today} +{s.Today.RankedScore.ToLocalisableString(@"N0")} · {ScoreSummaryStrings.PlayCount(s.Today.PlayCount.ToLocalisableString(@"N0"))}");
+            var tail = LocalisableString.Interpolate($@"· {ScoreSummaryStrings.PlayCount(s.Today.PlayCount.ToLocalisableString(@"N0"))}");
 
             if (s.Rank is int rank)
-                line = LocalisableString.Interpolate($@"{line} · #{rank.ToLocalisableString(@"N0")}");
+                tail = LocalisableString.Interpolate($@"{tail} · #{rank.ToLocalisableString(@"N0")}");
 
-            todayLine.Set(string.Empty, line);
+            todayLine.Set(ScoreSummaryStrings.Today, $@"+{s.Today.RankedScore:N0}", tail);
             today.Wanted = true;
 
             if (s.Next is APIScoreSummary.NextRank n)
             {
-                nextLine.Set(string.Empty, ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(n.RankedScoreNeeded), n.Rank.ToLocalisableString(@"N0"), n.Username));
+                nextLine.Set(default, ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(n.RankedScoreNeeded), n.Rank.ToLocalisableString(@"N0"), n.Username), default);
                 next.Wanted = true;
             }
             else
@@ -355,7 +452,7 @@ namespace osu.Game.Screens.Menu.Hub
 
             string left = EventDisplay.ShortCountdown(target - DateTimeOffset.Now);
 
-            eventLine.Set(ev.Title, ev.Status == ScosuEventStatus.Upcoming ? MenuHubStrings.StartsIn(left) : MenuHubStrings.EndsInLower(left));
+            eventLine.Set(default, ev.Title, ev.Status == ScosuEventStatus.Upcoming ? MenuHubStrings.StartsIn(left) : MenuHubStrings.EndsInLower(left));
             eventItem.Wanted = true;
         }
 
@@ -375,7 +472,7 @@ namespace osu.Game.Screens.Menu.Hub
 
             int onlineCount = friends.Count(f => friendPresences.ContainsKey(f.TargetID));
 
-            friendsLine.Set(string.Empty, MenuHubStrings.FriendsLine(onlineCount.ToString(@"N0"), friends.Count.ToString(@"N0")));
+            friendsLine.Set(MenuHubStrings.Friends, MenuHubStrings.FriendsOnline(onlineCount.ToString(@"N0"), friends.Count.ToString(@"N0")), default);
             friendsItem.Wanted = true;
         }
 
@@ -388,32 +485,138 @@ namespace osu.Game.Screens.Menu.Hub
             dashboard.Show();
         }
 
+        private void onTrackChanged(WorkingBeatmap _, TrackChangeDirection direction) => Schedule(() => pendingDirection = direction);
+
         private void displayBeatmap(WorkingBeatmap working)
         {
-            var metadata = working.Metadata;
+            var direction = pendingDirection;
+            pendingDirection = TrackChangeDirection.None;
 
-            title.Text = new RomanisableString(metadata.TitleUnicode, metadata.Title);
-            artist.Text = new RomanisableString(metadata.ArtistUnicode, metadata.Artist);
+            // Only slide when something is on screen to slide away.
+            float shift = songView == null || direction == TrackChangeDirection.None ? 0 : direction == TrackChangeDirection.Next ? 40 : -40;
 
-            LoadComponentAsync(new BeatmapBackgroundSprite(working)
+            var old = songView;
+
+            if (old != null)
             {
-                RelativeSizeAxes = Axes.Both,
-                FillMode = FillMode.Fill,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-            }, sprite =>
+                // A quick succession of clicks: whatever is still moving settles first.
+                old.FinishTransforms();
+                old.MoveToX(-shift, 350, Easing.OutQuint).FadeOut(350, Easing.OutQuint).Expire();
+            }
+
+            var view = songView = new SongView(working);
+            songHost.Add(view);
+
+            if (old != null)
             {
-                // A newer song may have been picked while this one loaded.
-                if (beatmap.Value != working)
-                    return;
+                view.X = shift;
+                view.Alpha = 0;
+                view.MoveToX(0, 350, Easing.OutQuint).FadeIn(350, Easing.OutQuint);
 
-                cover.Add(sprite);
-                sprite.FadeInFromZero(400, Easing.OutQuint);
+                // The progress would jump from full to empty, so it is out of sight while it does.
+                progressRow.FinishTransforms();
+                progressRow.FadeTo(0, 120).Then().FadeIn(300, Easing.OutQuint);
+            }
 
-                // Keep the placeholder underneath; drop older covers.
-                while (cover.Count > 2)
-                    cover.Remove(cover[1], true);
-            });
+            view.LoadCover(() => beatmap.Value == working);
+        }
+
+        /// <summary>
+        /// The song's cover, title and artist, one per song so that the old one can slide away while the new one comes in.
+        /// </summary>
+        private partial class SongView : Container
+        {
+            private readonly WorkingBeatmap working;
+            private readonly Container cover;
+
+            public SongView(WorkingBeatmap working)
+            {
+                this.working = working;
+
+                RelativeSizeAxes = Axes.Both;
+
+                var metadata = working.Metadata;
+
+                Children = new Drawable[]
+                {
+                    cover = new Container
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Size = new Vector2(cover_size),
+                        Masking = true,
+                        CornerRadius = 10,
+                        EdgeEffect = new EdgeEffectParameters
+                        {
+                            Type = EdgeEffectType.Glow,
+                            Colour = ScosuMenuStyle.VIOLET.Opacity(0.32f),
+                            Radius = 12,
+                        },
+                        Child = new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = ScosuMenuStyle.VIOLET.Opacity(0.4f),
+                        },
+                    },
+                    new FillFlowContainer
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Y = -8,
+                        Direction = FillDirection.Vertical,
+                        Spacing = new Vector2(0, 1),
+                        Padding = new MarginPadding { Left = cover_size + 14, Right = 3 * 32 + 10 },
+                        Children = new Drawable[]
+                        {
+                            new TruncatingSpriteText
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Text = new RomanisableString(metadata.TitleUnicode, metadata.Title),
+                                Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
+                            },
+                            new TruncatingSpriteText
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Text = new RomanisableString(metadata.ArtistUnicode, metadata.Artist),
+                                Font = ScosuMenuStyle.Body(12),
+                                Colour = ScosuMenuStyle.TEXT_DIM,
+                            },
+                        },
+                    },
+                };
+            }
+
+            /// <summary>
+            /// Loads the cover over the placeholder, which stays until the texture is there.
+            /// </summary>
+            public void LoadCover(Func<bool> stillWanted)
+            {
+                LoadComponentAsync(new BeatmapBackgroundSprite(working)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    FillMode = FillMode.Fill,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                }, sprite =>
+                {
+                    // Gone, or replaced by a newer song, while it loaded.
+                    if (IsDisposed || !stillWanted())
+                        return;
+
+                    cover.Add(sprite);
+                    sprite.FadeInFromZero(400, Easing.OutQuint);
+                });
+            }
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
+
+            if (musicController != null)
+                musicController.TrackChanged -= onTrackChanged;
         }
 
         protected override void PopIn() => this.MoveToY(0, transition_duration, Easing.OutQuint).FadeIn(transition_duration, Easing.OutQuint);
@@ -428,12 +631,13 @@ namespace osu.Game.Screens.Menu.Hub
         protected override bool OnClick(ClickEvent e) => true;
 
         /// <summary>
-        /// A line of text: an optional icon, a bold start and the rest.
+        /// A line of text: an optional icon, a dim label, the bright value and a dim tail.
         /// </summary>
         private partial class Line : FillFlowContainer
         {
-            private readonly OsuSpriteText bold;
-            private readonly OsuSpriteText text;
+            private readonly OsuSpriteText label;
+            private readonly OsuSpriteText value;
+            private readonly OsuSpriteText tail;
 
             public Line(IconUsage? icon)
             {
@@ -450,32 +654,117 @@ namespace osu.Game.Screens.Menu.Hub
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Icon = icon.Value,
-                        Size = new Vector2(11),
+                        Size = new Vector2(13),
+                        Margin = new MarginPadding { Right = 2 },
                     });
                 }
 
                 AddRange(new Drawable[]
                 {
-                    bold = new OsuSpriteText
-                    {
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
-                    },
-                    text = new OsuSpriteText
-                    {
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        Font = ScosuMenuStyle.Body(14, FontWeight.Regular),
-                    },
+                    label = text(FontWeight.Regular, ScosuMenuStyle.TEXT_DIM),
+                    value = text(FontWeight.Bold, Color4.White),
+                    tail = text(FontWeight.Regular, ScosuMenuStyle.TEXT_DIM),
                 });
             }
 
-            public void Set(string boldPart, LocalisableString rest)
+            private static OsuSpriteText text(FontWeight weight, Color4 colour) => new OsuSpriteText
             {
-                bold.Text = boldPart;
-                bold.Alpha = string.IsNullOrEmpty(boldPart) ? 0 : 1;
-                text.Text = rest;
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                Font = ScosuMenuStyle.Body(14, weight),
+                Colour = colour,
+            };
+
+            public void Set(LocalisableString labelText, LocalisableString valueText, LocalisableString tailText)
+            {
+                label.Text = labelText;
+                value.Text = valueText;
+                tail.Text = tailText;
+
+                // Empty pieces take no space (nor spacing).
+                label.Alpha = string.IsNullOrEmpty(labelText.ToString()) ? 0 : 1;
+                tail.Alpha = string.IsNullOrEmpty(tailText.ToString()) ? 0 : 1;
+            }
+        }
+
+        /// <summary>
+        /// A clickable piece of the bar, lit up under the cursor.
+        /// </summary>
+        private partial class BarButton : OsuClickableContainer
+        {
+            private readonly Box highlight;
+
+            public BarButton(Action action, Drawable content)
+            {
+                Action = action;
+                Anchor = Anchor.CentreLeft;
+                Origin = Anchor.CentreLeft;
+                AutoSizeAxes = Axes.Both;
+                Masking = true;
+                CornerRadius = 8;
+                Padding = new MarginPadding { Horizontal = 10, Vertical = 7 };
+
+                // The padding is the highlight's margin around the text; the item's spacing stays visually the same.
+                Margin = new MarginPadding { Horizontal = -10 };
+
+                Child = content;
+
+                // On top of the text, but faint enough to read through.
+                AddInternal(highlight = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = Color4.White,
+                    Alpha = 0,
+                });
+            }
+
+            protected override bool OnHover(HoverEvent e)
+            {
+                highlight.FadeTo(0.09f, 150, Easing.OutQuint);
+                return base.OnHover(e);
+            }
+
+            protected override void OnHoverLost(HoverLostEvent e)
+            {
+                highlight.FadeOut(200, Easing.OutQuint);
+                base.OnHoverLost(e);
+            }
+        }
+
+        /// <summary>
+        /// The song's progress: a thin track that grows under the cursor, and seeks on click and drag.
+        /// </summary>
+        private partial class SeekBar : ProgressBar
+        {
+            private const float height = 3;
+
+            public override bool HandleNonPositionalInput => IsHovered;
+
+            public SeekBar()
+                : base(true)
+            {
+                RelativeSizeAxes = Axes.X;
+                Height = height;
+                FillColour = ScosuMenuStyle.VIOLET;
+                BackgroundColour = Color4.White.Opacity(0.14f);
+            }
+
+            // The track is too thin to hit, so it takes the clicks around it too.
+            public override bool ReceivePositionalInputAt(Vector2 screenSpacePos)
+                => new RectangleF(0, -5, DrawWidth, DrawHeight + 10).Contains(ToLocalSpace(screenSpacePos));
+
+            protected override bool OnHover(HoverEvent e)
+            {
+                this.ResizeHeightTo(height * 1.8f, 200, Easing.OutQuint);
+                FillColour = ScosuMenuStyle.VIOLET_INK;
+                return base.OnHover(e);
+            }
+
+            protected override void OnHoverLost(HoverLostEvent e)
+            {
+                this.ResizeHeightTo(height, 200, Easing.OutQuint);
+                FillColour = ScosuMenuStyle.VIOLET;
+                base.OnHoverLost(e);
             }
         }
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -30,9 +31,12 @@ namespace osu.Game.Screens.Menu
     /// Hidden while logged out, on servers without reports, when there is no recent report, and once the report is opened or dismissed
     /// (see <see cref="OsuSetting.ScosuSeenWeeklyReport"/>).
     /// </summary>
-    public partial class WeeklyReportMenuCard : CornerCard
+    public partial class WeeklyReportMenuCard : CornerInfoCard
     {
         private const float transition_duration = 500;
+
+        private static readonly Color4 up_colour = Color4Extensions.FromHex(@"6ee39a");
+        private static readonly Color4 down_colour = Color4Extensions.FromHex(@"ff6b7e");
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
@@ -44,9 +48,6 @@ namespace osu.Game.Screens.Menu
         private OsuConfigManager config { get; set; } = null!;
 
         [Resolved]
-        private OsuColour colours { get; set; } = null!;
-
-        [Resolved]
         private OsuGame? game { get; set; }
 
         private readonly IBindable<IReadOnlyList<APIWeeklyReport>?> reports = new Bindable<IReadOnlyList<APIWeeklyReport>?>();
@@ -55,7 +56,7 @@ namespace osu.Game.Screens.Menu
         private APIWeeklyReport? shown;
 
         private Container content = null!;
-        private Box background = null!;
+        private DismissButton dismissButton = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -104,51 +105,73 @@ namespace osu.Game.Screens.Menu
 
             shown = report;
 
-            var highlights = ScosuMenuFormatting.PickHighlights(report);
+            var highlights = ScosuMenuFormatting.PickHighlights(report).Take(2);
 
             content.Children = new Drawable[]
             {
-                ScosuMenuStyle.CreateGlassBackground(),
-                background = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = ScosuMenuStyle.FILL,
-                    Alpha = 0,
-                },
+                CreateSurface(),
                 new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
                     AutoSizeAxes = Axes.Y,
                     Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(0, 4),
+                    Spacing = new Vector2(0, 6),
                     Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING),
                     Children = new Drawable[]
                     {
-                        new OsuSpriteText
+                        new FillFlowContainer
                         {
-                            Text = ScosuMenuStrings.WeeklyReportLabel.ToUpper(),
-                            Font = ScosuMenuStyle.Eyebrow,
-                            Spacing = new Vector2(1.5f, 0),
-                            Colour = ScosuMenuStyle.VIOLET,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Horizontal,
+                            Spacing = new Vector2(8, 0),
+                            Children = new Drawable[]
+                            {
+                                new Container
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Masking = true,
+                                    CornerRadius = 4,
+                                    Children = new Drawable[]
+                                    {
+                                        new Box
+                                        {
+                                            RelativeSizeAxes = Axes.Both,
+                                            Colour = ScosuMenuStyle.VIOLET,
+                                        },
+                                        new OsuSpriteText
+                                        {
+                                            Text = @"NEW",
+                                            Font = OsuFont.GetFont(size: 10, weight: FontWeight.Bold),
+                                            Colour = Color4Extensions.FromHex(@"17131f"),
+                                            Margin = new MarginPadding { Horizontal = 6, Vertical = 1 },
+                                        },
+                                    },
+                                },
+                                new OsuSpriteText
+                                {
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft,
+                                    Text = ScosuMenuStrings.WeeklyReportLabel.ToUpper(),
+                                    Font = ScosuMenuStyle.Eyebrow,
+                                    Spacing = new Vector2(1.5f, 0),
+                                    Colour = ScosuMenuStyle.VIOLET,
+                                },
+                            },
                         },
                         new OsuSpriteText
                         {
                             Text = ScosuMenuStrings.WeeklyReportTitle,
-                            Font = ScosuMenuStyle.Display(20),
+                            Font = ScosuMenuStyle.Display(22),
                         },
                         new FillFlowContainer
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
                             Direction = FillDirection.Vertical,
-                            Spacing = new Vector2(0, 2),
-                            Margin = new MarginPadding { Top = 2 },
-                            ChildrenEnumerable = highlights.Select(h => new OsuSpriteText
-                            {
-                                Text = ScosuMenuFormatting.HighlightText(h),
-                                Font = ScosuMenuStyle.Body(14, FontWeight.SemiBold),
-                                Colour = h.Change == @"worse" ? colours.Orange1 : Color4.White,
-                            }),
+                            Spacing = new Vector2(0, 3),
+                            ChildrenEnumerable = highlights.Select(createHighlight),
                         },
                         new FillFlowContainer
                         {
@@ -157,7 +180,6 @@ namespace osu.Game.Screens.Menu
                             AutoSizeAxes = Axes.Both,
                             Direction = FillDirection.Horizontal,
                             Spacing = new Vector2(4, 0),
-                            Margin = new MarginPadding { Top = 4 },
                             Colour = ScosuMenuStyle.VIOLET_INK,
                             Children = new Drawable[]
                             {
@@ -179,15 +201,64 @@ namespace osu.Game.Screens.Menu
                         },
                     },
                 },
-                new DismissButton(dismiss)
+                // Only there while the card is hovered, see Update.
+                dismissButton = new DismissButton(dismiss)
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
-                    Margin = new MarginPadding(6),
+                    Margin = new MarginPadding(8),
+                    Alpha = 0,
                 },
             };
 
             content.FadeIn(transition_duration, Easing.OutQuint);
+        }
+
+        /// <summary>
+        /// An arrow (green up, red down) and what changed.
+        /// </summary>
+        private static Drawable createHighlight(APIWeeklyReport.Highlight highlight)
+        {
+            bool worse = highlight.Change == @"worse";
+
+            return new FillFlowContainer
+            {
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Horizontal,
+                Spacing = new Vector2(7, 0),
+                Children = new Drawable[]
+                {
+                    new SpriteIcon
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Size = new Vector2(10),
+                        Icon = worse ? FontAwesome.Solid.ArrowDown : FontAwesome.Solid.ArrowUp,
+                        Colour = worse ? down_colour : up_colour,
+                    },
+                    new OsuSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Text = ScosuMenuFormatting.HighlightText(highlight),
+                        Font = ScosuMenuStyle.Body(14, FontWeight.SemiBold),
+                    },
+                },
+            };
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            // The button's own hover takes the card's away, so both count.
+            if (dismissButton != null)
+            {
+                float target = IsHovered || dismissButton.IsHovered ? 1 : 0;
+
+                if (dismissButton.Alpha != target && !dismissButton.Transforms.Any())
+                    dismissButton.FadeTo(target, 150, Easing.OutQuint);
+            }
         }
 
         /// <summary>
@@ -205,18 +276,6 @@ namespace osu.Game.Screens.Menu
             content.FadeOut(transition_duration, Easing.OutQuint);
         }
 
-        protected override bool OnHover(HoverEvent e)
-        {
-            background.FadeTo(1f, 200, Easing.OutQuint);
-            return base.OnHover(e);
-        }
-
-        protected override void OnHoverLost(HoverLostEvent e)
-        {
-            background.FadeTo(0f, 200, Easing.OutQuint);
-            base.OnHoverLost(e);
-        }
-
         protected override bool OnClick(ClickEvent e)
         {
             if (shown == null || content.Alpha == 0)
@@ -229,16 +288,13 @@ namespace osu.Game.Screens.Menu
             return true;
         }
 
-        protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
-
-        protected override void PopOut() => this.FadeOut(transition_duration, Easing.OutQuint);
 
         private partial class DismissButton : OsuClickableContainer
         {
             public DismissButton(Action action)
             {
                 Action = action;
-                Size = new Vector2(16);
+                Size = new Vector2(20);
                 TooltipText = ScosuMenuStrings.Dismiss;
 
                 Child = new SpriteIcon

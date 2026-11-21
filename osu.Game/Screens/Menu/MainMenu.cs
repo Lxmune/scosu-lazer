@@ -273,10 +273,8 @@ namespace osu.Game.Screens.Menu
                             Direction = FillDirection.Vertical,
                             Anchor = Anchor.TopLeft,
                             Origin = Anchor.TopLeft,
-                            Child = scoreSummaryDisplay = new ScoreSummaryDisplay
-                            {
-                                Margin = new MarginPadding(10),
-                            },
+                            // The card keeps its own margin from the screen's edges (see CornerCard).
+                            Child = scoreSummaryDisplay = new ScoreSummaryDisplay(),
                         },
                         bottomLeftDisplays = new FillFlowContainer
                         {

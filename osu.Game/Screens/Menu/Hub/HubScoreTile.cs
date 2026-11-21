@@ -39,23 +39,14 @@ namespace osu.Game.Screens.Menu.Hub
         [Resolved]
         private OsuGame? game { get; set; }
 
-        [Resolved]
-        private IBindable<RulesetInfo> ruleset { get; set; } = null!;
-
-        /// <summary>
-        /// The rank history changes once a day, so reopening the hub soon doesn't ask again.
-        /// </summary>
-        private static readonly TimeSpan history_interval = TimeSpan.FromMinutes(5);
-
-        private GetUserRequest? historyRequest;
-        private DateTimeOffset? lastHistoryFetch;
-        private float[]? rankHistory;
+        private readonly HubProfileProvider profile;
 
         private readonly IBindable<APIScoreSummary?> summary = new Bindable<APIScoreSummary?>();
         private readonly IBindable<APIState> apiState = new Bindable<APIState>();
 
-        public HubScoreTile()
+        public HubScoreTile(HubProfileProvider profile)
         {
+            this.profile = profile;
             Eyebrow.Text = MenuHubStrings.ScoreGained.ToUpper();
         }
 
@@ -70,6 +61,7 @@ namespace osu.Game.Screens.Menu.Hub
             apiState.BindTo(api.State);
             apiState.BindValueChanged(_ => Schedule(refresh));
             summary.BindValueChanged(_ => refresh(), true);
+            profile.User.BindValueChanged(_ => refresh());
         }
 
         private void refresh()
@@ -104,71 +96,17 @@ namespace osu.Game.Screens.Menu.Hub
         }
 
         /// <summary>
-        /// Fetches the user's rank history for the graph behind the numbers, unless that was done recently.
-        /// </summary>
-        public void RefreshIfStale()
-        {
-            if (historyRequest != null || !api.IsLoggedIn || api.State.Value != APIState.Online)
-                return;
-
-            if (lastHistoryFetch != null && DateTimeOffset.Now - lastHistoryFetch < history_interval)
-                return;
-
-            var req = historyRequest = new GetUserRequest(api.LocalUser.Value.Id, ruleset.Value);
-
-            req.Success += user => Schedule(() =>
-            {
-                if (req != historyRequest)
-                    return;
-
-                historyRequest = null;
-                lastHistoryFetch = DateTimeOffset.Now;
-
-                // Days without a rank are zeros.
-                rankHistory = user.Statistics?.RankHistory?.Data?.Where(r => r > 0).Select(r => (float)r).ToArray();
-                refresh();
-            });
-            req.Failure += _ => Schedule(() =>
-            {
-                if (req == historyRequest)
-                    historyRequest = null;
-            });
-
-            api.Queue(req);
-        }
-
-        /// <summary>
         /// The rank history as a faint area at the bottom of the tile, a better rank higher up.
         /// </summary>
         private void showGraph()
         {
+            // Days without a rank are zeros.
+            float[]? rankHistory = profile.User.Value?.Statistics?.RankHistory?.Data?.Where(r => r > 0).Select(r => (float)r).ToArray();
+
             if (rankHistory == null || rankHistory.Length < 2)
                 return;
 
-            SetBackground(new Container
-            {
-                RelativeSizeAxes = Axes.Both,
-                Children = new Drawable[]
-                {
-                    new Box
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        Height = 0.7f,
-                        Colour = ColourInfo.GradientVertical(ScosuMenuStyle.VIOLET.Opacity(0), ScosuMenuStyle.VIOLET.Opacity(0.16f)),
-                    },
-                    new LineGraph
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Anchor = Anchor.BottomLeft,
-                        Origin = Anchor.BottomLeft,
-                        Height = 0.7f,
-                        LineColour = ScosuMenuStyle.VIOLET.Opacity(0.7f),
-                        Values = rankHistory.Select(r => -r),
-                    },
-                },
-            }, 0);
+            SetBackground(HubGraphs.Area(rankHistory.Select(r => -r), ScosuMenuStyle.VIOLET), 0);
         }
 
         private static Drawable stat(string value, LocalisableString caption, Color4 colour) => new FillFlowContainer

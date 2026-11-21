@@ -17,6 +17,7 @@ using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Metadata;
 using osu.Game.Online.Rooms;
+using osu.Game.Scoring;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.Menu.Hub;
 using osu.Game.Tests.Visual.Metadata;
@@ -165,6 +166,46 @@ namespace osu.Game.Tests.Visual.Menus
                         });
                         return true;
 
+                    case GetUserRequest user:
+                        user.TriggerSuccess(new APIUser
+                        {
+                            Id = user.Lookup == null ? 1 : int.Parse(user.Lookup),
+                            Statistics = new UserStatistics
+                            {
+                                PlayCount = 1234,
+                                Accuracy = 98.45,
+                                CountryRank = 12,
+                                GradesCount = new UserStatistics.Grades { SS = 5, S = 20, A = 30 },
+                                RankHistory = new APIRankHistory { Mode = "osu", Data = Enumerable.Range(0, 60).Select(i => 100 - i).ToArray() },
+                            },
+                            MonthlyPlayCounts = new[]
+                            {
+                                new APIUserHistoryCount { Date = DateTime.Today.AddMonths(-1), Count = 200 },
+                                new APIUserHistoryCount { Date = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), Count = 321 },
+                            },
+                            Achievements = new[] { new APIUserAchievement { ID = 1, AchievedAt = DateTimeOffset.Now.AddDays(-3) } },
+                        });
+                        return true;
+
+                    case GetUserScoresRequest scores:
+                        scores.TriggerSuccess(new List<SoloScoreInfo>
+                        {
+                            new SoloScoreInfo
+                            {
+                                BeatmapID = 77,
+                                TotalScore = 1_234_567,
+                                Accuracy = 0.9876,
+                                PP = 345.6,
+                                Rank = ScoreRank.S,
+                                Beatmap = new APIBeatmap
+                                {
+                                    DifficultyName = "Another",
+                                    BeatmapSet = new APIBeatmapSet { Title = "Best Song", Artist = "Someone" },
+                                },
+                            },
+                        });
+                        return true;
+
                     case GetNewsRequest news:
                         news.TriggerSuccess(new GetNewsResponse
                         {
@@ -214,8 +255,15 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("report shown", () => shows("Your week is ready"));
             AddUntilStep("news shown", () => shows("Welcome to scosu"));
 
-            AddUntilStep("bar shows today", () => barShows("Today +4,812,330") && barShows("PlayerY"));
-            AddUntilStep("bar shows event and friends", () => barShows("Advent Rush 2026") && barShows("starts in") && barShows("Friends: 1 of 2 online"));
+            AddUntilStep("plays shown", () => shows("1,234") && shows("321 this month"));
+            AddUntilStep("accuracy shown", () => shows("98.45%"));
+            AddUntilStep("country rank shown", () => shows("#12"));
+            AddUntilStep("medals shown", () => shows("Latest:"));
+            AddUntilStep("best play shown", () => shows("Best Song") && shows("346pp"));
+            AddUntilStep("recent plays shown", () => shows("1.2M"));
+
+            AddUntilStep("bar shows today", () => barShows("+4,812,330") && barShows("PlayerY"));
+            AddUntilStep("bar shows event and friends", () => barShows("Advent Rush 2026") && barShows("starts in") && barShows("1 of 2 online"));
 
             AddUntilStep("sheet settled", () => sheet.ChildrenOfType<HubDailyTile>().Single().Alpha, () => Is.EqualTo(1));
             AddStep("click daily challenge", () =>
@@ -239,7 +287,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("friends placeholder", () => shows("Log in to see your friends"));
             AddUntilStep("report placeholder", () => shows("Log in to see your weekly report"));
             AddUntilStep("news placeholder", () => shows("No news right now"));
-            AddAssert("bar has no friends line", () => !barShows("Friends:"));
+            AddAssert("bar has no friends line", () => !barShows("of 2 online"));
 
             AddStep("hide bar", () => bar.Hide());
             AddUntilStep("bar hidden", () => bar.Alpha, () => Is.Zero);

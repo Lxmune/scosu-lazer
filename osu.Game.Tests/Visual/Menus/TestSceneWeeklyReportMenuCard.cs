@@ -102,11 +102,9 @@ namespace osu.Game.Tests.Visual.Menus
         {
             createCard();
             AddUntilStep("card shown", () => content.Alpha, () => Is.EqualTo(1));
-            AddStep("click dismiss", () =>
-            {
-                InputManager.MoveMouseTo(card.ChildrenOfType<osu.Game.Graphics.Containers.OsuClickableContainer>().First());
-                InputManager.Click(osuTK.Input.MouseButton.Left);
-            });
+            AddStep("hover dismiss button", () => InputManager.MoveMouseTo(card.ChildrenOfType<osu.Game.Graphics.Containers.OsuClickableContainer>().First()));
+            AddUntilStep("dismiss button appeared", () => card.ChildrenOfType<osu.Game.Graphics.Containers.OsuClickableContainer>().First().Alpha, () => Is.GreaterThan(0.9f));
+            AddStep("click dismiss", () => InputManager.Click(osuTK.Input.MouseButton.Left));
             AddUntilStep("card hidden", () => content.Alpha, () => Is.Zero);
             AddAssert("week remembered", () => localConfig.Get<string>(OsuSetting.ScosuSeenWeeklyReport), () => Is.EqualTo(reports[0].WeekStart));
         }

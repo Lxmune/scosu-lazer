@@ -162,6 +162,101 @@ namespace osu.Game.Screens.Menu.Hub
         /// </summary>
         public static LocalisableString Online(string count) => new TranslatableString(getKey(@"online"), @"{0} online", count);
 
+        /// <summary>
+        /// "Play count"
+        /// </summary>
+        public static LocalisableString PlayCount => new TranslatableString(getKey(@"play_count"), @"Play count");
+
+        /// <summary>
+        /// "plays"
+        /// </summary>
+        public static LocalisableString PlaysTotal => new TranslatableString(getKey(@"plays_total"), @"plays");
+
+        /// <summary>
+        /// "Accuracy"
+        /// </summary>
+        public static LocalisableString Accuracy => new TranslatableString(getKey(@"accuracy"), @"Accuracy");
+
+        /// <summary>
+        /// "Country rank"
+        /// </summary>
+        public static LocalisableString CountryRank => new TranslatableString(getKey(@"country_rank"), @"Country rank");
+
+        /// <summary>
+        /// "Best play"
+        /// </summary>
+        public static LocalisableString BestPlay => new TranslatableString(getKey(@"best_play"), @"Best play");
+
+        /// <summary>
+        /// "Recent plays"
+        /// </summary>
+        public static LocalisableString RecentPlays => new TranslatableString(getKey(@"recent_plays"), @"Recent plays");
+
+        /// <summary>
+        /// "Medals"
+        /// </summary>
+        public static LocalisableString Medals => new TranslatableString(getKey(@"medals"), @"Medals");
+
+        /// <summary>
+        /// "medals"
+        /// </summary>
+        public static LocalisableString MedalsCount => new TranslatableString(getKey(@"medals_count"), @"medals");
+
+        /// <summary>
+        /// "Log in to see your profile"
+        /// </summary>
+        public static LocalisableString LogInForProfile => new TranslatableString(getKey(@"log_in_for_profile"), @"Log in to see your profile");
+
+        /// <summary>
+        /// "Your profile isn't available right now"
+        /// </summary>
+        public static LocalisableString ProfileUnavailable => new TranslatableString(getKey(@"profile_unavailable"), @"Your profile isn't available right now");
+
+        /// <summary>
+        /// "No best play yet"
+        /// </summary>
+        public static LocalisableString NoBest => new TranslatableString(getKey(@"no_best"), @"No best play yet");
+
+        /// <summary>
+        /// "No recent plays"
+        /// </summary>
+        public static LocalisableString NoRecent => new TranslatableString(getKey(@"no_recent"), @"No recent plays");
+
+        /// <summary>
+        /// "No medals yet"
+        /// </summary>
+        public static LocalisableString NoMedals => new TranslatableString(getKey(@"no_medals"), @"No medals yet");
+
+        /// <summary>
+        /// "No country rank yet"
+        /// </summary>
+        public static LocalisableString NoCountryRank => new TranslatableString(getKey(@"no_country_rank"), @"No country rank yet");
+
+        /// <summary>
+        /// "Open the beatmap"
+        /// </summary>
+        public static LocalisableString OpenBeatmap => new TranslatableString(getKey(@"open_beatmap"), @"Open the beatmap");
+
+        /// <summary>
+        /// "No plays yet"
+        /// </summary>
+        public static LocalisableString NoPlays => new TranslatableString(getKey(@"no_plays"), @"No plays yet");
+
+        /// <summary>
+        /// "{0} this month"
+        /// </summary>
+        public static LocalisableString ThisMonthPlays(string count) => new TranslatableString(getKey(@"this_month_plays"), @"{0} this month", count);
+
+        /// <summary>
+        /// "{0} in 30 days"
+        /// </summary>
+        public static LocalisableString RankChange(string change) => new TranslatableString(getKey(@"rank_change"), @"{0} in 30 days", change);
+
+        /// <summary>
+        /// "Latest: {0}"
+        /// </summary>
+        public static LocalisableString LatestMedal(string date) => new TranslatableString(getKey(@"latest_medal"), @"Latest: {0}", date);
+
         private static string getKey(string key) => $@"{prefix}:{key}";
     }
 }

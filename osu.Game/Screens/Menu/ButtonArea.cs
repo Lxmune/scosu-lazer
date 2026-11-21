@@ -21,6 +21,7 @@ namespace osu.Game.Screens.Menu
         protected override Container<Drawable> Content => Flow;
 
         private readonly ButtonAreaBackground buttonAreaBackground;
+        private readonly Container primaryExtension;
         private Visibility state;
 
         public const float BUTTON_AREA_HEIGHT = 100;
@@ -39,6 +40,26 @@ namespace osu.Game.Screens.Menu
                 Children = new Drawable[]
                 {
                     buttonAreaBackground = new ButtonAreaBackground(),
+                    // scosu: the primary tile's gradient continued behind the logo, see ButtonSystem.Update.
+                    primaryExtension = new Container
+                    {
+                        RelativeSizeAxes = Axes.Y,
+                        Alpha = 0,
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = ScosuMenuStyle.PRIMARY,
+                            },
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Height = 3,
+                                Colour = ScosuMenuStyle.VIOLET_INK,
+                            },
+                        }
+                    },
                     Flow = new FlowContainerWithOrigin
                     {
                         Direction = FillDirection.Horizontal,
@@ -48,6 +69,16 @@ namespace osu.Game.Screens.Menu
                     }
                 }
             };
+        }
+
+        /// <summary>
+        /// Places the primary tile's extension (x range in this area's inner space) and sets how visible it is.
+        /// </summary>
+        public void SetPrimaryExtension(float left, float right, float alpha)
+        {
+            primaryExtension.X = left;
+            primaryExtension.Width = Math.Max(0, right - left);
+            primaryExtension.Alpha = alpha;
         }
 
         public ButtonSystemState ButtonSystemState

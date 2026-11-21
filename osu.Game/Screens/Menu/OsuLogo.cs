@@ -9,7 +9,9 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -156,6 +158,32 @@ namespace osu.Game.Screens.Menu
                                                     AutoSizeAxes = Axes.Both,
                                                     Children = new Drawable[]
                                                     {
+                                                        // scosu: a thin dark ring just outside the logo's outer ring plus a soft shadow, so the logo reads on bright
+                                                        // backgrounds. It is a child of the logo's own containers, so it beats, pulses and hovers with it.
+                                                        // The disc fills SCALE_ADJUST of the sprite; this circle is 1.2% larger, i.e. a few pixels of ring around the disc.
+                                                        // The intros use this logo too: the ring is dark on dark there, so it is barely visible.
+                                                        new CircularContainer
+                                                        {
+                                                            Anchor = Anchor.Centre,
+                                                            Origin = Anchor.Centre,
+                                                            RelativeSizeAxes = Axes.Both,
+                                                            Scale = SCALE_ADJUST * 1.012f,
+                                                            Masking = true,
+                                                            BorderThickness = 3,
+                                                            BorderColour = Color4Extensions.FromHex(@"120f19").Opacity(0.7f),
+                                                            EdgeEffect = new EdgeEffectParameters
+                                                            {
+                                                                Type = EdgeEffectType.Shadow,
+                                                                Colour = Color4.Black.Opacity(0.32f),
+                                                                Radius = 26,
+                                                            },
+                                                            Child = new Box
+                                                            {
+                                                                RelativeSizeAxes = Axes.Both,
+                                                                AlwaysPresent = true,
+                                                                Alpha = 0,
+                                                            },
+                                                        },
                                                         logo = new Sprite
                                                         {
                                                             Anchor = Anchor.Centre,
