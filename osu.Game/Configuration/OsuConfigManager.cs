@@ -35,6 +35,14 @@ namespace osu.Game.Configuration
         {
         }
 
+        protected override void PerformLoad()
+        {
+            base.PerformLoad();
+
+            // scosu: the score display mode isn't a setting here, so a "Classic" saved before it was removed doesn't stay.
+            SetValue(OsuSetting.ScoreDisplayMode, ScoringMode.Standardised);
+        }
+
         protected override void InitialiseDefaults()
         {
             // UI/selection defaults
@@ -69,8 +77,10 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.SongSelectBackgroundBlur, false);
 
             // Online settings
-            SetDefault(OsuSetting.Username, string.Empty);
-            SetDefault(OsuSetting.Token, string.Empty);
+            SetDefault(OsuSetting.ScosuUsername, string.Empty);
+            SetDefault(OsuSetting.ScosuToken, string.Empty);
+            SetDefault(OsuSetting.ScosuTokenServer, string.Empty);
+            SetDefault(OsuSetting.ScosuDeviceId, string.Empty);
 
             SetDefault(OsuSetting.AutomaticallyDownloadMissingBeatmaps, true);
 
@@ -79,14 +89,14 @@ namespace osu.Game.Configuration
                 if (enabled.NewValue)
                     SetValue(OsuSetting.SaveUsername, true);
                 else
-                    GetBindable<string>(OsuSetting.Token).SetDefault();
+                    GetBindable<string>(OsuSetting.ScosuToken).SetDefault();
             };
 
             SetDefault(OsuSetting.SaveUsername, true).ValueChanged += enabled =>
             {
                 if (!enabled.NewValue)
                 {
-                    GetBindable<string>(OsuSetting.Username).SetDefault();
+                    GetBindable<string>(OsuSetting.ScosuUsername).SetDefault();
                     SetValue(OsuSetting.SavePassword, false);
                 }
             };
@@ -174,6 +184,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.Version, string.Empty);
 
             SetDefault(OsuSetting.ShowScosuFirstRunSetup, true);
+            SetDefault(OsuSetting.ScosuSeenWeeklyReport, string.Empty);
             SetDefault(OsuSetting.ShowMobileDisclaimer, RuntimeInfo.IsMobile);
 
             SetDefault(OsuSetting.ScreenshotFormat, ScreenshotFormat.Jpg);
@@ -253,7 +264,8 @@ namespace osu.Game.Configuration
         {
             switch (lookup)
             {
-                case OsuSetting.Token:
+                case OsuSetting.ScosuToken:
+                case OsuSetting.ScosuDeviceId:
                     return true;
             }
 
@@ -336,7 +348,11 @@ namespace osu.Game.Configuration
     public enum OsuSetting
     {
         Ruleset,
-        Token,
+        /// <summary>
+        /// Not osu!'s <c>Token</c>: scosu can share its game.ini with osu!lazer, and osu!'s login
+        /// must never be sent to a scosu server (or the other way round).
+        /// </summary>
+        ScosuToken,
         MenuCursorSize,
         GameplayCursorSize,
         AutoCursorSize,
@@ -383,7 +399,10 @@ namespace osu.Game.Configuration
         BeatmapDetailTab,
         BeatmapLeaderboardSortMode,
         BeatmapDetailModsFilter,
-        Username,
+        /// <summary>
+        /// Not osu!'s <c>Username</c>, for the same reason as <see cref="ScosuToken"/>.
+        /// </summary>
+        ScosuUsername,
         ReleaseStream,
         SavePassword,
         SaveUsername,
@@ -406,6 +425,21 @@ namespace osu.Game.Configuration
         /// where that one is already off, and scosu's setup should still show once.
         /// </summary>
         ShowScosuFirstRunSetup,
+
+        /// <summary>
+        /// The API URL <see cref="ScosuToken"/> was issued by, so a token is never sent to another server.
+        /// </summary>
+        ScosuTokenServer,
+
+        /// <summary>
+        /// A random id this installation made for itself (see <see cref="Online.API.OAuth.IsValidDeviceId"/>), sent with logins so the server can link accounts played from one install.
+        /// </summary>
+        ScosuDeviceId,
+
+        /// <summary>
+        /// The newest weekly report (its week's Monday, <c>yyyy-MM-dd</c>) the main menu's card was shown for or dismissed.
+        /// </summary>
+        ScosuSeenWeeklyReport,
 
         ShowConvertedBeatmaps,
         Skin,

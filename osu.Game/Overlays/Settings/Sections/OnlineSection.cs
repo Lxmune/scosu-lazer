@@ -26,6 +26,8 @@ namespace osu.Game.Overlays.Settings.Sections
             {
                 new ServerSettings(),
                 new ContentDownloadSettings(),
+                // scosu: download the ranked maps you're missing, in one click (only on scosu servers).
+                new MissingBeatmapsSettings(),
                 new AlertsAndPrivacySettings(),
             };
 

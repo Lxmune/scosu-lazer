@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -7,6 +7,8 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Pooling;
+using osu.Framework.Graphics.Shapes;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
@@ -32,6 +34,8 @@ namespace osu.Game.Overlays.Music
         private Action<Live<BeatmapSetInfo>>? requestSelection;
 
         private MarqueeContainer text = null!;
+        private Box hoverBackground = null!;
+        private Box selectedBar = null!;
 
         [Resolved]
         private OsuColour colours { get; set; } = null!;
@@ -40,16 +44,32 @@ namespace osu.Game.Overlays.Music
         private void load(PlaylistOverlay playlistOverlay)
         {
             RelativeSizeAxes = Axes.X;
-            Height = 20;
+            Height = 24;
 
-            InternalChild = text = new MarqueeContainer
+            InternalChildren = new Drawable[]
             {
+                hoverBackground = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = colours.Pink,
+                    Alpha = 0,
+                },
+                selectedBar = new Box
+                {
+                    RelativeSizeAxes = Axes.Y,
+                    Width = 3,
+                    Colour = colours.PinkLight,
+                    Alpha = 0,
+                },
+                text = new MarqueeContainer
+                {
                 Anchor = Anchor.CentreLeft,
                 Origin = Anchor.CentreLeft,
                 RelativeSizeAxes = Axes.X,
                 InitialMoveDelay = 0,
                 AllowScrolling = false,
                 Padding = new MarginPadding { Horizontal = 15 },
+                },
             };
 
             selectedSet.BindTo(playlistOverlay.SelectedSet);
@@ -85,7 +105,7 @@ namespace osu.Game.Overlays.Music
                 flow.AddText(artist, sprite =>
                 {
                     sprite.Font = OsuFont.GetFont(size: 14, weight: FontWeight.Bold);
-                    sprite.Colour = colours.Gray9;
+                    sprite.Colour = colours.PinkLighter.Opacity(0.7f);
                 });
                 return flow;
             };
@@ -104,7 +124,9 @@ namespace osu.Game.Overlays.Music
             if (wasSelected == this.selected)
                 return;
 
-            text.FadeColour(this.selected == true ? colours.Yellow : Color4.White, 100);
+            text.FadeColour(this.selected == true ? colours.PinkLight : Color4.White, 150);
+            selectedBar.FadeTo(this.selected == true ? 1 : 0, 150);
+            hoverBackground.FadeTo(this.selected == true ? 0.15f : 0, 150);
         }
 
         protected override bool OnClick(ClickEvent e)
@@ -116,12 +138,14 @@ namespace osu.Game.Overlays.Music
         protected override bool OnHover(HoverEvent e)
         {
             text.AllowScrolling = true;
+            hoverBackground.FadeTo(0.3f, 100);
             return true;
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
             text.AllowScrolling = false;
+            hoverBackground.FadeTo(selected == true ? 0.15f : 0, 200);
             base.OnHoverLost(e);
         }
     }

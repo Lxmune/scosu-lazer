@@ -31,7 +31,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("ensure track is not virtual", () => Intro.Beatmap.Value.Track is TrackBass);
         }
 
-        protected override bool IntroReliesOnTrack => true;
-        protected override IntroScreen CreateScreen() => new IntroTriangles();
+        protected override bool IntroReliesOnTrack => false;
+        protected override IntroScreen CreateScreen() => new IntroCircles();
     }
 }

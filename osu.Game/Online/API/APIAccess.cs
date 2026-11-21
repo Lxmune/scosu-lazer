@@ -19,6 +19,7 @@ using osu.Framework.Extensions;
 using osu.Framework.Extensions.ExceptionExtensions;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Game.Configuration;
 using osu.Game.Localisation;
@@ -95,15 +96,26 @@ namespace osu.Game.Online.API
             Endpoints = endpoints;
             NotificationsClient = setUpNotificationsClient();
 
-            authentication = new OAuth(endpoints.APIClientID, endpoints.APIClientSecret, Endpoints.APIUrl);
+            // scosu: one random id per installation, kept in its settings (see OsuSetting.ScosuDeviceId).
+            string deviceId = config.Get<string>(OsuSetting.ScosuDeviceId);
+
+            if (!OAuth.IsValidDeviceId(deviceId))
+            {
+                deviceId = OAuth.GenerateDeviceId();
+                config.SetValue(OsuSetting.ScosuDeviceId, deviceId);
+            }
+
+            authentication = new OAuth(endpoints.APIClientID, endpoints.APIClientSecret, Endpoints.APIUrl, deviceId);
 
             log = Logger.GetLogger(LoggingTarget.Network);
             log.Add($@"API endpoint root: {Endpoints.APIUrl}");
             log.Add($@"API request version: {APIVersion}");
 
-            ProvidedUsername = config.Get<string>(OsuSetting.Username);
+            ProvidedUsername = config.Get<string>(OsuSetting.ScosuUsername);
 
-            authentication.TokenString = config.Get<string>(OsuSetting.Token);
+            // A token saved for another server (e.g. before switching to a custom one) is never sent here.
+            if (config.Get<string>(OsuSetting.ScosuTokenServer) == Endpoints.APIUrl)
+                authentication.TokenString = config.Get<string>(OsuSetting.ScosuToken);
             authentication.Token.ValueChanged += onTokenChanged;
 
             AddInternal(localUserState = new LocalUserState(this, config));
@@ -157,7 +169,11 @@ namespace osu.Game.Online.API
             return connector;
         }
 
-        private void onTokenChanged(ValueChangedEvent<OAuthToken> e) => config.SetValue(OsuSetting.Token, config.Get<bool>(OsuSetting.SavePassword) ? authentication.TokenString : string.Empty);
+        private void onTokenChanged(ValueChangedEvent<OAuthToken> e)
+        {
+            config.SetValue(OsuSetting.ScosuToken, config.Get<bool>(OsuSetting.SavePassword) ? authentication.TokenString : string.Empty);
+            config.SetValue(OsuSetting.ScosuTokenServer, Endpoints.APIUrl);
+        }
 
         void IAPIProvider.Schedule(Action action) => base.Schedule(action);
 
@@ -281,7 +297,7 @@ namespace osu.Game.Online.API
         private void triggerOutage(string reason)
         {
             state.Value = APIState.Failing;
-            string userFacingMessage = reason ?? "Online functionality is not available due to an outage. Sorry for the inconvenience.";
+            LocalisableString userFacingMessage = reason ?? NotificationsStrings.ServerOutageExplanation;
 
             userFacingOutageMessage.Value = userFacingMessage;
 
@@ -290,7 +306,7 @@ namespace osu.Game.Online.API
                 if (PostNotification != null)
                     PostNotification?.Invoke(new OutageNotification(userFacingMessage));
                 else
-                    log.Add(userFacingMessage, LogLevel.Important);
+                    log.Add(userFacingMessage.ToString(), LogLevel.Important);
             });
         }
 
@@ -331,7 +347,7 @@ namespace osu.Game.Online.API
                 Scheduler.Add(localUserState.SetPlaceholderLocalUser, ProvidedUsername, false);
 
             // save the username at this point, if the user requested for it to be.
-            config.SetValue(OsuSetting.Username, config.Get<bool>(OsuSetting.SaveUsername) ? ProvidedUsername : string.Empty);
+            config.SetValue(OsuSetting.ScosuUsername, config.Get<bool>(OsuSetting.SaveUsername) ? ProvidedUsername : string.Empty);
 
             // only check the liveness probe when actually connecting, and not when waiting for the second factor.
             // `attemptConnect()` runs on a tight 50ms loop while waiting for the second factor,
@@ -610,9 +626,9 @@ namespace osu.Game.Online.API
         /// </summary>
         public IBindable<APIState> State => state;
 
-        public IBindable<string> UserFacingOutageMessage => userFacingOutageMessage;
+        public IBindable<LocalisableString?> UserFacingOutageMessage => userFacingOutageMessage;
 
-        private readonly Bindable<string> userFacingOutageMessage = new Bindable<string>(string.Empty);
+        private readonly Bindable<LocalisableString?> userFacingOutageMessage = new Bindable<LocalisableString?>(string.Empty);
 
         private void handleWebException(WebException we)
         {

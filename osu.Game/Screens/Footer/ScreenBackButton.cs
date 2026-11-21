@@ -63,8 +63,9 @@ namespace osu.Game.Screens.Footer
                 }
             };
 
-            DarkerColour = Color4Extensions.FromHex("#DE31AE");
-            LighterColour = Color4Extensions.FromHex("#FF86DD");
+            // scosu: violet like the rest of the client's accent (see OsuColour.Pink).
+            DarkerColour = Color4Extensions.FromHex("#7856CE");
+            LighterColour = Color4Extensions.FromHex("#A88BF5");
             TextColour = Color4.White;
         }
     }

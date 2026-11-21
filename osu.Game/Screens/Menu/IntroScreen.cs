@@ -113,7 +113,8 @@ namespace osu.Game.Screens.Menu
             // prevent user from changing beatmap while the intro is still running.
             beatmap = Beatmap.BeginLease(false);
 
-            MenuVoice = config.GetBindable<bool>(OsuSetting.MenuVoice);
+            // scosu: never on. The intro voice is osu!'s own recording ("welcome to osu!"), which scosu doesn't use.
+            MenuVoice = new Bindable<bool>();
             MenuMusic = config.GetBindable<bool>(OsuSetting.MenuMusic);
 
             if (api.LocalUser.Value.IsSupporter)
@@ -323,7 +324,6 @@ namespace osu.Game.Screens.Menu
             base.LogoArriving(logo, resuming);
 
             logo.Colour = Color4.White;
-            logo.Triangles = false;
             logo.Ripple = false;
 
             if (!resuming)

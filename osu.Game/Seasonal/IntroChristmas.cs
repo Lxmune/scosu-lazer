@@ -23,8 +23,8 @@ namespace osu.Game.Seasonal
 {
     public partial class IntroChristmas : IntroScreen
     {
-        // nekodex - circle the halls
-        public const string CHRISTMAS_BEATMAP_SET_HASH = "7e26183e72a496f672c3a21292e6b469fdecd084d31c259ea10a31df5b46cd77";
+        // scosu - scosu intro (christmas)
+        public const string CHRISTMAS_BEATMAP_SET_HASH = "7df47bfec26e14cdb6d45d59a768ce4c6d69f79004af84351d07b428437439ac";
 
         protected override string BeatmapHash => CHRISTMAS_BEATMAP_SET_HASH;
 
@@ -159,13 +159,13 @@ namespace osu.Game.Seasonal
                 using (BeginAbsoluteSequence(0))
                 {
                     using (BeginDelayedSequence(getTimeForBeat(-16)))
-                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to osu!");
+                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to scosu");
 
                     using (BeginDelayedSequence(getTimeForBeat(-15)))
                         welcomeText.FadeIn().OnComplete(t => t.Text = "");
 
                     using (BeginDelayedSequence(getTimeForBeat(-14)))
-                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to osu!");
+                        welcomeText.FadeIn().OnComplete(t => t.Text = "welcome to scosu");
 
                     using (BeginDelayedSequence(getTimeForBeat(-13)))
                         welcomeText.FadeIn().OnComplete(t => t.Text = "");
@@ -177,7 +177,7 @@ namespace osu.Game.Seasonal
                         welcomeText.FadeIn().OnComplete(t => t.Text = "");
 
                     using (BeginDelayedSequence(getTimeForBeat(-10)))
-                        welcomeText.FadeIn().OnComplete(t => t.Text = "merry osumas!");
+                        welcomeText.FadeIn().OnComplete(t => t.Text = "merry christmas!");
 
                     using (BeginDelayedSequence(getTimeForBeat(-9)))
                     {

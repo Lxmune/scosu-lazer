@@ -2,6 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using DiscordRPC;
 using DiscordRPC.Message;
@@ -22,6 +24,7 @@ using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using osu.Game.Overlays;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Users;
 using LogLevel = osu.Framework.Logging.LogLevel;
 
@@ -29,7 +32,7 @@ namespace osu.Desktop
 {
     internal partial class DiscordRichPresence : Component
     {
-        private const string client_id = "1216669957799018608";
+        private const string client_id = "1564082817464410132";
 
         private DiscordRpcClient client = null!;
 
@@ -50,6 +53,9 @@ namespace osu.Desktop
 
         [Resolved]
         private LocalUserStatisticsProvider statisticsProvider { get; set; } = null!;
+
+        [Resolved]
+        private IBindable<IReadOnlyList<Mod>> selectedMods { get; set; } = null!;
 
         private IBindable<DiscordRichPresenceMode> privacyMode = null!;
         private IBindable<UserStatus> userStatus = null!;
@@ -110,6 +116,8 @@ namespace osu.Desktop
             user = api.LocalUser.GetBoundCopy();
 
             ruleset.BindValueChanged(_ => schedulePresenceUpdate());
+            // scosu: Relax and Autopilot have their own leaderboards (see RelaxLeaderboards).
+            selectedMods.BindValueChanged(_ => schedulePresenceUpdate());
             userStatus.BindValueChanged(_ => schedulePresenceUpdate());
             userActivity.BindValueChanged(_ => schedulePresenceUpdate());
             privacyMode.BindValueChanged(_ => schedulePresenceUpdate());
@@ -161,6 +169,10 @@ namespace osu.Desktop
             if (user == null)
                 return;
 
+            // scosu: the leaderboard the play counts for, e.g. "osu! (RX)" with the RX mod.
+            var leaderboard = ruleset.Value.GetLeaderboardRuleset(selectedMods.Value.Select(m => m.Acronym));
+            var buttons = new List<Button>();
+
             // user activity
             if (userActivity.Value != null)
             {
@@ -169,18 +181,11 @@ namespace osu.Desktop
 
                 if (userActivity.Value.GetBeatmapID(hideIdentifiableInformation) is int beatmapId && beatmapId > 0)
                 {
-                    presence.Buttons = new[]
+                    buttons.Add(new Button
                     {
-                        new Button
-                        {
-                            Label = "View beatmap",
-                            Url = $@"{api.Endpoints.WebsiteUrl}/beatmaps/{beatmapId}?mode={ruleset.Value.ShortName}"
-                        }
-                    };
-                }
-                else
-                {
-                    presence.Buttons = null;
+                        Label = "View beatmap",
+                        Url = $@"{api.Endpoints.WebsiteUrl}/beatmaps/{beatmapId}?mode={ruleset.Value.ShortName}"
+                    });
                 }
             }
             else
@@ -188,6 +193,18 @@ namespace osu.Desktop
                 presence.State = "Idle";
                 presence.Details = string.Empty;
             }
+
+            // scosu: a second button to the player's profile, on the leaderboard they're playing.
+            if (!hideIdentifiableInformation && user.Value.Id > 1)
+            {
+                buttons.Add(new Button
+                {
+                    Label = "View profile",
+                    Url = $@"{api.Endpoints.WebsiteUrl}/users/{user.Value.Id}/{leaderboard.ShortName}"
+                });
+            }
+
+            presence.Buttons = buttons.Count > 0 ? buttons.ToArray() : null;
 
             // user party
             if (!hideIdentifiableInformation && multiplayerClient.Room != null && !multiplayerClient.Room.Settings.MatchType.IsMatchmakingType())
@@ -229,13 +246,12 @@ namespace osu.Desktop
                 presence.Assets.LargeImageText = string.Empty;
             else
             {
-                var statistics = statisticsProvider.GetStatisticsFor(ruleset.Value);
-                presence.Assets.LargeImageText = $"{user.Value.Username}" + (statistics?.GlobalRank > 0 ? $" (rank #{statistics.GlobalRank:N0})" : string.Empty);
+                presence.Assets.LargeImageText = clampLength(largeImageText(leaderboard));
             }
 
-            // small image
+            // small image: the ruleset's icon (Relax and Autopilot are played in it), named after the leaderboard.
             presence.Assets.SmallImageKey = ruleset.Value.IsLegacyRuleset() ? $"mode_{ruleset.Value.OnlineID}" : "mode_custom";
-            presence.Assets.SmallImageText = ruleset.Value.Name;
+            presence.Assets.SmallImageText = leaderboard.Name;
         }
 
         private void onJoin(object sender, JoinMessage args) => Scheduler.AddOnce(() =>
@@ -268,6 +284,36 @@ namespace osu.Desktop
         });
 
         private static readonly int ellipsis_length = Encoding.UTF8.GetByteCount(new[] { '…' });
+
+        /// <summary>
+        /// scosu: "[TAG] name · #1,234 · 12.3M score", with the rank and ranked score of the leaderboard being played
+        /// (scosu ranks players by ranked score).
+        /// </summary>
+        private string largeImageText(RulesetInfo leaderboard)
+        {
+            var text = new StringBuilder();
+
+            if (!string.IsNullOrEmpty(user!.Value.Team?.ShortName))
+                text.Append($@"[{user.Value.Team.ShortName}] ");
+            text.Append(user.Value.Username);
+
+            var statistics = statisticsProvider.GetStatisticsFor(leaderboard);
+
+            if (statistics?.GlobalRank > 0)
+                text.Append($@" · #{statistics.GlobalRank:N0}");
+            if (statistics?.RankedScore > 0)
+                text.Append($@" · {compact(statistics.RankedScore)} score");
+
+            return text.ToString();
+        }
+
+        private static string compact(long value) => value switch
+        {
+            >= 1_000_000_000 => $@"{value / 1e9:0.##}B",
+            >= 1_000_000 => $@"{value / 1e6:0.#}M",
+            >= 1_000 => $@"{value / 1e3:0.#}K",
+            _ => value.ToString(@"N0"),
+        };
 
         private static string clampLength(string str)
         {

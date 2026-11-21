@@ -55,7 +55,7 @@ namespace osu.Game.Overlays
         private RulesetStore rulesets { get; set; } = null!;
 
         public UserProfileOverlay()
-            : base(OverlayColourScheme.Pink)
+            : base(OverlayColourScheme.Purple) // scosu: every in-game web page uses the accent colour (violet), whatever hue the player chose
         {
             base.Content.Add(new PopoverContainer
             {
@@ -125,9 +125,6 @@ namespace osu.Game.Overlays
                 }
                 : Array.Empty<ProfileSection>();
 
-            if (!sameUser)
-                changeOverlayColours(OverlayColourScheme.Pink.GetHue());
-
             recreateBaseContent();
 
             if (API.State.Value != APIState.Offline)
@@ -143,12 +140,6 @@ namespace osu.Game.Overlays
         private void userLoadComplete(APIUser loadedUser, IRulesetInfo? userRuleset)
         {
             Debug.Assert(sections != null && sectionsContainer != null && tabs != null);
-
-            // reuse header and content if same colour scheme, otherwise recreate both.
-            int profileHue = loadedUser.ProfileHue ?? OverlayColourScheme.Pink.GetHue();
-
-            if (changeOverlayColours(profileHue))
-                recreateBaseContent();
 
             var actualRuleset = rulesets.GetLeaderboardRuleset(userRuleset?.ShortName ?? loadedUser.PlayMode).AsNonNull();
 
@@ -245,18 +236,6 @@ namespace osu.Game.Overlays
                     sectionsContainer.ScrollTo(lastSection);
                 }
             };
-        }
-
-        private bool changeOverlayColours(int hue)
-        {
-            if (hue == ColourProvider.Hue)
-                return false;
-
-            ColourProvider.ChangeColourScheme(hue);
-
-            RecreateHeader();
-            UpdateColours();
-            return true;
         }
 
         private partial class ProfileSectionTabControl : OsuTabControl<ProfileSection>

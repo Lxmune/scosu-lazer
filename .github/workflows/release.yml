@@ -61,7 +61,11 @@ jobs:
           echo "FILE_VERSION=${GITHUB_REF_NAME%%-*}" >> $GITHUB_ENV
           if [[ $GITHUB_REF_NAME == *-* ]]; then echo "PRERELEASE=--pre" >> $GITHUB_ENV; fi
 
+      # The key signs score submissions (see osu.Game/Online/Rooms/ScoreSignature.cs): MSBuild reads it from the environment and builds it into the game.
+      # It must be the same as the server's SCORE_SIGNING_KEY; hexadecimal digits only (`openssl rand -hex 32`).
       - name: Publish
+        env:
+          SCOSU_SCORE_SIGNING_KEY: ${{ secrets.SCORE_SIGNING_KEY }}
         run: dotnet publish osu.Desktop -c Release -r ${{ matrix.rid }} --self-contained -p:Version=$VERSION -p:FileVersion=$FILE_VERSION -o build
 
       # Velopack makes delta updates against the previous release, and adds to its release list.

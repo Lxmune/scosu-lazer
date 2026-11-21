@@ -22,7 +22,8 @@ namespace osu.Game.Overlays.Profile.Sections
             {
                 new PlayHistorySubsection(User),
                 new PaginatedMostPlayedBeatmapContainer(User),
-                new PaginatedScoreContainer(ScoreType.Recent, User, UsersStrings.ShowExtraHistoricalRecentPlaysTitle),
+                // scosu: the server's recent plays aren't limited to 24 hours, so the title drops osu!'s "(24h)".
+                new PaginatedScoreContainer(ScoreType.Recent, User, "Recent Plays"),
                 new ReplaysSubsection(User)
             };
         }

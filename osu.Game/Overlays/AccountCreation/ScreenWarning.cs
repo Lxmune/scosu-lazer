@@ -82,7 +82,6 @@ namespace osu.Game.Overlays.AccountCreation
                             {
                                 Scale = new Vector2(0.1f),
                                 Anchor = Anchor.Centre,
-                                Triangles = false,
                             },
                         },
                         new OsuSpriteText
@@ -122,7 +121,7 @@ namespace osu.Game.Overlays.AccountCreation
 
             multiAccountExplanationText.AddText("Are you ");
             multiAccountExplanationText.AddText(api.ProvidedUsername, cp => cp.Colour = colours.BlueLight);
-            multiAccountExplanationText.AddText("? osu! has a policy of ");
+            multiAccountExplanationText.AddText("? scosu has a policy of ");
             multiAccountExplanationText.AddText("one account per person!", cp => cp.Colour = colours.Yellow);
             multiAccountExplanationText.AddText(" Please be aware that creating more than one account per person may result in ");
             multiAccountExplanationText.AddText("permanent deactivation of accounts", cp => cp.Colour = colours.Yellow);

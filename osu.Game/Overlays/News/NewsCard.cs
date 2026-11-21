@@ -42,13 +42,11 @@ namespace osu.Game.Overlays.News
         }
 
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colourProvider, OsuGame? game)
+        private void load(OverlayColourProvider colourProvider, NewsOverlay? news)
         {
+            // scosu: posts open in the game.
             if (post.Slug != null)
-            {
-                TooltipText = CommonStrings.ViewInBrowser;
-                Action = () => game?.OpenUrlExternally(@"/home/news/" + post.Slug);
-            }
+                Action = () => news?.ShowArticle(post.Slug);
 
             AddRange(new Drawable[]
             {

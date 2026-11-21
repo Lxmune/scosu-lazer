@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Graphics.Sprites;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework;
@@ -51,6 +52,16 @@ namespace osu.Game.Screens.Menu
         public Action? OnPlaylists;
         public Action<Room>? OnDailyChallenge;
 
+        /// <summary>
+        /// scosu: opens or closes the menu's hub (see <see cref="MenuHubPage"/>).
+        /// </summary>
+        public Action? OnHub;
+
+        /// <summary>
+        /// scosu: asked first when going back (Esc). Returns true if it handled it, e.g. by closing the hub.
+        /// </summary>
+        public Func<bool>? OnBack;
+
         private readonly IBindable<bool> isIdle = new BindableBool();
 
         private OsuLogo? logo;
@@ -82,6 +93,29 @@ namespace osu.Game.Screens.Menu
 
         private readonly ButtonArea buttonArea;
 
+        protected override void Update()
+        {
+            base.Update();
+
+            // scosu: the violet of the primary tile continues behind the logo, from the facade's centre to the tile,
+            // so no dark band shows around the right half of the round logo. Everything is read from the layout each frame,
+            // so it follows the logo's beat scaling (the facade is resized with it) and the tile's own expand animation.
+            var primaries = buttonsTopLevel.Take(1).Concat(buttonsPlay.Take(1)).ToList();
+            float alpha = primaries.Count == 0 ? 0 : primaries.Max(b => b.State == ButtonState.Expanded || b.Alpha > 0 ? b.Alpha : 0);
+            var active = primaries.OrderByDescending(b => b.Alpha).FirstOrDefault();
+
+            if (active == null || alpha <= 0)
+            {
+                buttonArea.SetPrimaryExtension(0, 0, 0);
+                return;
+            }
+
+            var space = buttonArea.Flow.Parent!;
+            float left = space.ToLocalSpace(logoTrackingContainer.LogoFacade.ScreenSpaceDrawQuad.Centre).X;
+            float right = space.ToLocalSpace(active.ScreenSpaceDrawQuad.TopLeft).X + 2; // small overlap hides any seam
+            buttonArea.SetPrimaryExtension(left, right, alpha);
+        }
+
         private readonly MainMenuButton backButton;
 
         private readonly List<MainMenuButton> buttonsTopLevel = new List<MainMenuButton>();
@@ -108,10 +142,7 @@ namespace osu.Game.Screens.Menu
 
             buttonArea.AddRange(new Drawable[]
             {
-                new MainMenuButton(ButtonSystemStrings.Settings, string.Empty, OsuIcon.Settings, new Color4(85, 85, 85, 255), (_, _) => OnSettings?.Invoke(), Key.O, Key.S)
-                {
-                    Padding = new MarginPadding { Right = WEDGE_WIDTH },
-                },
+                new MainMenuButton(ButtonSystemStrings.Settings, string.Empty, OsuIcon.Settings, new Color4(85, 85, 85, 255), (_, _) => OnSettings?.Invoke(), Key.O, Key.S),
                 backButton = new MainMenuButton(ButtonSystemStrings.Back, @"back-to-top", OsuIcon.PrevCircle, new Color4(51, 58, 94, 255), (_, _) =>
                 {
                     switch (State)
@@ -126,7 +157,7 @@ namespace osu.Game.Screens.Menu
                     }
                 })
                 {
-                    Padding = new MarginPadding { Right = WEDGE_WIDTH },
+                    IsQuiet = true, // scosu
                     VisibleStateMin = ButtonSystemState.Play,
                     VisibleStateMax = ButtonSystemState.Edit,
                 },
@@ -150,7 +181,7 @@ namespace osu.Game.Screens.Menu
         {
             buttonsPlay.Add(new MainMenuButton(ButtonSystemStrings.Solo, @"button-default-select", OsuIcon.Player, new Color4(102, 68, 204, 255), (_, _) => OnSolo?.Invoke(), Key.P)
             {
-                Padding = new MarginPadding { Left = WEDGE_WIDTH },
+                IsPrimary = true, // scosu
             });
             // scosu hides the daily challenge and ranked play, so "multi" leads straight to the lounge
             // (its submenu would only have held the lounge).
@@ -159,21 +190,19 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsEdit.Add(new MainMenuButton(EditorStrings.BeatmapEditor.ToLower(), @"button-default-select", OsuIcon.Beatmap, new Color4(238, 170, 0, 255), (_, _) => OnEditBeatmap?.Invoke(), Key.B,
-                Key.E)
-            {
-                Padding = new MarginPadding { Left = WEDGE_WIDTH },
-            });
+                Key.E));
             buttonsEdit.Add(new MainMenuButton(SkinEditorStrings.SkinEditor.ToLower(), @"button-default-select", OsuIcon.SkinB, new Color4(220, 160, 0, 255), (_, _) => OnEditSkin?.Invoke(), Key.S));
             buttonsEdit.ForEach(b => b.VisibleState = ButtonSystemState.Edit);
 
-            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Play, @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), (_, _) => State = ButtonSystemState.Play, Key.P, Key.M,
+            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Play, @"button-play-select", OsuIcon.PlayCircle, new Color4(102, 68, 204, 255), (_, _) => State = ButtonSystemState.Play, Key.P, Key.M,
                 Key.L)
             {
-                Padding = new MarginPadding { Left = WEDGE_WIDTH },
+                IsPrimary = true, // scosu
             });
             buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Edit, @"button-play-select", OsuIcon.EditCircle, new Color4(238, 170, 0, 255), (_, _) => State = ButtonSystemState.Edit, Key.E));
             buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Browse, @"button-default-select", OsuIcon.Beatmap, new Color4(165, 204, 0, 255), (_, _) => OnBeatmapListing?.Invoke(), Key.B,
                 Key.D));
+            buttonsTopLevel.Add(new MainMenuButton("hub", @"button-default-select", FontAwesome.Solid.ThLarge, new Color4(120, 90, 220, 255), (_, _) => OnHub?.Invoke(), Key.H));
 
             if (host.CanExit)
                 buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Exit, string.Empty, OsuIcon.CrossCircle, new Color4(238, 51, 153, 255), (_, e) => OnExit?.Invoke(e), Key.Q));
@@ -347,6 +376,9 @@ namespace osu.Game.Screens.Menu
 
         private bool goBack()
         {
+            if (OnBack?.Invoke() == true)
+                return true;
+
             switch (State)
             {
                 case ButtonSystemState.TopLevel:

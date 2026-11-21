@@ -54,12 +54,14 @@ using osu.Game.Online.API.Requests;
 using osu.Game.Online.Chat;
 using osu.Game.Online.Leaderboards;
 using osu.Game.Online.Rooms;
+using osu.Game.Online.Solo;
 using osu.Game.Overlays;
 using osu.Game.Overlays.BeatmapListing;
 using osu.Game.Overlays.Mods;
 using osu.Game.Overlays.Music;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Overlays.OSD;
+using osu.Game.Overlays.ScosuEvent;
 using osu.Game.Overlays.SkinEditor;
 using osu.Game.Overlays.Toolbar;
 using osu.Game.Overlays.Volume;
@@ -148,6 +150,8 @@ namespace osu.Game
         private BeatmapSetOverlay beatmapSetOverlay;
 
         private WikiOverlay wikiOverlay;
+
+        private ScosuEventOverlay eventOverlay;
 
         private ChangelogOverlay changelogOverlay;
 
@@ -1104,6 +1108,7 @@ namespace osu.Game
             });
 
             Add(sessionIdleTracker);
+            Add(new UnlimitedFrameLimiter());
 
             Container logoContainer;
 
@@ -1236,11 +1241,19 @@ namespace osu.Game
             loadComponentSingleFile(chatOverlay = new ChatOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(new MessageNotifier(), Add, true);
             loadComponentSingleFile(new FirstPlaceLostNotifier(), Add, true);
+            loadComponentSingleFile(new ScosuServerNotifier(), Add, true);
+            loadComponentSingleFile(new SessionSummaryNotifier(), Add, true);
+            loadComponentSingleFile(new ScoreSubmissionQueue(), Add, true);
             loadComponentSingleFile(Settings = new SettingsOverlay(), leftFloatingOverlayContent.Add, true);
             loadComponentSingleFile(changelogOverlay = new ChangelogOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(userProfile = new UserProfileOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(beatmapSetOverlay = new BeatmapSetOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(wikiOverlay = new WikiOverlay(), overlayContent.Add, true);
+            // scosu: the scosu event (shown by the main menu's card and by its page, opened from the card).
+            loadComponentSingleFile(new ScosuEventProvider(), Add, true);
+            // scosu: tells the player right away when the server no longer accepts plays from this build.
+            loadComponentSingleFile(new ScosuClientVersionChecker(), Add);
+            loadComponentSingleFile(eventOverlay = new ScosuEventOverlay(), overlayContent.Add, true);
             loadComponentSingleFile(skinEditor = new SkinEditorOverlay(ScreenContainer), overlayContent.Add, true);
 
             loadComponentSingleFile(loginOverlay = new LoginOverlay
@@ -1294,7 +1307,7 @@ namespace osu.Game
             }
 
             // ensure only one of these overlays are open at once.
-            var singleDisplayOverlays = new OverlayContainer[] { chatOverlay, news, dashboard, beatmapListing, changelogOverlay, rankingsOverlay, wikiOverlay };
+            var singleDisplayOverlays = new OverlayContainer[] { chatOverlay, news, dashboard, beatmapListing, changelogOverlay, rankingsOverlay, wikiOverlay, eventOverlay };
 
             foreach (var overlay in singleDisplayOverlays)
             {
@@ -1406,6 +1419,10 @@ namespace osu.Game
                 LocalConfig.SetValue<float>(OsuSetting.MenuParallaxScale, LocalConfig.Get<bool>(OsuSetting.MenuParallax) ? 1 : 0);
 #pragma warning restore CS0612 // Type or member is obsolete
             }
+
+            // Hitsound volume should be set to the same user setting that they previously had for effect volume.
+            if (combined < 20261117 && LocalConfig.Get<double>(OsuSetting.HitsoundVolume) == 0.6)
+                LocalConfig.SetValue(OsuSetting.HitsoundVolume, frameworkConfig.Get<double>(FrameworkSetting.VolumeEffect));
         }
 
         private void handleBackButton()

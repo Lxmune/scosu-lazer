@@ -20,6 +20,7 @@ using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.Placeholders;
 using osu.Game.Rulesets.Mods;
@@ -212,6 +213,16 @@ namespace osu.Game.Screens.Ranking.Statistics
         {
             foreach (var statistic in newScore.Ruleset.CreateInstance().CreateStatisticsForScore(newScore, playableBeatmap))
                 yield return statistic;
+
+            // scosu: how much of the beatmap's best score the play earned, and what it lost.
+            if (api.Endpoints.RanksByStableScore && api.IsLoggedIn && newScore.OnlineID > 0 && newScore.Ruleset.IsLegacyRuleset())
+            {
+                yield return new StatisticItem(ScosuResultsStrings.ScoreLostHeader, () => new ScoreLostBreakdown(newScore)
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                });
+            }
 
             if (AchievedScore != null
                 && newScore.UserID > 1

@@ -48,8 +48,7 @@ namespace osu.Game.Overlays.Settings.Sections.Graphics
                 {
                     Keywords = new[] { @"compatibility", @"directx" },
                 },
-                // TODO: this needs to be a custom dropdown at some point
-                new SettingsItemV2(new FormEnumDropdown<FrameSync>
+                new SettingsItemV2(new FrameSyncDropdown
                 {
                     Caption = GraphicsSettingsStrings.FrameLimiter,
                     Current = config.GetBindable<FrameSync>(FrameworkSetting.FrameSync),
@@ -93,6 +92,13 @@ namespace osu.Game.Overlays.Settings.Sections.Graphics
                     }));
                 }
             });
+        }
+
+        private partial class FrameSyncDropdown : FormEnumDropdown<FrameSync>
+        {
+            // Uncapped (see UnlimitedFrameLimiter), so not "basically" unlimited.
+            protected override LocalisableString GenerateItemText(FrameSync item)
+                => item == FrameSync.Unlimited ? GraphicsSettingsStrings.UnlimitedFrameLimiter : base.GenerateItemText(item);
         }
 
         private partial class RendererDropdown : FormEnumDropdown<RendererType>

@@ -34,6 +34,18 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty(@"favourite_count")]
         public int FavouriteCount { get; set; }
 
+        /// <summary>
+        /// Play count on bancho (the official server), when the server provides it.
+        /// </summary>
+        [JsonProperty(@"osu_play_count")]
+        public int? BanchoPlayCount { get; set; }
+
+        /// <summary>
+        /// Favourite count on bancho (the official server), when the server provides it.
+        /// </summary>
+        [JsonProperty(@"osu_favourite_count")]
+        public int? BanchoFavouriteCount { get; set; }
+
         [JsonProperty(@"bpm")]
         public double BPM { get; set; }
 

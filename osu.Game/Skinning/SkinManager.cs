@@ -43,6 +43,11 @@ namespace osu.Game.Skinning
         /// </summary>
         public Skin DefaultClassicSkin { get; }
 
+        /// <summary>
+        /// The "retro" skin.
+        /// </summary>
+        public Skin RetroSkin { get; }
+
         private readonly AudioManager audio;
 
         private readonly Scheduler scheduler;
@@ -64,8 +69,6 @@ namespace osu.Game.Skinning
         private Skin argonSkin { get; }
 
         private Skin trianglesSkin { get; }
-
-        private Skin retroSkin { get; }
 
         private static readonly Live<SkinInfo> random_skin_info = new SkinInfo
         {
@@ -100,7 +103,7 @@ namespace osu.Game.Skinning
 
             var defaultSkins = new[]
             {
-                retroSkin = new RetroSkin(this),
+                RetroSkin = new RetroSkin(this),
                 DefaultClassicSkin = new DefaultLegacySkin(this),
                 trianglesSkin = new TrianglesSkin(this),
                 argonSkin = new ArgonSkin(this),
@@ -112,8 +115,19 @@ namespace osu.Game.Skinning
             {
                 foreach (var skin in defaultSkins)
                 {
-                    if (r.Find<SkinInfo>(skin.SkinInfo.ID) == null)
+                    var stored = r.Find<SkinInfo>(skin.SkinInfo.ID);
+
+                    if (stored == null)
+                    {
                         r.Add(skin.SkinInfo.Value);
+                        continue;
+                    }
+
+                    // scosu: the built-in skins were renamed (no osu! branding), so installs that stored the old names take the new ones.
+                    if (stored.Name != skin.SkinInfo.Value.Name)
+                        stored.Name = skin.SkinInfo.Value.Name;
+                    if (stored.Creator != skin.SkinInfo.Value.Creator)
+                        stored.Creator = skin.SkinInfo.Value.Creator;
                 }
             });
 
@@ -447,7 +461,7 @@ namespace osu.Game.Skinning
                     skinInfo = DefaultClassicSkin.SkinInfo;
 
                 if (guid == SkinInfo.RETRO_SKIN)
-                    skinInfo = retroSkin.SkinInfo;
+                    skinInfo = RetroSkin.SkinInfo;
             }
 
             CurrentSkinInfo.Value = skinInfo ?? trianglesSkin.SkinInfo;

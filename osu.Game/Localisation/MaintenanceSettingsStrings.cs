@@ -40,9 +40,9 @@ namespace osu.Game.Localisation
         public static LocalisableString SelectNewLocation => new TranslatableString(getKey(@"select_new_location"), @"Please select a new location");
 
         /// <summary>
-        /// "The target directory already seems to have an osu! install. Use that data instead? osu! will restart."
+        /// "The target directory already seems to have a scosu install. Use that data instead? scosu will restart."
         /// </summary>
-        public static LocalisableString TargetDirectoryAlreadyInstalledOsu => new TranslatableString(getKey(@"target_directory_already_installed_osu"), @"The target directory already seems to have an osu! install. Use that data instead? osu! will restart.");
+        public static LocalisableString TargetDirectoryAlreadyInstalledOsu => new TranslatableString(getKey(@"target_directory_already_installed_osu"), @"The target directory already seems to have a scosu install. Use that data instead? scosu will restart.");
 
         /// <summary>
         /// "Delete ALL beatmaps"
@@ -139,6 +139,6 @@ namespace osu.Game.Localisation
         /// </summary>
         public static LocalisableString NoVideosFoundToDelete => new TranslatableString(getKey(@"no_videos_found_to_delete"), @"No videos found to delete!");
 
-        private static string getKey(string key) => $"{prefix}:{key}";
+        private static string getKey(string key) => $@"{prefix}:{key}";
     }
 }

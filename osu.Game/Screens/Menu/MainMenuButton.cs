@@ -8,6 +8,7 @@ using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.Sprites;
@@ -26,7 +27,7 @@ namespace osu.Game.Screens.Menu
 {
     /// <summary>
     /// Button designed specifically for the osu!next main menu.
-    /// In order to correctly flow, we have to use a negative margin on the parent container (due to the parallelogram shape).
+    /// scosu: the button is a flat tile now (a faint fill, a violet line on top while hovered, see <see cref="IsPrimary"/> for the filled one).
     /// </summary>
     public partial class MainMenuButton : BeatSyncedContainer, IStateful<ButtonState>
     {
@@ -68,7 +69,12 @@ namespace osu.Game.Screens.Menu
         private readonly Container background;
         private readonly Drawable backgroundContent;
         private readonly Box boxHoverLayer;
+        private readonly Box fillBox;
+        private readonly Box hoverFill;
+        private readonly Box topLine;
+        private readonly Box divider;
         private readonly SpriteIcon icon;
+        private readonly OsuSpriteText label;
 
         private Vector2 initialSize => BaseSize + Padding.Total;
 
@@ -76,6 +82,17 @@ namespace osu.Game.Screens.Menu
         private Sample? sampleClick;
         private Sample? sampleHover;
         private SampleChannel? sampleChannel;
+
+        /// <summary>
+        /// scosu: whether this is the band's main button (play, solo): filled with the violet gradient and a light line on top.
+        /// Set it in the object initialiser.
+        /// </summary>
+        public bool IsPrimary { get; init; }
+
+        /// <summary>
+        /// scosu: a quieter tile (the back button): dimmer icon and label until hovered.
+        /// </summary>
+        public bool IsQuiet { get; init; }
 
         public override bool IsPresent => base.IsPresent
                                           // Allow keyboard interaction based on state rather than waiting for delayed animations.
@@ -100,23 +117,42 @@ namespace osu.Game.Screens.Menu
                     AlwaysPresent = true,
                     Masking = true,
                     MaskingSmoothness = 2,
-                    EdgeEffect = new EdgeEffectParameters
-                    {
-                        Type = EdgeEffectType.Shadow,
-                        Colour = Color4.Black.Opacity(0.2f),
-                        Roundness = 5,
-                        Radius = 8,
-                    },
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     Children = new[]
                     {
                         backgroundContent = CreateBackground(colour).With(bg =>
                         {
-                            bg.RelativeSizeAxes = Axes.Y;
-                            bg.Anchor = Anchor.Centre;
-                            bg.Origin = Anchor.Centre;
+                            bg.RelativeSizeAxes = Axes.Both;
                         }),
+                        // scosu: only the primary button is filled. The others show the band itself, so the band is one even colour,
+                        // also around the logo (a fill on the buttons alone left a darker strip on either side of the circle).
+                        fillBox = new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Alpha = 0,
+                        },
+                        hoverFill = new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.White.Opacity(0.08f),
+                            Alpha = 0,
+                        },
+                        divider = new Box
+                        {
+                            RelativeSizeAxes = Axes.Y,
+                            Width = 1,
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            Colour = Color4.White.Opacity(0.07f),
+                        },
+                        topLine = new Box
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            Height = 3,
+                            Colour = ScosuMenuStyle.VIOLET,
+                            Alpha = 0,
+                        },
                         boxHoverLayer = new Box
                         {
                             EdgeSmoothness = new Vector2(1.5f, 0),
@@ -135,7 +171,7 @@ namespace osu.Game.Screens.Menu
                     Origin = Anchor.Centre,
                     Children = new Drawable[]
                     {
-                        new OsuSpriteText
+                        label = new OsuSpriteText
                         {
                             Shadow = true,
                             AllowMultiline = false,
@@ -143,8 +179,7 @@ namespace osu.Game.Screens.Menu
                             Origin = Anchor.BottomCentre,
                             Margin = new MarginPadding
                             {
-                                Left = -3,
-                                Bottom = 7,
+                                Bottom = 12,
                             },
                             Text = text
                         },
@@ -163,29 +198,28 @@ namespace osu.Game.Screens.Menu
             });
         }
 
-        protected virtual Drawable CreateBackground(Colour4 accentColour) => new Container
-        {
-            Child = new Box
-            {
-                EdgeSmoothness = new Vector2(1.5f, 0),
-                RelativeSizeAxes = Axes.Both,
-                Colour = accentColour,
-            }
-        };
+        /// <summary>
+        /// scosu: the accent colour is no longer drawn by default (the flat look is one faint fill for every button);
+        /// subclasses such as <see cref="DailyChallengeButton"/> can still put their own picture behind it.
+        /// </summary>
+        protected virtual Drawable CreateBackground(Colour4 accentColour) => Empty();
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
 
-            background.Shear = new Vector2(ButtonSystem.WEDGE_WIDTH / initialSize.Y, 0);
+            // scosu: flat tiles, no shear. The primary button gets the violet gradient and a light top line that is always shown.
+            if (IsPrimary)
+            {
+                fillBox.Colour = ScosuMenuStyle.PRIMARY;
+                fillBox.Alpha = 1;
+                topLine.Colour = ScosuMenuStyle.VIOLET_INK;
+                topLine.Alpha = 1;
+                divider.Alpha = 0;
+            }
 
-            // for whatever reason, attempting to size the background "just in time" to cover the visible width
-            // results in gaps when the width changes are quick (only visible when testing menu at 100% speed, not visible slowed down).
-            // to ensure there's no missing backdrop, just use a ballpark that should be enough to always cover the width and then some.
-            // note that while on a code inspections it would seem that `1.5 * initialSize.X` would be enough, elastic usings are used in this button
-            // (which can exceed the [0;1] range during interpolation).
-            backgroundContent.Width = 2 * initialSize.X;
-            backgroundContent.Shear = -background.Shear;
+            if (IsQuiet)
+                setContentDim(true);
 
             animateState();
             FinishTransforms(true);
@@ -208,7 +242,8 @@ namespace osu.Game.Screens.Menu
                 i => i.ScaleTo(HOVER_SCALE, duration, Easing.Out)
             ).Then(
                 i => i.MoveToY(0, duration, Easing.In),
-                i => i.ScaleTo(new Vector2(HOVER_SCALE, HOVER_SCALE * BOUNCE_COMPRESSION), duration, Easing.In)
+                // scosu: the icon keeps its proportions (osu! squashes it on the way down).
+                i => i.ScaleTo(HOVER_SCALE, duration, Easing.In)
             );
 
             rightward = !rightward;
@@ -222,10 +257,16 @@ namespace osu.Game.Screens.Menu
 
             icon.ClearTransforms();
             icon.RotateTo(rightward ? -BOUNCE_ROTATION : BOUNCE_ROTATION, duration, Easing.InOutSine);
-            icon.ScaleTo(new Vector2(HOVER_SCALE, HOVER_SCALE * BOUNCE_COMPRESSION), duration, Easing.Out);
+            icon.ScaleTo(HOVER_SCALE, duration, Easing.Out);
 
             sampleHover?.Play();
-            background.ResizeTo(Vector2.Multiply(initialSize, new Vector2(1.5f, 1)), 500, Easing.OutElastic);
+
+            // scosu: no more widening on hover (it would push the neighbouring flat tiles around); a brighter fill and the top line instead.
+            hoverFill.FadeIn(150, Easing.Out);
+            setContentDim(false);
+            icon.TransformTo(nameof(icon.Colour), (ColourInfo)ScosuMenuStyle.VIOLET_INK, 150, Easing.Out);
+            if (!IsPrimary)
+                topLine.FadeIn(150, Easing.Out);
 
             return true;
         }
@@ -237,8 +278,11 @@ namespace osu.Game.Screens.Menu
             icon.MoveTo(Vector2.Zero, 500, Easing.Out);
             icon.ScaleTo(Vector2.One, 200, Easing.Out);
 
-            if (State == ButtonState.Expanded)
-                background.ResizeTo(initialSize, 500, Easing.OutElastic);
+            hoverFill.FadeOut(250, Easing.Out);
+            setContentDim(IsQuiet);
+            icon.TransformTo(nameof(icon.Colour), (ColourInfo)Color4.White, 250, Easing.Out);
+            if (!IsPrimary)
+                topLine.FadeOut(250, Easing.Out);
         }
 
         [BackgroundDependencyLoader]
@@ -251,12 +295,15 @@ namespace osu.Game.Screens.Menu
         protected override bool OnMouseDown(MouseDownEvent e)
         {
             boxHoverLayer.FadeTo(0.1f, 1000, Easing.OutQuint);
+            // scosu: pressed state, the label and icon sink a little.
+            content.ScaleTo(0.95f, 80, Easing.Out);
             return base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseUpEvent e)
         {
             boxHoverLayer.FadeTo(0, 1000, Easing.OutQuint);
+            content.ScaleTo(1, 250, Easing.OutBack);
             base.OnMouseUp(e);
         }
 
@@ -278,6 +325,13 @@ namespace osu.Game.Screens.Menu
             }
 
             return false;
+        }
+
+        private void setContentDim(bool dim)
+        {
+            float alpha = dim ? 0.65f : 1;
+            label.FadeTo(alpha, 150);
+            icon.FadeTo(alpha, 150);
         }
 
         private void trigger(UIEvent e)
@@ -347,7 +401,7 @@ namespace osu.Game.Screens.Menu
                 case ButtonState.Expanded:
                     const int expand_duration = 500;
                     background.ResizeTo(initialSize, expand_duration, Easing.OutExpo);
-                    this.FadeIn(expand_duration / 6f);
+                    this.FadeIn(150); // scosu: a little slower so sub-menus crossfade instead of popping
                     break;
 
                 case ButtonState.Exploded:

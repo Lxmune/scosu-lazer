@@ -9,8 +9,8 @@ namespace osu.Game.Tests.NonVisual
     [TestFixture]
     public class ProductionEndpointConfigurationTest
     {
-        [TestCase(null, "https://lazer.scosu.net")]
-        [TestCase("", "https://lazer.scosu.net")]
+        [TestCase(null, "https://scosu.net")]
+        [TestCase("", "https://scosu.net")]
         [TestCase("https://example.com/", "https://example.com")]
         [TestCase(" https://example.com:8443 ", "https://example.com:8443")]
         public void TestAcceptedServerUrls(string? input, string expected)
@@ -35,8 +35,8 @@ namespace osu.Game.Tests.NonVisual
         {
             var scosu = new ProductionEndpointConfiguration();
 
-            Assert.That(scosu.APIUrl, Is.EqualTo("https://lazer.scosu.net"));
-            Assert.That(scosu.MultiplayerUrl, Is.EqualTo("https://lazer.scosu.net/signalr/multiplayer"));
+            Assert.That(scosu.APIUrl, Is.EqualTo("https://scosu.net"));
+            Assert.That(scosu.MultiplayerUrl, Is.EqualTo("https://scosu.net/signalr/multiplayer"));
             Assert.That(scosu.RanksByStableScore, Is.True);
 
             var other = new ProductionEndpointConfiguration("https://osu.example.com");
@@ -45,7 +45,7 @@ namespace osu.Game.Tests.NonVisual
             Assert.That(other.RanksByStableScore, Is.False);
 
             // an invalid address falls back to the scosu server rather than connecting anywhere else.
-            Assert.That(new ProductionEndpointConfiguration("http://osu.example.com").APIUrl, Is.EqualTo("https://lazer.scosu.net"));
+            Assert.That(new ProductionEndpointConfiguration("http://osu.example.com").APIUrl, Is.EqualTo("https://scosu.net"));
         }
     }
 }

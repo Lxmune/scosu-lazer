@@ -78,7 +78,8 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddAssert("requested local midnight", () => lastRequest?.Today, () => Is.EqualTo(new DateTimeOffset(DateTime.Today, TimeZoneInfo.Local.GetUtcOffset(DateTime.Today))));
             AddUntilStep("content shown", () => content.Alpha, () => Is.EqualTo(1));
-            AddAssert("next rank shown", () => display.ChildrenOfType<OsuSpriteText>().Any(t => t.Text.ToString().Contains("PlayerY") && t.IsPresent));
+            AddAssert("next place left to the bar", () => display.ChildrenOfType<OsuSpriteText>().All(t => !t.Text.ToString().Contains("PlayerY")));
+            AddAssert("week shows only its rank change", () => display.ChildrenOfType<OsuSpriteText>().Any(t => t.IsPresent && t.Text.ToString().Contains("#52 → #41")));
         }
 
         [Test]
@@ -134,11 +135,22 @@ namespace osu.Game.Tests.Visual.Menus
 
         private void createDisplay() => AddStep("create display", () =>
         {
-            Child = display = new ScoreSummaryDisplay
+            var provider = new ScoreSummaryProvider();
+
+            Child = new DependencyProvidingContainer
             {
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                State = { Value = Visibility.Visible },
+                RelativeSizeAxes = Axes.Both,
+                CachedDependencies = new (Type, object)[] { (typeof(ScoreSummaryProvider), provider) },
+                Children = new Drawable[]
+                {
+                    provider,
+                    display = new ScoreSummaryDisplay
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        State = { Value = Visibility.Visible },
+                    },
+                },
             };
         });
     }

@@ -11,7 +11,7 @@ using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Colour;
+using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -19,7 +19,6 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps.ControlPoints;
-using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
 using osuTK;
@@ -36,7 +35,7 @@ namespace osu.Game.Screens.Menu
         private const double transition_length = 300;
 
         /// <summary>
-        /// The osu! logo sprite has a shadow included in its texture.
+        /// The logo texture has empty space around the logo.
         /// This adjustment vector is used to match the precise edge of the border of the logo.
         /// </summary>
         public static readonly Vector2 SCALE_ADJUST = new Vector2(0.94f);
@@ -61,9 +60,6 @@ namespace osu.Game.Screens.Menu
         protected Sample SampleBeat;
         protected Sample SampleDownbeat;
 
-        private readonly Container colourAndTriangles;
-        private readonly TrianglesV2 triangles;
-
         /// <summary>
         /// Return value decides whether the logo should play its own sample for the click action.
         /// </summary>
@@ -81,11 +77,6 @@ namespace osu.Game.Screens.Menu
 
         private readonly Container rippleContainer;
 
-        public bool Triangles
-        {
-            set => colourAndTriangles.FadeTo(value ? 1 : 0, transition_length, Easing.OutQuint);
-        }
-
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => logoContainer.ReceivePositionalInputAt(screenSpacePos);
 
         public bool Ripple
@@ -101,8 +92,6 @@ namespace osu.Game.Screens.Menu
         private readonly Container impactContainer;
 
         private const double early_activation = 60;
-
-        private const float triangles_paused_velocity = 0.5f;
 
         public override bool IsPresent => base.IsPresent || Scheduler.HasPendingTasks;
 
@@ -169,6 +158,38 @@ namespace osu.Game.Screens.Menu
                                                     AutoSizeAxes = Axes.Both,
                                                     Children = new Drawable[]
                                                     {
+                                                        // scosu: a thin dark ring just outside the logo's outer ring plus a soft shadow, so the logo reads on bright
+                                                        // backgrounds. It is a child of the logo's own containers, so it beats, pulses and hovers with it.
+                                                        // The disc fills SCALE_ADJUST of the sprite; this circle is 1.2% larger, i.e. a few pixels of ring around the disc.
+                                                        // The intros use this logo too: the ring is dark on dark there, so it is barely visible.
+                                                        new CircularContainer
+                                                        {
+                                                            Anchor = Anchor.Centre,
+                                                            Origin = Anchor.Centre,
+                                                            RelativeSizeAxes = Axes.Both,
+                                                            Scale = SCALE_ADJUST * 1.012f,
+                                                            Masking = true,
+                                                            BorderThickness = 3,
+                                                            BorderColour = Color4Extensions.FromHex(@"120f19").Opacity(0.7f),
+                                                            EdgeEffect = new EdgeEffectParameters
+                                                            {
+                                                                Type = EdgeEffectType.Shadow,
+                                                                Colour = Color4.Black.Opacity(0.32f),
+                                                                Radius = 26,
+                                                            },
+                                                            Child = new Box
+                                                            {
+                                                                RelativeSizeAxes = Axes.Both,
+                                                                AlwaysPresent = true,
+                                                                Alpha = 0,
+                                                            },
+                                                        },
+                                                        logo = new Sprite
+                                                        {
+                                                            Anchor = Anchor.Centre,
+                                                            Origin = Anchor.Centre,
+                                                        },
+                                                        // scosu: the flash goes over the logo image, which would hide it (osu!'s logo image is see-through).
                                                         logoContainer = new CircularContainer
                                                         {
                                                             Anchor = Anchor.Centre,
@@ -176,45 +197,13 @@ namespace osu.Game.Screens.Menu
                                                             RelativeSizeAxes = Axes.Both,
                                                             Scale = SCALE_ADJUST,
                                                             Masking = true,
-                                                            Children = new Drawable[]
+                                                            Child = flashLayer = new Box
                                                             {
-                                                                colourAndTriangles = new Container
-                                                                {
-                                                                    RelativeSizeAxes = Axes.Both,
-                                                                    Anchor = Anchor.Centre,
-                                                                    Origin = Anchor.Centre,
-                                                                    Children = new Drawable[]
-                                                                    {
-                                                                        new Box
-                                                                        {
-                                                                            RelativeSizeAxes = Axes.Both,
-                                                                            Colour = ColourInfo.GradientVertical(Color4Extensions.FromHex(@"ff66ab"), Color4Extensions.FromHex(@"cc5289")),
-                                                                        },
-                                                                        triangles = new TrianglesV2
-                                                                        {
-                                                                            Anchor = Anchor.Centre,
-                                                                            Origin = Anchor.Centre,
-                                                                            Thickness = 0.009f,
-                                                                            ScaleAdjust = 3,
-                                                                            SpawnRatio = 1.4f,
-                                                                            Colour = ColourInfo.GradientVertical(Color4Extensions.FromHex(@"ff66ab"), Color4Extensions.FromHex(@"b6346f")),
-                                                                            RelativeSizeAxes = Axes.Both,
-                                                                        },
-                                                                    }
-                                                                },
-                                                                flashLayer = new Box
-                                                                {
-                                                                    RelativeSizeAxes = Axes.Both,
-                                                                    Blending = BlendingParameters.Additive,
-                                                                    Colour = Color4.White,
-                                                                    Alpha = 0,
-                                                                },
+                                                                RelativeSizeAxes = Axes.Both,
+                                                                Blending = BlendingParameters.Additive,
+                                                                Colour = Color4.White,
+                                                                Alpha = 0,
                                                             },
-                                                        },
-                                                        logo = new Sprite
-                                                        {
-                                                            Anchor = Anchor.Centre,
-                                                            Origin = Anchor.Centre,
                                                         },
                                                     }
                                                 },
@@ -282,8 +271,8 @@ namespace osu.Game.Screens.Menu
             SampleBeat = audio.Samples.Get(@"Menu/osu-logo-heartbeat");
             SampleDownbeat = audio.Samples.Get(@"Menu/osu-logo-downbeat");
 
-            logo.Texture = textures.Get(@"Menu/logo");
-            ripple.Texture = textures.Get(@"Menu/logo");
+            logo.Texture = textures.Get(@"Menu/scosu-logo");
+            ripple.Texture = textures.Get(@"Menu/scosu-logo");
         }
 
         private int lastBeatIndex;
@@ -340,11 +329,6 @@ namespace osu.Game.Screens.Menu
                     .FadeTo(visualizer_default_alpha * 1.8f * amplitudeAdjust, early_activation, Easing.Out).Then()
                     .FadeTo(visualizer_default_alpha, beatLength);
             }
-
-            this.Delay(early_activation).Schedule(() =>
-            {
-                triangles.Velocity += amplitudeAdjust * (effectPoint.KiaiMode ? 6 : 3);
-            });
         }
 
         public void PlayIntro()
@@ -371,12 +355,6 @@ namespace osu.Game.Screens.Menu
             {
                 float maxAmplitude = lastBeatIndex >= 0 ? musicController.CurrentTrack.CurrentAmplitudes.Maximum : 0;
                 logoAmplitudeContainer.Scale = new Vector2((float)Interpolation.Damp(logoAmplitudeContainer.Scale.X, 1 - Math.Max(0, maxAmplitude - scale_adjust_cutoff) * 0.04f, 0.9f, Time.Elapsed));
-
-                triangles.Velocity = (float)Interpolation.Damp(triangles.Velocity, triangles_paused_velocity * (IsKiaiTime ? 4 : 2), 0.995f, Time.Elapsed);
-            }
-            else
-            {
-                triangles.Velocity = (float)Interpolation.Damp(triangles.Velocity, triangles_paused_velocity, 0.9f, Time.Elapsed);
             }
         }
 

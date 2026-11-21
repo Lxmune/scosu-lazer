@@ -30,14 +30,13 @@ namespace osu.Game.Scoring
         /// <param name="statistics">The judgements of the play.</param>
         /// <param name="maximumStatistics">The judgements of a perfect play on the beatmap.</param>
         /// <param name="maxCombo">The longest combo of the play.</param>
-        /// <param name="mods">The mods of the play, with their settings.</param>
+        /// <param name="multiplier">The <see cref="ScoreMultiplier"/> of the play's mods.</param>
         /// <param name="judgementOrder">The order of the play's judgements (see <see cref="EncodeJudgement"/>), if known.</param>
         public static long Calculate(StableScoreAttributes attributes, int rulesetId, IReadOnlyDictionary<HitResult, int> statistics,
-                                     IReadOnlyDictionary<HitResult, int> maximumStatistics, int maxCombo, IReadOnlyList<APIMod> mods,
+                                     IReadOnlyDictionary<HitResult, int> maximumStatistics, int maxCombo, double multiplier,
                                      string? judgementOrder = null)
         {
             var play = new Play(statistics, maximumStatistics, maxCombo, parseOrder(judgementOrder, statistics, maxCombo));
-            double multiplier = ScoreMultiplier(rulesetId, mods, attributes.ConvertedColumns);
 
             switch (rulesetId)
             {
@@ -164,7 +163,13 @@ namespace osu.Game.Scoring
         private static long maniaScore(Play play, double multiplier)
         {
             long[] counts = mania_judgements.Select(j => play.Count(j.Result)).ToArray();
-            long notes = Math.Max(counts.Sum(), mania_judgements.Sum(j => play.Maximum(j.Result)));
+            long mentioned = counts.Sum();
+            long maximum = mania_judgements.Sum(j => play.Maximum(j.Result));
+            // Notes the play doesn't mention (not reached yet, or a failed play) count as misses.
+            int missIndex = Array.FindIndex(mania_judgements, j => j.Result == HitResult.Miss);
+            long unjudged = Math.Max(maximum - mentioned, 0);
+            counts[missIndex] += unjudged;
+            long notes = Math.Max(mentioned, maximum);
             if (notes == 0)
                 return 0;
 
@@ -175,8 +180,10 @@ namespace osu.Game.Scoring
             double baseHalf = mania_half * hitValues / (320.0 * notes);
 
             // Bonus half: replays stable's bonus counter over the judgements in order.
-            // When the order isn't known, the judgements are spread evenly over the beatmap instead.
+            // Notes without a judgement come last, as misses. When the order isn't known, the judgements
+            // are spread evenly over the beatmap instead.
             var order = play.Order?.Select(result => Array.FindIndex(mania_judgements, j => j.Result == result)).Where(index => index >= 0)
+                                  .Concat(Enumerable.Repeat(missIndex, (int)unjudged))
                         ?? evenlySpread(counts);
 
             long bonusCounter = 100;
@@ -224,112 +231,51 @@ namespace osu.Game.Scoring
         }
 
         /// <summary>
-        /// osu!stable's score multiplier of <paramref name="mods"/> (lazer's <c>GetLegacyScoreMultiplier</c>), with scosu's house rules:
-        /// Relax and Autopilot count ×1 (their plays have their own leaderboards), and so does Difficulty Adjust when it only changes the approach rate.
-        /// Speed mods count their speed (Double Time at 1.15× is ×1.15), and osu!'s Classic ×0.99, or ×0.97 without its note lock.
+        /// The score multiplier of <paramref name="mods"/>: lazer's own (<see cref="Ruleset.CreateScoreMultiplierCalculator"/>), with scosu's exceptions:
+        /// Relax and Autopilot count ×1 (their plays have their own leaderboards), and Difficulty Adjust's approach rate never changes it
+        /// (a Difficulty Adjust that changes nothing else counts ×1). scosu's server ports the same code (<c>stable_score::mods</c>).
         /// </summary>
-        /// <param name="rulesetId">The online ID of the ruleset played.</param>
+        /// <param name="ruleset">The ruleset played.</param>
+        /// <param name="difficulty">The beatmap's own difficulty, which Difficulty Adjust is measured against.</param>
         /// <param name="mods">The mods, with their settings.</param>
-        /// <param name="convertedColumns">The key count of an osu! beatmap converted to osu!mania (0 otherwise), for the key mod penalty.</param>
-        public static double ScoreMultiplier(int rulesetId, IReadOnlyList<APIMod> mods, long convertedColumns)
+        public static double ScoreMultiplier(Ruleset ruleset, IBeatmapDifficultyInfo difficulty, IEnumerable<Mod> mods)
         {
-            bool scoreV2 = mods.Any(m => m.Acronym == "SV2");
-            double multiplier = 1;
+            var counted = new List<Mod>();
 
             foreach (var mod in mods)
-                multiplier *= modMultiplier(rulesetId, mod, scoreV2);
-
-            // Playing a converted beatmap with another key count than the converter chose.
-            if (rulesetId == 3 && convertedColumns > 0)
             {
-                long? chosen = mods.Select(m => keyCount(m.Acronym)).LastOrDefault(k => k != null);
+                if (mod.Acronym is "RX" or "AP")
+                    continue;
 
-                if (chosen > convertedColumns)
-                    multiplier *= 0.9;
-                else if (chosen < convertedColumns)
-                    multiplier *= 0.9 - 0.04 * (convertedColumns - chosen.Value);
+                if (mod is ModDifficultyAdjust)
+                {
+                    // Settings that differ from the defaults. `extended_limits` changes nothing by itself: it only allows values outside 0-10.
+                    var settings = new APIMod(mod);
+                    settings.Settings.Remove("approach_rate");
+
+                    if (settings.Settings.Keys.All(setting => setting == "extended_limits"))
+                        continue;
+
+                    counted.Add(settings.ToMod(ruleset));
+                    continue;
+                }
+
+                counted.Add(mod);
             }
 
-            return multiplier;
-        }
-
-        private static double modMultiplier(int rulesetId, APIMod mod, bool scoreV2)
-        {
-            // Settings that differ from the defaults. `extended_limits` changes nothing by itself: it only allows values outside 0-10.
-            if (mod.Acronym == "DA" && mod.Settings.Keys.Any(setting => setting != "approach_rate" && setting != "extended_limits"))
-                return 0.5;
-
-            if (speed(mod) is double speedChange)
-                return speedChange;
-
-            switch (mod.Acronym)
-            {
-                case "NF":
-                    return scoreV2 ? 1 : 0.5;
-
-                case "EZ":
-                    return 0.5;
-            }
-
-            if (rulesetId == 3)
-                return 1;
-
-            switch (rulesetId, mod.Acronym)
-            {
-                case (0, "CL"):
-                    return mod.Settings.TryGetValue("classic_note_lock", out object? noteLock) && !Convert.ToBoolean(noteLock, CultureInfo.InvariantCulture) ? 0.97 : 0.99;
-
-                case (0, "HD"):
-                    return 1.06;
-
-                case (0, "HR"):
-                    return scoreV2 ? 1.10 : 1.06;
-
-                case (0, "FL"):
-                    return 1.12;
-
-                case (0, "SO"):
-                    return 0.9;
-
-                case (1, "HD" or "HR"):
-                    return 1.06;
-
-                case (1, "FL"):
-                    return 1.12;
-
-                case (2, "HD"):
-                    return scoreV2 ? 1 : 1.06;
-
-                case (2, "HR" or "FL"):
-                    return 1.12;
-
-                default:
-                    return 1;
-            }
+            return ruleset.CreateScoreMultiplierCalculator(new ScoreMultiplierContext(difficulty)).CalculateFor(counted);
         }
 
         /// <summary>
-        /// The default speed of a speed mod (Double Time, Nightcore, Half Time, Daycore) and the speeds lazer allows it,
+        /// The speeds lazer allows a speed mod (Double Time, Nightcore, Half Time, Daycore),
         /// or <c>null</c> for other mods (scosu's <c>scoring::speed_range</c>).
         /// </summary>
-        private static (double Default, double Min, double Max)? speedRange(string acronym) => acronym switch
+        private static (double Min, double Max)? speedRange(string acronym) => acronym switch
         {
-            "DT" or "NC" => (1.5, 1.01, 2),
-            "HT" or "DC" => (0.75, 0.5, 0.99),
+            "DT" or "NC" => (1.01, 2),
+            "HT" or "DC" => (0.5, 0.99),
             _ => null,
         };
-
-        /// <summary>
-        /// The speed <paramref name="mod"/> plays at if it is a speed mod, kept to the speeds lazer allows like the server does.
-        /// </summary>
-        private static double? speed(APIMod mod)
-        {
-            if (speedRange(mod.Acronym) is not { } range)
-                return null;
-
-            double speedChange = mod.Settings.TryGetValue("speed_change", out object? value) ? Convert.ToDouble(value, CultureInfo.InvariantCulture) : range.Default;
-            return Math.Clamp(speedChange, range.Min, range.Max);
-        }
 
         /// <summary>
         /// Whether the best scores on beatmaps with <paramref name="status"/> add up to players' ranked score (scosu's <c>scoring::RANKED_SCORE_STATUSES</c>).
@@ -343,24 +289,17 @@ namespace osu.Game.Scoring
         public static (double Multiplier, bool Ranked) GetModEffects(Ruleset ruleset, IBeatmapInfo beatmap, IReadOnlyList<Mod> mods)
         {
             int rulesetId = ruleset.RulesetInfo.OnlineID;
-            var apiMods = mods.Select(m => new APIMod(m)).ToArray();
-
-            // The key count lazer's converter gives an osu! beatmap played in osu!mania: the same as the server's.
-            long convertedColumns = rulesetId == 3 && beatmap.Ruleset.OnlineID != 3 ? ruleset.GetVariantForBeatmap(beatmap) : 0;
-
-            return (ScoreMultiplier(rulesetId, apiMods, convertedColumns), apiMods.All(m => IsRankedMod(rulesetId, m)));
+            return (ScoreMultiplier(ruleset, beatmap.Difficulty, mods), mods.All(m => IsRankedMod(rulesetId, new APIMod(m))));
         }
 
         /// <summary>
-        /// The stable score of a perfect play with <paramref name="mods"/>: the most ranked score a beatmap can give with them.
+        /// The stable score of a perfect play with mods of <paramref name="multiplier"/>: the most ranked score a beatmap can give with them.
         /// </summary>
         /// <param name="attributes">The beatmap's attributes, from the server.</param>
         /// <param name="rulesetId">The online ID of the ruleset played.</param>
-        /// <param name="mods">The mods, with their settings.</param>
-        public static long MaximumScore(StableScoreAttributes attributes, int rulesetId, IReadOnlyList<APIMod> mods)
+        /// <param name="multiplier">The mods' <see cref="ScoreMultiplier"/>.</param>
+        public static long MaximumScore(StableScoreAttributes attributes, int rulesetId, double multiplier)
         {
-            double multiplier = ScoreMultiplier(rulesetId, mods, attributes.ConvertedColumns);
-
             switch (rulesetId)
             {
                 case 0:
@@ -432,14 +371,6 @@ namespace osu.Game.Scoring
                 return true;
 
             return ranked_with_defaults[rulesetId].Contains(mod.Acronym) && mod.Settings.Count == 0;
-        }
-
-        private static long? keyCount(string acronym)
-        {
-            if (acronym.EndsWith('K') && long.TryParse(acronym.AsSpan(0, acronym.Length - 1), NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out long keys))
-                return keys;
-
-            return null;
         }
 
         /// <summary>

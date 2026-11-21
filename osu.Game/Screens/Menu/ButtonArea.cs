@@ -21,6 +21,7 @@ namespace osu.Game.Screens.Menu
         protected override Container<Drawable> Content => Flow;
 
         private readonly ButtonAreaBackground buttonAreaBackground;
+        private readonly Container primaryExtension;
         private Visibility state;
 
         public const float BUTTON_AREA_HEIGHT = 100;
@@ -39,15 +40,45 @@ namespace osu.Game.Screens.Menu
                 Children = new Drawable[]
                 {
                     buttonAreaBackground = new ButtonAreaBackground(),
+                    // scosu: the primary tile's gradient continued behind the logo, see ButtonSystem.Update.
+                    primaryExtension = new Container
+                    {
+                        RelativeSizeAxes = Axes.Y,
+                        Alpha = 0,
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = ScosuMenuStyle.PRIMARY,
+                            },
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                Height = 3,
+                                Colour = ScosuMenuStyle.VIOLET_INK,
+                            },
+                        }
+                    },
                     Flow = new FlowContainerWithOrigin
                     {
                         Direction = FillDirection.Horizontal,
-                        Spacing = new Vector2(-ButtonSystem.WEDGE_WIDTH, 0),
+                        Spacing = Vector2.Zero, // scosu: flat tiles sit edge to edge, no wedge overlap
                         Anchor = Anchor.Centre,
                         AutoSizeAxes = Axes.Both,
                     }
                 }
             };
+        }
+
+        /// <summary>
+        /// Places the primary tile's extension (x range in this area's inner space) and sets how visible it is.
+        /// </summary>
+        public void SetPrimaryExtension(float left, float right, float alpha)
+        {
+            primaryExtension.X = left;
+            primaryExtension.Width = Math.Max(0, right - left);
+            primaryExtension.Alpha = alpha;
         }
 
         public ButtonSystemState ButtonSystemState
@@ -100,7 +131,7 @@ namespace osu.Game.Screens.Menu
             {
                 RelativeSizeAxes = Axes.Both;
                 Size = new Vector2(2, 1);
-                Colour = OsuColour.Gray(50);
+                Colour = ScosuMenuStyle.BAND; // scosu: one dark violet band, no grey
                 Anchor = Anchor.Centre;
                 Origin = Anchor.Centre;
             }

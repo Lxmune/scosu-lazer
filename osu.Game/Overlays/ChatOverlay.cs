@@ -67,7 +67,7 @@ namespace osu.Game.Overlays
         private ChannelManager channelManager { get; set; } = null!;
 
         [Cached]
-        private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Pink);
+        private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple); // scosu: the accent colour, as on every in-game web page
 
         [Cached]
         private readonly Bindable<Channel?> currentChannel = new Bindable<Channel?>();

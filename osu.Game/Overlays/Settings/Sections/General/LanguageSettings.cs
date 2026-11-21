@@ -16,16 +16,10 @@ namespace osu.Game.Overlays.Settings.Sections.General
         protected override LocalisableString Header => GeneralSettingsStrings.LanguageHeader;
 
         [BackgroundDependencyLoader]
-        private void load(OsuGameBase game, OsuConfigManager config, FrameworkConfigManager frameworkConfig)
+        private void load(OsuConfigManager config, FrameworkConfigManager frameworkConfig)
         {
             Children = new Drawable[]
             {
-                new SettingsItemV2(new FormEnumDropdown<Language>
-                {
-                    Caption = GeneralSettingsStrings.LanguageDropdown,
-                    Current = game.CurrentLanguage,
-                    AlwaysShowSearchBar = true,
-                }),
                 new SettingsItemV2(new FormCheckBox
                 {
                     Caption = GeneralSettingsStrings.PreferOriginalMetadataLanguage,

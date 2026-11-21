@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
@@ -57,7 +56,7 @@ namespace osu.Game.Overlays.Toolbar
             {
                 set => Scheduler.AddOnce(() =>
                 {
-                    IconContainer.Colour = value ? Color4Extensions.FromHex("#00FFAA") : colours.GrayF;
+                    IconContainer.Colour = value ? colours.PinkLight : colours.GrayF; // scosu: violet accent (see OsuColour.Pink)
                 });
             }
 

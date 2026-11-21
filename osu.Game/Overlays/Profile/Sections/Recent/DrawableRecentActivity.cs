@@ -190,17 +190,17 @@ namespace osu.Game.Overlays.Profile.Sections.Recent
 
                 case RecentActivityType.UserSupportAgain:
                     addUserLink();
-                    addText(" has once again chosen to support osu! - thanks for your generosity!");
+                    addText(" has once again chosen to support scosu - thanks for your generosity!");
                     break;
 
                 case RecentActivityType.UserSupportFirst:
                     addUserLink();
-                    addText(" has become an osu!supporter - thanks for your generosity!");
+                    addText(" has become a supporter - thanks for your generosity!");
                     break;
 
                 case RecentActivityType.UserSupportGift:
                     addUserLink();
-                    addText(" has received the gift of osu!supporter!");
+                    addText(" has received the gift of supporter!");
                     break;
 
                 case RecentActivityType.UsernameChange:
@@ -210,8 +210,18 @@ namespace osu.Game.Overlays.Profile.Sections.Recent
             }
         }
 
-        private string getRulesetName() =>
-            rulesets.AvailableRulesets.FirstOrDefault(r => r.ShortName == activity.Mode)?.Name ?? activity.Mode;
+        private string getRulesetName()
+        {
+            // scosu: a Relax or Autopilot leaderboard ("osurx") is named like the ruleset selector names it ("standard (RX)").
+            var mode = new RulesetInfo { ShortName = activity.Mode };
+            string playedShortName = mode.GetPlayedRulesetShortName();
+            string? name = rulesets.AvailableRulesets.FirstOrDefault(r => r.ShortName == playedShortName)?.Name;
+
+            if (name == null)
+                return activity.Mode;
+
+            return mode.GetRelaxLeaderboardMod() is string mod ? $@"{name} ({mod})" : name;
+        }
 
         private void addUserLink()
             => content.AddLink(activity.User.AsNonNull().Username, LinkAction.OpenUserProfile, getLinkArgument(activity.User.AsNonNull().Url), creationParameters: t => t.Font = getLinkFont(FontWeight.Bold));

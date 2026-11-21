@@ -34,7 +34,9 @@ namespace osu.Game.Overlays.BeatmapSet
         private const float tile_spacing = 2;
 
         private readonly LinkFlowContainer infoContainer;
-        private readonly Statistic nominations, plays, favourites;
+        private readonly Statistic nominations, plays, favourites, banchoPlays, banchoFavourites;
+        private readonly FillFlowContainer banchoGroup;
+        private readonly OsuSpriteText banchoLabel, scosuLabel;
 
         public readonly DifficultiesContainer Difficulties;
 
@@ -113,11 +115,32 @@ namespace osu.Game.Overlays.BeatmapSet
                                 {
                                     TooltipText = BeatmapsetsStrings.ShowStatsNominations,
                                 },
-                                plays = new Statistic(FontAwesome.Solid.PlayCircle)
+                                // bancho's counts come first; when they're shown, scosu's get a label of their own.
+                                banchoGroup = new FillFlowContainer
                                 {
-                                    TooltipText = BeatmapsetsStrings.ShowStatsPlaycount,
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Horizontal,
+                                    Spacing = new Vector2(6f, 0),
+                                    Alpha = 0,
+                                    Children = new Drawable[]
+                                    {
+                                        banchoLabel = createSourceLabel("bancho"),
+                                        banchoPlays = new Statistic(FontAwesome.Solid.PlayCircle),
+                                        banchoFavourites = new Statistic(FontAwesome.Regular.Heart),
+                                    }
                                 },
-                                favourites = new Statistic(FontAwesome.Solid.Heart),
+                                new FillFlowContainer
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Horizontal,
+                                    Spacing = new Vector2(6f, 0),
+                                    Children = new Drawable[]
+                                    {
+                                        scosuLabel = createSourceLabel("scosu"),
+                                        plays = new Statistic(FontAwesome.Solid.PlayCircle),
+                                        favourites = new Statistic(FontAwesome.Solid.Heart),
+                                    }
+                                },
                             },
                         },
                     },
@@ -139,7 +162,16 @@ namespace osu.Game.Overlays.BeatmapSet
         {
             updateDisplay();
             background.Colour = colourProvider.Background3;
+            banchoLabel.Colour = scosuLabel.Colour = colourProvider.Foreground1;
         }
+
+        private static OsuSpriteText createSourceLabel(string source) => new OsuSpriteText
+        {
+            Anchor = Anchor.CentreLeft,
+            Origin = Anchor.CentreLeft,
+            Text = source,
+            Font = OsuFont.GetFont(size: 11, weight: FontWeight.SemiBold),
+        };
 
         protected override void LoadComplete()
         {
@@ -194,8 +226,21 @@ namespace osu.Game.Overlays.BeatmapSet
                 nominations.Hide();
 
             plays.Value = BeatmapSet?.PlayCount ?? 0;
+            plays.TooltipText = $"Plays on scosu: {plays.Value:N0}";
             favourites.Value = BeatmapSet?.FavouriteCount ?? 0;
-            favourites.TooltipText = BeatmapSet?.FavouriteCount > 0 ? BeatmapsetsStrings.ShowStatsFavourites : BeatmapsetsStrings.ShowStatsNoFavourites;
+            favourites.TooltipText = $"Favourites on scosu: {favourites.Value:N0}";
+
+            int? banchoPlayCount = BeatmapSet?.BanchoPlayCount;
+            int? banchoFavouriteCount = BeatmapSet?.BanchoFavouriteCount;
+
+            banchoPlays.Alpha = banchoPlayCount != null ? 1 : 0;
+            banchoFavourites.Alpha = banchoFavouriteCount != null ? 1 : 0;
+            banchoGroup.Alpha = scosuLabel.Alpha = banchoPlayCount != null || banchoFavouriteCount != null ? 1 : 0;
+
+            banchoPlays.Value = banchoPlayCount ?? 0;
+            banchoPlays.TooltipText = $"Plays on bancho: {banchoPlays.Value:N0}";
+            banchoFavourites.Value = banchoFavouriteCount ?? 0;
+            banchoFavourites.TooltipText = $"Favourites on bancho: {banchoFavourites.Value:N0}";
 
             updateDifficultyButtons();
         }

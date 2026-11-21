@@ -125,12 +125,25 @@ namespace osu.Game.Overlays.News.Sidebar
 
         private partial class PostLink : LinkFlowContainer
         {
+            private readonly APINewsPost post;
+
+            [Resolved(canBeNull: true)]
+            private NewsOverlay news { get; set; }
+
             public PostLink(APINewsPost post)
                 : base(t => t.Font = OsuFont.GetFont(size: 12))
             {
+                this.post = post;
+
                 RelativeSizeAxes = Axes.X;
                 AutoSizeAxes = Axes.Y;
-                AddLink(post.Title, LinkAction.External, @"/home/news/" + post.Slug, "view in browser");
+            }
+
+            [BackgroundDependencyLoader]
+            private void load()
+            {
+                // scosu: posts open in the game.
+                AddLink(post.Title, () => news?.ShowArticle(post.Slug));
             }
         }
 

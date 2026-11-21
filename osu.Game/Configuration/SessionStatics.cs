@@ -34,6 +34,8 @@ namespace osu.Game.Configuration
             SetDefault<ScoreInfo?>(Static.LastAppliedOffsetScore, null);
             SetDefault<UserActivity?>(Static.UserOnlineActivity, null);
             SetDefault<APITag[]?>(Static.AllBeatmapTags, null);
+            // scosu: the hub's daily challenge tile can open the challenge before the band's button has set this.
+            SetDefault(Static.DailyChallengeIntroPlayed, false);
         }
 
         /// <summary>

@@ -25,9 +25,9 @@ namespace osu.Game.Localisation
         public static LocalisableString ImportAllFilesFromDirectory => new TranslatableString(getKey(@"import_all_files_from_directory"), @"Import all files from directory");
 
         /// <summary>
-        /// "Imports all osu! files from selected directory"
+        /// "Imports all beatmap, skin and replay files from selected directory"
         /// </summary>
-        public static LocalisableString ImportAllFilesFromDirectoryTooltip => new TranslatableString(getKey(@"import_all_files_from_directory_tooltip"), @"Imports all osu! files from selected directory");
+        public static LocalisableString ImportAllFilesFromDirectoryTooltip => new TranslatableString(getKey(@"import_all_files_from_directory_tooltip"), @"Imports all beatmap, skin and replay files from selected directory");
 
         /// <summary>
         /// "Select a file"
@@ -39,6 +39,6 @@ namespace osu.Game.Localisation
         /// </summary>
         public static LocalisableString RunLatencyCertifier => new TranslatableString(getKey(@"run_latency_certifier"), @"Run latency certifier");
 
-        private static string getKey(string key) => $"{prefix}:{key}";
+        private static string getKey(string key) => $@"{prefix}:{key}";
     }
 }
