@@ -446,7 +446,7 @@ namespace osu.Game.Screens.Menu.Hub
             var set = score.Beatmap?.BeatmapSet;
 
             if (set != null)
-                SetBackground(Cover(set), 0.6f);
+                SetBackground(Cover(set), 0.82f);
 
             Body.Add(new TruncatingSpriteText
             {
@@ -484,7 +484,10 @@ namespace osu.Game.Screens.Menu.Hub
     /// </summary>
     public partial class HubRecentTile : HubProfileTile
     {
-        private const float row_height = 34;
+        /// <summary>
+        /// The shortest a row gets: the list shows as many rows as fit at this height, stretched to fill it exactly.
+        /// </summary>
+        private const float min_row_height = 30;
 
         /// <summary>
         /// Where the list starts: under the eyebrow.
@@ -529,7 +532,7 @@ namespace osu.Game.Screens.Menu.Hub
             if (scores[0].Beatmap?.BeatmapSet is APIBeatmapSet cover)
                 SetBackground(Cover(cover), 0.85f);
 
-            rows.ChildrenEnumerable = scores.Select(score => new RecentRow(score, row_height) { Action = () => Game?.ShowBeatmap(score.BeatmapID) });
+            rows.ChildrenEnumerable = scores.Select(score => new RecentRow(score, min_row_height) { Action = () => Game?.ShowBeatmap(score.BeatmapID) });
             list.ScrollToStart(false);
             list.Show();
 
@@ -555,9 +558,18 @@ namespace osu.Game.Screens.Menu.Hub
         {
             base.UpdateAfterChildren();
 
-            // Only whole rows show: a row cut by the tile's edge would look like it overlaps it.
-            float available = DrawHeight - list_top - 8;
-            list.Height = Math.Max(1, (int)(available / row_height)) * row_height;
+            // Only whole rows show, stretched to fill the list: a row cut by the tile's edge would look like it overlaps it,
+            // and a gap under the last one like something hides the rest.
+            float available = Math.Max(min_row_height, DrawHeight - list_top - 8);
+            float rowHeight = available / Math.Max(1, (int)(available / min_row_height));
+
+            list.Height = available;
+
+            foreach (var row in rows)
+            {
+                if (row.Height != rowHeight)
+                    row.Height = rowHeight;
+            }
         }
 
         private partial class RecentRow : OsuClickableContainer

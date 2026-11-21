@@ -260,6 +260,7 @@ namespace osu.Game.Screens.Menu.Hub
 
         /// <summary>
         /// A picture or graph behind the tile's text, darkened by <paramref name="dim"/> so that the text stays readable.
+        /// The game blends in linear light, so a picture needs a dim of 0.8 or more to look clearly darker.
         /// </summary>
         protected void SetBackground(Drawable? drawable, float dim = 0.5f)
         {
