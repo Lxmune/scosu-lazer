@@ -24,7 +24,7 @@ namespace osu.Game.Screens.Menu.Hub
         /// <summary>
         /// How many recent plays are fetched.
         /// </summary>
-        public const int RECENT_COUNT = 5;
+        public const int RECENT_COUNT = 25;
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
