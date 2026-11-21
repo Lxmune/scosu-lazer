@@ -6,19 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Containers;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Online;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Rooms;
 using osu.Game.Screens.Menu.Hub;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Menu
 {
@@ -33,16 +28,14 @@ namespace osu.Game.Screens.Menu
         /// <summary>
         /// How long the menu takes to scroll from one screen to the other.
         /// </summary>
-        public const float SCROLL_DURATION = 700;
+        public const float SCROLL_DURATION = 400;
 
         /// <summary>
         /// Below this the tiles stop shrinking and the page scrolls instead.
         /// </summary>
         private const float min_grid_height = 520;
 
-        private const float cell_gap = 8;
-
-        private const float heading_height = 46;
+        private const float cell_gap = 12;
 
         private const int columns = 6;
         private const int rows = 4;
@@ -63,9 +56,12 @@ namespace osu.Game.Screens.Menu
         private readonly HubTile[] tiles;
         private readonly HubDailyTile dailyTile;
         private readonly HubEventTile eventTile;
+        private readonly HubReportTile reportTile;
         private readonly Dictionary<HubTile, Container> cells = new Dictionary<HubTile, Container>();
         private readonly (HubTile tile, int column, int row, int columns, int rows)[] withEvent;
+        private readonly (HubTile tile, int column, int row, int columns, int rows)[] withEventNoReport;
         private readonly (HubTile tile, int column, int row, int columns, int rows)[] withoutEvent;
+        private readonly (HubTile tile, int column, int row, int columns, int rows)[] withoutEventNoReport;
         private readonly IBindable<APIScosuEvent?> currentEvent = new Bindable<APIScosuEvent?>();
 
         [Resolved]
@@ -85,7 +81,7 @@ namespace osu.Game.Screens.Menu
 
             var score = new HubScoreTile(profile);
             var friends = new HubFriendsTile();
-            var report = new HubReportTile();
+            var report = reportTile = new HubReportTile();
             newsTile = new HubNewsTile();
             var plays = new HubPlaysTile(profile);
             var accuracy = new HubAccuracyTile(profile);
@@ -128,6 +124,36 @@ namespace osu.Game.Screens.Menu
                 (recent, 0, 3, 6, 1),
             };
 
+            // Without a weekly report, its tile is left out too (an empty tile only takes room), and its neighbours widen.
+            withEventNoReport = new (HubTile, int, int, int, int)[]
+            {
+                (score, 0, 0, 3, 1),
+                (eventTile, 3, 0, 2, 2),
+                (dailyTile, 5, 0, 1, 1),
+                (friends, 0, 1, 1, 1),
+                (newsTile, 1, 1, 2, 1),
+                (medals, 5, 1, 1, 1),
+                (plays, 0, 2, 2, 1),
+                (accuracy, 2, 2, 2, 1),
+                (country, 4, 2, 2, 1),
+                (best, 0, 3, 2, 1),
+                (recent, 2, 3, 4, 1),
+            };
+
+            withoutEventNoReport = new (HubTile, int, int, int, int)[]
+            {
+                (score, 0, 0, 3, 1),
+                (dailyTile, 3, 0, 1, 1),
+                (newsTile, 4, 0, 2, 1),
+                (friends, 0, 1, 2, 1),
+                (plays, 2, 1, 4, 1),
+                (accuracy, 0, 2, 2, 1),
+                (country, 2, 2, 1, 1),
+                (medals, 3, 2, 1, 1),
+                (best, 4, 2, 2, 1),
+                (recent, 0, 3, 6, 1),
+            };
+
             tiles = withEvent.Select(l => l.tile).ToArray();
 
             gridHolder = new Container
@@ -150,8 +176,8 @@ namespace osu.Game.Screens.Menu
                 gridHolder.Add(cell);
             }
 
-            // Laid out without the event until the event provider says there is one.
-            applyLayout(false, false);
+            // Laid out without the event and the report until they are known.
+            applyLayout(false);
 
             InternalChildren = new Drawable[]
             {
@@ -164,26 +190,15 @@ namespace osu.Game.Screens.Menu
                     Y = 1,
                     Alpha = 0,
                     // Under the dock along the top, above the bar along the bottom.
-                    Padding = new MarginPadding { Top = HubDock.HEIGHT + 14, Bottom = HubBar.HEIGHT + 14, Horizontal = 24 },
+                    Padding = new MarginPadding { Top = HubDock.HEIGHT + 16, Bottom = HubBar.HEIGHT + 16, Horizontal = 24 },
                     Children = new Drawable[]
                     {
                         new InputBlocker { RelativeSizeAxes = Axes.Both },
-                        new OsuSpriteText
-                        {
-                            Text = MenuHubStrings.OnScosuNow,
-                            Font = ScosuMenuStyle.Display(24),
-                            Shadow = true,
-                            ShadowColour = Color4.Black.Opacity(0.6f),
-                        },
-                        new Container
+                        // No heading: the dock above already says where this is.
+                        scroll = new HubScrollContainer
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Top = heading_height },
-                            Child = scroll = new HubScrollContainer
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                Child = gridHolder,
-                            },
+                            Child = gridHolder,
                         },
                     },
                 },
@@ -197,16 +212,23 @@ namespace osu.Game.Screens.Menu
             if (eventProvider != null)
                 currentEvent.BindTo(eventProvider.Event);
 
-            currentEvent.BindValueChanged(e => applyLayout(e.NewValue != null, true), true);
+            currentEvent.BindValueChanged(_ => applyLayout(true));
+            reportTile.HasReport.BindValueChanged(_ => applyLayout(true));
+            applyLayout(false);
         }
 
         /// <summary>
-        /// Places the tiles for whether there is an event: they glide to their new places when the event starts or ends
-        /// while the hub is open.
+        /// Places the tiles for whether there is an event and a weekly report: they glide to their new places when either
+        /// changes while the hub is open.
         /// </summary>
-        private void applyLayout(bool hasEvent, bool animate)
+        private void applyLayout(bool animate)
         {
-            var layout = hasEvent ? withEvent : withoutEvent;
+            bool hasEvent = currentEvent.Value != null;
+            bool hasReport = reportTile.HasReport.Value;
+
+            var layout = hasEvent
+                ? hasReport ? withEvent : withEventNoReport
+                : hasReport ? withoutEvent : withoutEventNoReport;
             double duration = animate && State.Value == Visibility.Visible ? 500 : 0;
 
             foreach (var (tile, cell) in cells)
@@ -245,12 +267,12 @@ namespace osu.Game.Screens.Menu
             newsTile.RefreshIfStale();
             profile.RefreshIfStale();
 
-            // The tiles settle in as the page arrives, one after another.
+            // The tiles settle in with the page, a touch after one another (all within ~0.4s).
             for (int i = 0; i < tiles.Length; i++)
             {
-                tiles[i].FadeOut().MoveToY(30)
-                        .Delay(120 + Math.Min(i, 9) * 40)
-                        .FadeIn(450, Easing.OutQuint).MoveToY(0, 500, Easing.OutQuint);
+                tiles[i].FadeOut().MoveToY(12)
+                        .Delay(Math.Min(i, 5) * 25)
+                        .FadeIn(250, Easing.OutQuint).MoveToY(0, 300, Easing.OutQuint);
             }
         }
 

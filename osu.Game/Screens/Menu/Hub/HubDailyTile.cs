@@ -102,11 +102,11 @@ namespace osu.Game.Screens.Menu.Hub
 
             if (beatmap?.BeatmapSet is APIBeatmapSet set)
             {
-                SetBackground(new UpdateableOnlineBeatmapSetCover(timeBeforeLoad: 0, timeBeforeUnload: 600_000)
+                SetCoverBackground(new UpdateableOnlineBeatmapSetCover(timeBeforeLoad: 0, timeBeforeUnload: 600_000)
                 {
                     RelativeSizeAxes = Axes.Both,
                     OnlineInfo = set,
-                }, 0.7f);
+                });
             }
 
             if (beatmap != null)

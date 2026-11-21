@@ -37,7 +37,10 @@ namespace osu.Game.Screens.Menu.Hub
     /// </summary>
     public abstract partial class HubProfileTile : HubTile
     {
-        protected const float BIG_SIZE = 36;
+        /// <summary>
+        /// The figure of a profile tile: smaller than the score tile's, which leads the hub.
+        /// </summary>
+        protected const float BIG_SIZE = 26;
 
         [Resolved]
         protected IAPIProvider Api { get; private set; } = null!;
@@ -357,17 +360,27 @@ namespace osu.Game.Screens.Menu.Hub
 
         protected override void Display()
         {
-            SetBackground(new UpdateableFlag(User.CountryCode)
-            {
-                Anchor = Anchor.CentreRight,
-                Origin = Anchor.CentreRight,
-                Size = new Vector2(120, 80),
-                X = -14,
-                Alpha = 0.25f,
-            }, 0);
-
             Body.Add(Big($@"#{User.Statistics!.CountryRank:N0}"));
-            Body.Add(Sub(User.CountryCode.GetDescription()));
+            Body.Add(new FillFlowContainer
+            {
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Horizontal,
+                Spacing = new Vector2(6, 0),
+                Children = new Drawable[]
+                {
+                    new UpdateableFlag(User.CountryCode)
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Size = new Vector2(18, 12),
+                    },
+                    Sub(User.CountryCode.GetDescription()).With(t =>
+                    {
+                        t.Anchor = Anchor.CentreLeft;
+                        t.Origin = Anchor.CentreLeft;
+                    }),
+                },
+            });
 
             var history = User.Statistics.RankHistory?.Data;
 
@@ -404,16 +417,6 @@ namespace osu.Game.Screens.Menu.Hub
 
         protected override void Display()
         {
-            SetBackground(new SpriteIcon
-            {
-                Anchor = Anchor.CentreRight,
-                Origin = Anchor.CentreRight,
-                Size = new Vector2(80),
-                X = -10,
-                Icon = FontAwesome.Solid.Award,
-                Colour = ScosuMenuStyle.VIOLET.Opacity(0.18f),
-            }, 0);
-
             Body.Add(Big(User.Achievements!.Length.ToString(@"N0")));
             Body.Add(Sub(MenuHubStrings.MedalsCount));
 
@@ -446,7 +449,7 @@ namespace osu.Game.Screens.Menu.Hub
             var set = score.Beatmap?.BeatmapSet;
 
             if (set != null)
-                SetBackground(Cover(set), 0.7f);
+                SetCoverBackground(Cover(set));
 
             Body.Add(new TruncatingSpriteText
             {
@@ -492,7 +495,7 @@ namespace osu.Game.Screens.Menu.Hub
         /// <summary>
         /// Where the list starts: under the eyebrow.
         /// </summary>
-        private const float list_top = 30;
+        private const float list_top = 36;
 
         private readonly HubScrollContainer list;
         private readonly FillFlowContainer<RecentRow> rows;
@@ -505,7 +508,8 @@ namespace osu.Game.Screens.Menu.Hub
             {
                 RelativeSizeAxes = Axes.X,
                 Y = list_top,
-                Padding = new MarginPadding { Horizontal = 6 },
+                // The rows' own padding (8) brings their text in line with the eyebrow.
+                Padding = new MarginPadding { Horizontal = CONTENT_PADDING - 8 },
                 Alpha = 0,
                 Child = rows = new FillFlowContainer<RecentRow>
                 {
@@ -720,13 +724,13 @@ namespace osu.Game.Screens.Menu.Hub
 
             protected override bool OnHover(HoverEvent e)
             {
-                hover.FadeTo(0.07f, 150, Easing.OutQuint);
+                hover.FadeTo(0.07f, HOVER_DURATION, Easing.OutQuint);
                 return base.OnHover(e);
             }
 
             protected override void OnHoverLost(HoverLostEvent e)
             {
-                hover.FadeOut(300, Easing.OutQuint);
+                hover.FadeOut(HOVER_DURATION, Easing.OutQuint);
                 base.OnHoverLost(e);
             }
         }

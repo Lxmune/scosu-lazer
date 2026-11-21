@@ -249,11 +249,12 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("event shown", () => shows("Advent Rush 2026") && shows("Gain 200M"));
             AddAssert("event tile in the grid", () => this.ChildrenOfType<HubEventTile>().Single().Parent!.Alpha, () => Is.EqualTo(1));
             AddUntilStep("daily challenge shown", () => shows("Innocent Sorrow") && shows("Insane"));
-            // The cover is darkened by an opaque box at the dim's alpha (not by a box that is itself see-through).
-            AddAssert("daily cover dimmed", () => this.ChildrenOfType<HubDailyTile>().Single().ChildrenOfType<Box>()
-                                                      .Any(b => b.Alpha == 0.7f && b.Colour.TopLeft.SRGB.A == 1));
+            // The cover fades from dark under the text (left) to visible (right).
+            AddAssert("daily cover faded", () => this.ChildrenOfType<HubDailyTile>().Single().ChildrenOfType<Box>()
+                                                     .Any(b => b.Colour.TopLeft.SRGB.A > 0.9f && b.Colour.TopRight.SRGB.A < 0.5f));
             AddUntilStep("friends shown", () => shows("1 of 2 online"));
             AddUntilStep("report shown", () => shows("Your week is ready"));
+            AddAssert("report tile in the grid", () => this.ChildrenOfType<HubReportTile>().Single().Parent!.Alpha, () => Is.EqualTo(1));
             AddUntilStep("news shown", () => shows("Welcome to scosu"));
 
             AddUntilStep("plays shown", () => shows("1,234") && shows("321 this month"));
@@ -286,7 +287,7 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("no event tile without an event", () => this.ChildrenOfType<HubEventTile>().Single().Parent!.Alpha, () => Is.Zero);
             AddUntilStep("daily challenge placeholder", () => shows("No daily challenge today"));
             AddUntilStep("friends placeholder", () => shows("Log in to see your friends"));
-            AddUntilStep("report placeholder", () => shows("Log in to see your weekly report"));
+            AddUntilStep("no report tile without a report", () => this.ChildrenOfType<HubReportTile>().Single().Parent!.Alpha, () => Is.Zero);
             AddUntilStep("news placeholder", () => shows("No news right now"));
             AddAssert("bar has no friends line", () => !barShows("of 2 online"));
 

@@ -4,6 +4,7 @@
 using System;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -23,7 +24,17 @@ namespace osu.Game.Screens.Menu.Hub
     /// </summary>
     public abstract partial class HubTile : OsuClickableContainer
     {
-        private const float horizontal_padding = 14;
+        /// <summary>
+        /// The space between a tile's edges and its content, the same in every tile (graphs are inset by it too).
+        /// </summary>
+        public const float CONTENT_PADDING = 18;
+
+        private const float vertical_padding = 16;
+
+        /// <summary>
+        /// How fast tiles answer the cursor.
+        /// </summary>
+        public const double HOVER_DURATION = 120;
 
         protected OsuSpriteText Eyebrow { get; }
 
@@ -69,7 +80,7 @@ namespace osu.Game.Screens.Menu.Hub
                 placeholder = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Top = 20, Horizontal = horizontal_padding, Bottom = 8 },
+                    Padding = new MarginPadding { Top = 20, Horizontal = CONTENT_PADDING, Bottom = 8 },
                     Alpha = 0,
                     Child = new FillFlowContainer
                     {
@@ -105,7 +116,7 @@ namespace osu.Game.Screens.Menu.Hub
                 new Container
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Horizontal = horizontal_padding + (accent != null ? 4 : 0), Vertical = 12 },
+                    Padding = new MarginPadding { Horizontal = CONTENT_PADDING + (accent != null ? 4 : 0), Vertical = vertical_padding },
                     Children = new Drawable[]
                     {
                         new FillFlowContainer
@@ -125,7 +136,8 @@ namespace osu.Game.Screens.Menu.Hub
                                         Eyebrow = new OsuSpriteText
                                         {
                                             Font = ScosuMenuStyle.Eyebrow,
-                                            Colour = accent ?? ScosuMenuStyle.VIOLET,
+                                            // Neutral: violet is kept for what can be clicked and each tile's one accent.
+                                            Colour = accent ?? ScosuMenuStyle.TEXT_DIM,
                                             Spacing = new Vector2(1.2f, 0),
                                         },
                                         eyebrowDetail = new OsuSpriteText
@@ -283,6 +295,20 @@ namespace osu.Game.Screens.Menu.Hub
         }
 
         /// <summary>
+        /// A picture behind the tile, faded from the left: dark under the text, visible towards the right.
+        /// </summary>
+        protected void SetCoverBackground(Drawable cover)
+        {
+            SetBackground(cover, 0);
+
+            background.Add(new Box
+            {
+                RelativeSizeAxes = Axes.Both,
+                Colour = ColourInfo.GradientHorizontal(ScosuMenuStyle.TILE.Opacity(0.96f), ScosuMenuStyle.TILE.Opacity(0.4f)),
+            });
+        }
+
+        /// <summary>
         /// Replaces the tile's content by a muted icon and line, centred, for when there is nothing to show.
         /// </summary>
         protected void ShowPlaceholder(IconUsage icon, LocalisableString text)
@@ -302,8 +328,8 @@ namespace osu.Game.Screens.Menu.Hub
 
         private void setHovered(bool hovered)
         {
-            fill.FadeTo(hovered ? 0.1f : base_fill, 200, Easing.OutQuint);
-            hoverOutline.FadeTo(hovered ? 1 : 0, 200, Easing.OutQuint);
+            fill.FadeTo(hovered ? 0.1f : base_fill, HOVER_DURATION, Easing.OutQuint);
+            hoverOutline.FadeTo(hovered ? 1 : 0, HOVER_DURATION, Easing.OutQuint);
         }
 
         protected override bool OnHover(HoverEvent e)

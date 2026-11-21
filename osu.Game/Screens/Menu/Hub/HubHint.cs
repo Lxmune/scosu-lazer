@@ -83,15 +83,15 @@ namespace osu.Game.Screens.Menu.Hub
 
         protected override bool OnHover(HoverEvent e)
         {
-            label.FadeColour(ScosuMenuStyle.VIOLET_INK, 200, Easing.OutQuint);
-            chevron.FadeColour(ScosuMenuStyle.VIOLET_INK, 200, Easing.OutQuint);
+            label.FadeColour(ScosuMenuStyle.VIOLET_INK, HubTile.HOVER_DURATION, Easing.OutQuint);
+            chevron.FadeColour(ScosuMenuStyle.VIOLET_INK, HubTile.HOVER_DURATION, Easing.OutQuint);
             return base.OnHover(e);
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            label.FadeColour(Color4.White, 300, Easing.OutQuint);
-            chevron.FadeColour(ScosuMenuStyle.TEXT_DIM, 300, Easing.OutQuint);
+            label.FadeColour(Color4.White, HubTile.HOVER_DURATION, Easing.OutQuint);
+            chevron.FadeColour(ScosuMenuStyle.TEXT_DIM, HubTile.HOVER_DURATION, Easing.OutQuint);
             base.OnHoverLost(e);
         }
 

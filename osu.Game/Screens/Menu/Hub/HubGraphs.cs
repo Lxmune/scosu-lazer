@@ -48,8 +48,8 @@ namespace osu.Game.Screens.Menu.Hub
                 Anchor = Anchor.BottomLeft,
                 Origin = Anchor.BottomLeft,
                 Height = height,
-                // Room for the dot at the end.
-                Padding = new MarginPadding { Right = 16 },
+                // Inset like the tile's text (and leaving room for the dot at the end).
+                Padding = new MarginPadding { Horizontal = HubTile.CONTENT_PADDING },
             };
 
             // The area under the line, as one shape: opaque columns drawn into a buffer, which is then tinted with a single
@@ -129,7 +129,12 @@ namespace osu.Game.Screens.Menu.Hub
         /// </summary>
         public static Drawable Bars(IReadOnlyList<float> values, Color4 colour)
         {
-            var container = new Container { RelativeSizeAxes = Axes.Both };
+            // Inset like the tile's text.
+            var container = new Container
+            {
+                RelativeSizeAxes = Axes.Both,
+                Padding = new MarginPadding { Horizontal = HubTile.CONTENT_PADDING },
+            };
 
             if (values.Count == 0)
                 return container;

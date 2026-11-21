@@ -125,11 +125,11 @@ namespace osu.Game.Screens.Menu.Hub
 
         protected override void PopIn()
         {
-            // Docks once the band has scrolled away (and not if the hub closes before then).
+            // Docks as the band scrolls away.
             ClearTransforms();
             content.ClearTransforms();
-            this.Delay(MenuHubPage.SCROLL_DURATION * 0.4f).FadeIn(300, Easing.OutQuint);
-            content.MoveToY(-12).Delay(MenuHubPage.SCROLL_DURATION * 0.4f).MoveToY(0, 400, Easing.OutQuint);
+            this.FadeIn(200, Easing.OutQuint);
+            content.MoveToY(-8).MoveToY(0, 250, Easing.OutQuint);
         }
 
         protected override void PopOut()
@@ -260,13 +260,13 @@ namespace osu.Game.Screens.Menu.Hub
 
             protected override bool OnHover(HoverEvent e)
             {
-                hover.FadeTo(0.12f, 150, Easing.OutQuint);
+                hover.FadeTo(0.12f, HubTile.HOVER_DURATION, Easing.OutQuint);
                 return base.OnHover(e);
             }
 
             protected override void OnHoverLost(HoverLostEvent e)
             {
-                hover.FadeOut(300, Easing.OutQuint);
+                hover.FadeOut(HubTile.HOVER_DURATION, Easing.OutQuint);
                 base.OnHoverLost(e);
             }
 
