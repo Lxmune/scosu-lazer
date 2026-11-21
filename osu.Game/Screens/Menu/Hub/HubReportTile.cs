@@ -8,7 +8,9 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
+using osuTK;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Graphics.Sprites;
@@ -63,7 +65,7 @@ namespace osu.Game.Screens.Menu.Hub
         {
             if (reports.Value is not IReadOnlyList<APIWeeklyReport> list)
             {
-                ShowPlaceholder(api.IsLoggedIn ? MenuHubStrings.NoReport : MenuHubStrings.LogInForReport);
+                ShowPlaceholder(FontAwesome.Solid.FileAlt, api.IsLoggedIn ? MenuHubStrings.NoReport : MenuHubStrings.LogInForReport);
                 return;
             }
 
@@ -74,20 +76,54 @@ namespace osu.Game.Screens.Menu.Hub
 
             if (report == null)
             {
-                ShowPlaceholder(MenuHubStrings.NoReport);
+                ShowPlaceholder(FontAwesome.Solid.FileAlt, MenuHubStrings.NoReport);
                 return;
             }
 
-            Body.Clear();
+            ShowContent();
 
-            var highlight = ScosuMenuFormatting.PickHighlights(report).FirstOrDefault();
+            var highlights = ScosuMenuFormatting.PickHighlights(report);
+            var highlight = highlights.FirstOrDefault();
 
             Body.Add(new TruncatingSpriteText
             {
                 RelativeSizeAxes = Axes.X,
                 Text = unseen != null || highlight == null ? MenuHubStrings.WeekIsReady : ScosuMenuFormatting.HighlightText(highlight),
-                Font = ScosuMenuStyle.Display(16),
+                Font = ScosuMenuStyle.Display(20),
             });
+
+            // The headline is the first highlight once the report was seen; the rest are listed under it.
+            foreach (var h in highlights.Skip(unseen != null || highlight == null ? 0 : 1).Take(2))
+            {
+                bool improved = h.Change == @"improved";
+
+                Body.Add(new FillFlowContainer
+                {
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y,
+                    Direction = FillDirection.Horizontal,
+                    Spacing = new Vector2(6, 0),
+                    Children = new Drawable[]
+                    {
+                        new SpriteIcon
+                        {
+                            Anchor = Anchor.CentreLeft,
+                            Origin = Anchor.CentreLeft,
+                            Icon = improved ? FontAwesome.Solid.ArrowUp : FontAwesome.Solid.ArrowDown,
+                            Size = new Vector2(9),
+                            Colour = improved ? ScosuMenuStyle.VIOLET : ScosuMenuStyle.TEXT_DIM,
+                        },
+                        new TruncatingSpriteText
+                        {
+                            Anchor = Anchor.CentreLeft,
+                            Origin = Anchor.CentreLeft,
+                            Text = ScosuMenuFormatting.HighlightText(h),
+                            Font = ScosuMenuStyle.Body(12),
+                            Colour = ScosuMenuStyle.TEXT_DIM,
+                        },
+                    },
+                });
+            }
 
             SetFoot(FontAwesome.Solid.FileAlt, MenuHubStrings.ReadOnWebsite);
             SetAction(() => open(report, unseen != null));

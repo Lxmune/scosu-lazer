@@ -7,7 +7,10 @@ using osu.Framework.Allocation;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Graphics.Containers;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Overlays.News;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
@@ -38,7 +41,7 @@ namespace osu.Game.Screens.Menu.Hub
         public HubNewsTile()
         {
             Eyebrow.Text = MenuHubStrings.News.ToUpper();
-            ShowPlaceholder(MenuHubStrings.NoNews);
+            ShowPlaceholder(FontAwesome.Solid.Newspaper, MenuHubStrings.NoNews);
         }
 
         /// <summary>
@@ -78,16 +81,26 @@ namespace osu.Game.Screens.Menu.Hub
 
             if (post == null)
             {
-                ShowPlaceholder(MenuHubStrings.NoNews);
+                ShowPlaceholder(FontAwesome.Solid.Newspaper, MenuHubStrings.NoNews);
                 return;
             }
 
-            Body.Clear();
-            Body.Add(new TruncatingSpriteText
+            ShowContent();
+
+            if (!string.IsNullOrEmpty(post.FirstImage))
+                SetBackground(new DelayedLoadWrapper(() => new NewsPostBackground(post.FirstImage)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    FillMode = FillMode.Fill,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                }) { RelativeSizeAxes = Axes.Both }, 0.6f);
+
+            Body.Add(new OsuTextFlowContainer(t => t.Font = ScosuMenuStyle.Display(18))
             {
                 RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
                 Text = post.Title,
-                Font = ScosuMenuStyle.Display(16),
             });
             Body.Add(new TruncatingSpriteText
             {
@@ -96,6 +109,26 @@ namespace osu.Game.Screens.Menu.Hub
                 Font = ScosuMenuStyle.Body(12),
                 Colour = ScosuMenuStyle.TEXT_DIM,
             });
+
+            if (!string.IsNullOrWhiteSpace(post.Preview))
+            {
+                Body.Add(new Container
+                {
+                    RelativeSizeAxes = Axes.X,
+                    Height = 34,
+                    Masking = true,
+                    Child = new OsuTextFlowContainer(t =>
+                    {
+                        t.Font = ScosuMenuStyle.Body(12);
+                        t.Colour = ScosuMenuStyle.TEXT_DIM;
+                    })
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Text = post.Preview,
+                    },
+                });
+            }
 
             SetFoot(FontAwesome.Solid.Newspaper, MenuHubStrings.Read);
             SetAction(() => news?.ShowArticle(post.Slug));

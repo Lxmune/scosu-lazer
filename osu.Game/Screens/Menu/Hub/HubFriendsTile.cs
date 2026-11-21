@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -27,7 +28,7 @@ namespace osu.Game.Screens.Menu.Hub
     public partial class HubFriendsTile : HubTile
     {
         private const int max_avatars = 5;
-        private const float avatar_size = 30;
+        private const float avatar_size = 40;
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
@@ -71,23 +72,23 @@ namespace osu.Game.Screens.Menu.Hub
         {
             if (!api.IsLoggedIn)
             {
-                ShowPlaceholder(MenuHubStrings.LogInForFriends);
+                ShowPlaceholder(FontAwesome.Solid.UserFriends, MenuHubStrings.LogInForFriends);
                 return;
             }
 
             if (friends.Count == 0)
             {
-                ShowPlaceholder(MenuHubStrings.NoFriends);
+                ShowPlaceholder(FontAwesome.Solid.UserFriends, MenuHubStrings.NoFriends);
                 return;
             }
 
             var online = friends.Where(f => presences.ContainsKey(f.TargetID)).ToArray();
 
-            Body.Clear();
+            ShowContent();
             Body.Add(new OsuSpriteText
             {
                 Text = MenuHubStrings.FriendsOnline(online.Length.ToString(@"N0"), friends.Count.ToString(@"N0")),
-                Font = ScosuMenuStyle.Display(16),
+                Font = ScosuMenuStyle.Display(20),
             });
 
             var avatars = online.Where(f => f.TargetUser != null).Take(max_avatars).Select(f => f.TargetUser!).ToArray();
@@ -99,7 +100,7 @@ namespace osu.Game.Screens.Menu.Hub
                     AutoSizeAxes = Axes.Both,
                     Direction = FillDirection.Horizontal,
                     // Overlapping, like a stack of faces.
-                    Spacing = new Vector2(-8, 0),
+                    Spacing = new Vector2(-10, 0),
                     Margin = new MarginPadding { Top = 4 },
                     ChildrenEnumerable = avatars.Select(u => new CircularContainer
                     {
@@ -123,7 +124,14 @@ namespace osu.Game.Screens.Menu.Hub
                 });
             }
 
-            SetFoot(FontAwesome.Solid.Comments, MenuHubStrings.OpenFriends);
+            // Who they are, or where to find them when nobody is on.
+            string names = string.Join(@", ", avatars.Take(3).Select(u => u.Username));
+            int more = online.Length - Math.Min(avatars.Length, 3);
+
+            if (names.Length > 0 && more > 0)
+                names += $@" +{more}";
+
+            SetFoot(FontAwesome.Solid.Comments, names.Length > 0 ? names : MenuHubStrings.OpenFriends);
             SetAction(openFriends);
         }
 

@@ -143,6 +143,21 @@ namespace osu.Game.Screens.Menu.Hub
         public static LocalisableString Hide => new TranslatableString(getKey(@"hide"), @"Hide");
 
         /// <summary>
+        /// "starts in {0}"
+        /// </summary>
+        public static LocalisableString StartsIn(string time) => new TranslatableString(getKey(@"starts_in"), @"starts in {0}", time);
+
+        /// <summary>
+        /// "ends in {0}"
+        /// </summary>
+        public static LocalisableString EndsInLower(string time) => new TranslatableString(getKey(@"ends_in_lower"), @"ends in {0}", time);
+
+        /// <summary>
+        /// "Friends: {0} of {1} online"
+        /// </summary>
+        public static LocalisableString FriendsLine(string online, string total) => new TranslatableString(getKey(@"friends_line"), @"Friends: {0} of {1} online", online, total);
+
+        /// <summary>
         /// "{0} online"
         /// </summary>
         public static LocalisableString Online(string count) => new TranslatableString(getKey(@"online"), @"{0} online", count);

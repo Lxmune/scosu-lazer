@@ -31,6 +31,10 @@ namespace osu.Game.Screens.Menu.Hub
         protected FillFlowContainer Body { get; }
 
         private readonly Box fill;
+        private readonly Container background;
+        private readonly Container placeholder;
+        private readonly SpriteIcon placeholderIcon;
+        private readonly OsuTextFlowContainer placeholderText;
         private readonly Container hoverOutline;
         private readonly Drawable foot;
         private readonly SpriteIcon footIcon;
@@ -47,11 +51,48 @@ namespace osu.Game.Screens.Menu.Hub
 
             Children = new Drawable[]
             {
+                background = new Container { RelativeSizeAxes = Axes.Both },
                 fill = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = Color4.White,
                     Alpha = base_fill,
+                },
+                placeholder = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Padding = new MarginPadding { Top = 20, Horizontal = horizontal_padding, Bottom = 8 },
+                    Alpha = 0,
+                    Child = new FillFlowContainer
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Spacing = new Vector2(0, 6),
+                        Children = new Drawable[]
+                        {
+                            placeholderIcon = new SpriteIcon
+                            {
+                                Anchor = Anchor.TopCentre,
+                                Origin = Anchor.TopCentre,
+                                Size = new Vector2(20),
+                                Colour = ScosuMenuStyle.TEXT_DIM,
+                                Alpha = 0.6f,
+                            },
+                            placeholderText = new OsuTextFlowContainer(t =>
+                            {
+                                t.Font = ScosuMenuStyle.Body(13);
+                                t.Colour = ScosuMenuStyle.TEXT_DIM;
+                            })
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                TextAnchor = Anchor.TopCentre,
+                            },
+                        },
+                    },
                 },
                 new Container
                 {
@@ -172,21 +213,49 @@ namespace osu.Game.Screens.Menu.Hub
         }
 
         /// <summary>
-        /// Replaces the body by a muted line, for when the tile has nothing to show.
+        /// Starts a tile's content afresh: no placeholder, no body, no background.
         /// </summary>
-        protected void ShowPlaceholder(LocalisableString text)
+        protected void ShowContent()
+        {
+            placeholder.Hide();
+            Body.Clear();
+            SetBackground(null);
+        }
+
+        /// <summary>
+        /// A picture or graph behind the tile's text, darkened by <paramref name="dim"/> so that the text stays readable.
+        /// </summary>
+        protected void SetBackground(Drawable? drawable, float dim = 0.5f)
+        {
+            background.Clear();
+
+            if (drawable == null)
+                return;
+
+            background.Add(drawable);
+
+            if (dim > 0)
+            {
+                background.Add(new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = ScosuMenuStyle.BAND,
+                    Alpha = dim,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Replaces the tile's content by a muted icon and line, centred, for when there is nothing to show.
+        /// </summary>
+        protected void ShowPlaceholder(IconUsage icon, LocalisableString text)
         {
             Body.Clear();
-            Body.Add(new OsuTextFlowContainer(t =>
-            {
-                t.Font = ScosuMenuStyle.Body(14);
-                t.Colour = ScosuMenuStyle.TEXT_DIM;
-            })
-            {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y,
-                Text = text,
-            });
+            SetBackground(null);
+
+            placeholderIcon.Icon = icon;
+            placeholderText.Text = text;
+            placeholder.Show();
 
             SetFoot(null, default);
             SetAction(null);

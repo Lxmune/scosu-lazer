@@ -76,6 +76,12 @@ namespace osu.Game.Screens.Menu
         private FillFlowContainer content = null!;
         private Container panel = null!;
         private Drawable chip = null!;
+        private Box chipBackground = null!;
+
+        /// <summary>
+        /// scosu: drawn without its pill (no background or outline, slightly larger text), for the hub's bar where it sits among other text.
+        /// </summary>
+        public bool Flat { get; init; }
         private OsuSpriteText chipText = null!;
         private OsuSpriteText countText = null!;
         private FillFlowContainer<PlayerRow> list = null!;
@@ -170,10 +176,12 @@ namespace osu.Game.Screens.Menu
                     },
                     chip = new ChipButton(toggle)
                     {
+                        BorderThickness = Flat ? 0 : 1.5f,
                         Children = new Drawable[]
                         {
-                            new Box
+                            chipBackground = new Box
                             {
+                                Alpha = Flat ? 0 : 1,
                                 RelativeSizeAxes = Axes.Both,
                                 Colour = ScosuMenuStyle.GLASS,
                             },
@@ -182,7 +190,7 @@ namespace osu.Game.Screens.Menu
                                 AutoSizeAxes = Axes.Both,
                                 Direction = FillDirection.Horizontal,
                                 Spacing = new Vector2(6, 0),
-                                Padding = new MarginPadding { Horizontal = 11, Vertical = 5 },
+                                Padding = new MarginPadding { Horizontal = Flat ? 0 : 11, Vertical = 5 },
                                 Children = new Drawable[]
                                 {
                                     new Circle
@@ -196,7 +204,7 @@ namespace osu.Game.Screens.Menu
                                     {
                                         Anchor = Anchor.CentreLeft,
                                         Origin = Anchor.CentreLeft,
-                                        Font = ScosuMenuStyle.Body(12, FontWeight.SemiBold),
+                                        Font = ScosuMenuStyle.Body(Flat ? 14 : 12, FontWeight.SemiBold),
                                     },
                                 },
                             },
@@ -398,7 +406,6 @@ namespace osu.Game.Screens.Menu
                 AutoSizeAxes = Axes.Both;
                 Masking = true;
                 CornerRadius = 99;
-                BorderThickness = 1.5f;
                 BorderColour = ScosuMenuStyle.OUTLINE;
             }
         }

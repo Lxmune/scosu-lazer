@@ -8,6 +8,7 @@ using NUnit.Framework;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Testing;
+using osu.Game.Database;
 using osu.Game.Online;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.Sprites;
@@ -33,6 +34,7 @@ namespace osu.Game.Tests.Visual.Menus
         private ScoreSummaryProvider scoreProvider = null!;
         private WeeklyReportProvider reportProvider = null!;
         private ScosuEventProvider eventProvider = null!;
+        private HubBar bar = null!;
 
         private Room? openedRoom;
 
@@ -57,7 +59,9 @@ namespace osu.Game.Tests.Visual.Menus
         }
 
         // Text flows split their text into one sprite per word, so the sprites are joined back before looking.
-        private bool shows(string text) => string.Concat(sheet.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
+        private bool shows(string text) => string.Concat(this.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
+
+        private bool barShows(string text) => string.Concat(bar.ChildrenOfType<OsuSpriteText>().Where(t => t.IsPresent).Select(t => t.Text.ToString())).Contains(text);
 
         private void createSheet() => AddStep("create sheet", () =>
         {
@@ -65,6 +69,7 @@ namespace osu.Game.Tests.Visual.Menus
             scoreProvider = new ScoreSummaryProvider();
             reportProvider = new WeeklyReportProvider();
             eventProvider = new ScosuEventProvider();
+            var userLookupCache = new UserLookupCache();
 
             Children = new Drawable[]
             {
@@ -72,6 +77,7 @@ namespace osu.Game.Tests.Visual.Menus
                 scoreProvider,
                 reportProvider,
                 eventProvider,
+                userLookupCache,
                 new DependencyProvidingContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -81,20 +87,36 @@ namespace osu.Game.Tests.Visual.Menus
                         (typeof(ScoreSummaryProvider), scoreProvider),
                         (typeof(WeeklyReportProvider), reportProvider),
                         (typeof(ScosuEventProvider), eventProvider),
+                        (typeof(UserLookupCache), userLookupCache),
                     },
                     Child = new OsuContextMenuContainer
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Child = sheet = new MenuHubSheet
+                        Children = new Drawable[]
                         {
-                            Available = true,
-                            OnDailyChallenge = room => openedRoom = room,
+                            // As in the menu: the sheet sits on the bar and is drawn behind it.
+                            new Container
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Padding = new MarginPadding { Bottom = HubBar.HEIGHT },
+                                Child = sheet = new MenuHubSheet
+                                {
+                                    Available = true,
+                                    OnDailyChallenge = room => openedRoom = room,
+                                },
+                            },
+                            bar = new HubBar
+                            {
+                                Anchor = Anchor.BottomCentre,
+                                Origin = Anchor.BottomCentre,
+                            },
                         },
                     },
                 },
             };
 
             sheet.Show();
+            bar.Show();
         });
 
         [Test]
@@ -192,6 +214,9 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("report shown", () => shows("Your week is ready"));
             AddUntilStep("news shown", () => shows("Welcome to scosu"));
 
+            AddUntilStep("bar shows today", () => barShows("Today +4,812,330") && barShows("PlayerY"));
+            AddUntilStep("bar shows event and friends", () => barShows("Advent Rush 2026") && barShows("starts in") && barShows("Friends: 1 of 2 online"));
+
             AddUntilStep("sheet settled", () => sheet.ChildrenOfType<HubDailyTile>().Single().Alpha, () => Is.EqualTo(1));
             AddStep("click daily challenge", () =>
             {
@@ -214,6 +239,12 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("friends placeholder", () => shows("Log in to see your friends"));
             AddUntilStep("report placeholder", () => shows("Log in to see your weekly report"));
             AddUntilStep("news placeholder", () => shows("No news right now"));
+            AddAssert("bar has no friends line", () => !barShows("Friends:"));
+
+            AddStep("hide bar", () => bar.Hide());
+            AddUntilStep("bar hidden", () => bar.Alpha, () => Is.Zero);
+            AddStep("close sheet", () => sheet.Hide());
+            AddUntilStep("panel invisible when closed", () => sheet.ChildrenOfType<Container>().First(c => c.Y > 0.99f || c.Alpha == 0).Alpha, () => Is.Zero);
         }
     }
 }

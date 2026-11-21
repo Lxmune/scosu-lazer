@@ -63,7 +63,7 @@ namespace osu.Game.Screens.Menu.Hub
             if (ev == null)
             {
                 Eyebrow.Text = ScosuEventStrings.Label.ToUpper();
-                ShowPlaceholder(ScosuEventStrings.None);
+                ShowPlaceholder(FontAwesome.Solid.Flag, ScosuEventStrings.None);
                 return;
             }
 
@@ -71,17 +71,23 @@ namespace osu.Game.Screens.Menu.Hub
 
             string description = string.IsNullOrWhiteSpace(ev.Tagline) ? ev.Description : ev.Tagline;
 
-            Body.Clear();
+            ShowContent();
+
+            string? picture = ev.Appearance.BannerUrl ?? ev.Appearance.MenuImageUrl;
+
+            if (!string.IsNullOrEmpty(picture))
+                SetBackground(EventDisplay.Picture(picture, 0), Math.Max(ev.Appearance.MenuDim, 0.55f));
+
             Body.Add(new TruncatingSpriteText
             {
                 RelativeSizeAxes = Axes.X,
                 Text = ev.Title,
-                Font = ScosuMenuStyle.Display(20),
+                Font = ScosuMenuStyle.Display(24),
             });
             Body.Add(new Container
             {
                 RelativeSizeAxes = Axes.X,
-                Height = 48,
+                Height = 52,
                 Masking = true,
                 Child = new OsuTextFlowContainer(t =>
                 {
@@ -103,8 +109,8 @@ namespace osu.Game.Screens.Menu.Hub
                 {
                     AutoSizeAxes = Axes.Both,
                     Direction = FillDirection.Horizontal,
-                    Spacing = new Vector2(6, 0),
-                    Margin = new MarginPadding { Top = 6 },
+                    Spacing = new Vector2(8, 0),
+                    Margin = new MarginPadding { Top = 8 },
                     Children = boxes,
                 });
             }
@@ -166,7 +172,7 @@ namespace osu.Game.Screens.Menu.Hub
 
             public CountBox()
             {
-                Size = new Vector2(54, 46);
+                Size = new Vector2(66, 58);
                 Masking = true;
                 CornerRadius = 8;
 
@@ -181,8 +187,8 @@ namespace osu.Game.Screens.Menu.Hub
                     {
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
-                        Y = 4,
-                        Font = ScosuMenuStyle.Display(18),
+                        Y = 5,
+                        Font = ScosuMenuStyle.Display(26),
                     },
                     unit = new OsuSpriteText
                     {

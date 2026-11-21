@@ -41,6 +41,7 @@ using osu.Game.Overlays.Volume;
 using osu.Game.Rulesets;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Edit;
+using osu.Game.Screens.Menu.Hub;
 using osu.Game.Screens.OnlinePlay.DailyChallenge;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Screens.OnlinePlay.Playlists;
@@ -122,8 +123,6 @@ namespace osu.Game.Screens.Menu
         private const float hub_transition_duration = 600;
 
         private ParallaxContainer buttonsContainer;
-        // scosu: the song playing, top right. It stays on screen (the SongTicker faded after a few seconds) and makes way for the hub.
-        private NowPlayingMenuCard nowPlayingCard;
         private MenuHubSheet hubSheet;
         private bool hubOpen;
 
@@ -145,8 +144,7 @@ namespace osu.Game.Screens.Menu
         private FillFlowContainer leftDisplays;
         private FillFlowContainer rightDisplays;
         private FillFlowContainer bottomLeftDisplays;
-        private Container bottomRightDisplays;
-        private OnlinePlayersDisplay onlinePlayersDisplay;
+        private HubBar hubBar;
 
         private Sample reappearSampleSwoosh;
 
@@ -181,6 +179,8 @@ namespace osu.Game.Screens.Menu
                 weeklyReportProvider,
                 SeasonalUIConfig.ENABLED ? new MainMenuSeasonalLighting() : Empty(),
                 new ScrollAdjustsVolume(),
+                // scosu: while the band is out, the mouse wheel opens (down) and closes (up) the hub instead of changing the volume.
+                new HubScrollHandler { Scrolled = onHubScroll },
                 buttonsContainer = new ParallaxContainer
                 {
                     ParallaxAmount = 0.01f,
@@ -233,8 +233,8 @@ namespace osu.Game.Screens.Menu
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
                     Spacing = new Vector2(5),
-                    // Above the hub's handle.
-                    Margin = new MarginPadding { Bottom = MenuHubSheet.HANDLE_HEIGHT + 10 },
+                    // Above the bar and the hub's handle.
+                    Margin = new MarginPadding { Bottom = HubBar.HEIGHT + MenuHubSheet.HANDLE_HEIGHT + 20 },
                     Children = new Drawable[]
                     {
                         menuTipDisplay = new MenuTipDisplay
@@ -264,9 +264,9 @@ namespace osu.Game.Screens.Menu
                     RelativeSizeAxes = Axes.Both,
                     Children = new Drawable[]
                     {
-                        // scosu: the menu at rest has a card in each corner. Today's score top left, the song playing top right
-                        // (with the weekly report under it), the event bottom left (or top right, see placeEventCard()), and the
-                        // players online bottom right. They slide out towards their edges when the hub opens (see setHub()).
+                        // scosu: the menu at rest has today's score top left, the weekly report top right (when there's a new one),
+                        // and the event bottom left (or top right, see placeEventCard()), above the bar. They slide out towards
+                        // their edges when the hub opens (see setHub()). The song playing is in the toolbar and the hub's bar.
                         leftDisplays = new FillFlowContainer
                         {
                             AutoSizeAxes = Axes.Both,
@@ -284,23 +284,12 @@ namespace osu.Game.Screens.Menu
                             Direction = FillDirection.Vertical,
                             Anchor = Anchor.BottomLeft,
                             Origin = Anchor.BottomLeft,
-                            Margin = new MarginPadding { Bottom = 10 },
+                            // Above the bar.
+                            Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 10 },
                             Child = eventMenuCard = new EventMenuCard
                             {
                                 Anchor = Anchor.BottomLeft,
                                 Origin = Anchor.BottomLeft,
-                            },
-                        },
-                        bottomRightDisplays = new Container
-                        {
-                            AutoSizeAxes = Axes.Both,
-                            Anchor = Anchor.BottomRight,
-                            Origin = Anchor.BottomRight,
-                            Margin = new MarginPadding(10),
-                            Child = onlinePlayersDisplay = new OnlinePlayersDisplay
-                            {
-                                Anchor = Anchor.BottomRight,
-                                Origin = Anchor.BottomRight,
                             },
                         },
                         rightDisplays = new FillFlowContainer
@@ -309,15 +298,9 @@ namespace osu.Game.Screens.Menu
                             Direction = FillDirection.Vertical,
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight,
-                            // The song playing first, then the event's card when it asks to be here (see placeEventCard()),
-                            // then the weekly report.
+                            // The event's card when it asks to be here (see placeEventCard()), then the weekly report.
                             Children = new Drawable[]
                             {
-                                nowPlayingCard = new NowPlayingMenuCard
-                                {
-                                    Anchor = Anchor.TopRight,
-                                    Origin = Anchor.TopRight,
-                                },
                                 weeklyReportCard = new WeeklyReportMenuCard
                                 {
                                     Anchor = Anchor.TopRight,
@@ -325,11 +308,23 @@ namespace osu.Game.Screens.Menu
                                 },
                             },
                         },
-                        // The hub: a sheet of tiles that slides up from the bottom (see setHub()).
-                        hubSheet = new MenuHubSheet
+                        // The hub: a sheet of tiles that slides up from behind the bar (see setHub()).
+                        new Container
                         {
-                            RequestState = setHub,
-                            OnDailyChallenge = openDailyChallenge,
+                            RelativeSizeAxes = Axes.Both,
+                            Padding = new MarginPadding { Bottom = HubBar.HEIGHT },
+                            Child = hubSheet = new MenuHubSheet
+                            {
+                                RequestState = setHub,
+                                OnDailyChallenge = openDailyChallenge,
+                            },
+                        },
+                        // The bar along the bottom (today's score, the event, players and friends online, the song playing),
+                        // there whenever the band is out. In front of the sheet, which slides out from behind it.
+                        hubBar = new HubBar
+                        {
+                            Anchor = Anchor.BottomCentre,
+                            Origin = Anchor.BottomCentre,
                         },
                     },
                 },
@@ -351,22 +346,19 @@ namespace osu.Game.Screens.Menu
                     case ButtonSystemState.Exit:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Hidden;
-                        nowPlayingCard.Hide();
                         eventMenuCard.Hide();
                         weeklyReportCard.Hide();
                         scoreSummaryDisplay.Hide();
-                        onlinePlayersDisplay.Hide();
+                        hubBar.Hide();
                         break;
 
                     default:
                         ApplyToBackground(b => b.FadeColour(OsuColour.Gray(baseDim * 0.8f), 500, Easing.OutSine));
                         onlineMenuBanner.State.Value = Visibility.Visible;
-                        if (!hubOpen)
-                            nowPlayingCard.Show();
                         eventMenuCard.Show();
                         weeklyReportCard.Show();
                         scoreSummaryDisplay.Show();
-                        onlinePlayersDisplay.Show();
+                        hubBar.Show();
                         break;
                 }
             };
@@ -382,8 +374,6 @@ namespace osu.Game.Screens.Menu
             base.LoadComplete();
             GetContainingInputManager();
 
-            // The song playing stays first on the right, above the event's card when it's there.
-            rightDisplays.SetLayoutPosition(nowPlayingCard, -2);
 
             eventMenuCard.MenuPosition.BindValueChanged(position => placeEventCard(position.NewValue), true);
         }
@@ -393,7 +383,7 @@ namespace osu.Game.Screens.Menu
         /// </summary>
         private void placeEventCard(ScosuEventMenuPosition position)
         {
-            // On the right, below the song playing (and above the weekly report); otherwise in the bottom left corner.
+            // On the right, above the weekly report; otherwise in the bottom left corner.
             if (position == ScosuEventMenuPosition.TopRight)
                 moveCard(eventMenuCard, rightDisplays, Anchor.TopRight, -1);
             else
@@ -407,7 +397,7 @@ namespace osu.Game.Screens.Menu
 
         /// <summary>
         /// scosu: opens or closes the hub. The band rises to make room for its sheet, which slides up from the bottom;
-        /// the corner cards slide out towards their edges (the song playing, top right, upwards), and come back when it closes.
+        /// the corner cards slide out towards their edges, and come back when it closes.
         /// The hub's tiles show the same things (and more), from the same providers.
         /// </summary>
         private void setHub(bool open)
@@ -422,14 +412,12 @@ namespace osu.Game.Screens.Menu
 
             if (open)
             {
-                nowPlayingCard.Hide();
                 bottomElementsFlow.FadeOut(hub_transition_duration / 2, Easing.OutQuint);
                 buttonsContainer.MoveToY(-hub_band_rise, hub_transition_duration, Easing.OutQuint);
 
                 slideCorner(leftDisplays, new Vector2(-corner_slide, 0), false);
                 slideCorner(rightDisplays, new Vector2(0, -corner_slide), false);
                 slideCorner(bottomLeftDisplays, new Vector2(-corner_slide, 0), false);
-                slideCorner(bottomRightDisplays, new Vector2(corner_slide, 0), false);
 
                 hubSheet.Show();
             }
@@ -443,10 +431,7 @@ namespace osu.Game.Screens.Menu
                 slideCorner(leftDisplays, Vector2.Zero, true);
                 slideCorner(rightDisplays, Vector2.Zero, true);
                 slideCorner(bottomLeftDisplays, Vector2.Zero, true);
-                slideCorner(bottomRightDisplays, Vector2.Zero, true);
 
-                if (bandIsOut)
-                    nowPlayingCard.Show();
             }
         }
 
@@ -617,10 +602,9 @@ namespace osu.Game.Screens.Menu
             // supporterDisplay
             //     .FadeOut(500, Easing.OutQuint);
 
-            nowPlayingCard.Hide();
             eventMenuCard.Hide();
             scoreSummaryDisplay.Hide();
-            onlinePlayersDisplay.Hide();
+            hubBar.Hide();
 
             samplePlaybackDisabled.Value = true;
         }
@@ -654,8 +638,7 @@ namespace osu.Game.Screens.Menu
             weeklyReportCard.Show();
             scoreSummaryDisplay.Refresh();
             scoreSummaryDisplay.Show();
-            onlinePlayersDisplay.Show();
-            nowPlayingCard.Show();
+            hubBar.Show();
 
             samplePlaybackDisabled.Value = false;
         }
@@ -698,7 +681,6 @@ namespace osu.Game.Screens.Menu
             Buttons.State = ButtonSystemState.Exit;
             OverlayActivationMode.Value = OverlayActivation.Disabled;
 
-            nowPlayingCard.Hide();
 
             this.FadeOut(3000);
 
@@ -710,7 +692,7 @@ namespace osu.Game.Screens.Menu
 
             eventMenuCard.Hide();
             scoreSummaryDisplay.Hide();
-            onlinePlayersDisplay.Hide();
+            hubBar.Hide();
 
             return base.OnExiting(e);
         }
@@ -762,6 +744,35 @@ namespace osu.Game.Screens.Menu
         private void loadQuickPlay() => this.Push(new OnlinePlay.Matchmaking.Intro.ScreenIntro(MatchmakingPoolType.QuickPlay));
 
         private void loadRankedPlay() => this.Push(new OnlinePlay.Matchmaking.Intro.ScreenIntro(MatchmakingPoolType.RankedPlay));
+
+        private bool onHubScroll(ScrollEvent e)
+        {
+            // Alt + wheel still changes the volume everywhere.
+            if (!bandIsOut || e.AltPressed)
+                return false;
+
+            if (e.ScrollDelta.Y < 0)
+                setHub(true);
+            else if (e.ScrollDelta.Y > 0)
+                setHub(false);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Takes the mouse wheel anywhere on the menu that nothing above it uses (the hub's sheet scrolls itself when it has to).
+        /// </summary>
+        private partial class HubScrollHandler : Drawable
+        {
+            public Func<ScrollEvent, bool> Scrolled;
+
+            public HubScrollHandler()
+            {
+                RelativeSizeAxes = Axes.Both;
+            }
+
+            protected override bool OnScroll(ScrollEvent e) => Scrolled?.Invoke(e) ?? false;
+        }
 
         private partial class MobileDisclaimerDialog : PopupDialog
         {

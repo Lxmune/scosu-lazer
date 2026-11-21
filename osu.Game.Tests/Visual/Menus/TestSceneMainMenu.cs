@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Linq;
@@ -8,6 +8,8 @@ using osu.Framework.Testing;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays;
 using osu.Game.Screens.Menu;
+using osu.Game.Screens.Menu.Hub;
+using osuTK;
 using osuTK.Input;
 
 namespace osu.Game.Tests.Visual.Menus
@@ -95,27 +97,32 @@ namespace osu.Game.Tests.Visual.Menus
         public void TestHub()
         {
             MenuHubSheet hub() => Game.ChildrenOfType<MenuHubSheet>().Single();
-            NowPlayingMenuCard nowPlaying() => Game.ChildrenOfType<NowPlayingMenuCard>().Single();
+            HubBar bar() => Game.ChildrenOfType<HubBar>().Single();
             ScoreSummaryDisplay score() => Game.ChildrenOfType<ScoreSummaryDisplay>().Single();
             ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
 
             AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);
 
+            // The test game opens with the band out.
+            AddStep("go to the logo", () => buttons().State = ButtonSystemState.Initial);
+            AddAssert("no bar on the logo", () => bar().State.Value, () => Is.EqualTo(Visibility.Hidden));
+
+            // Any key on the logo brings the band out (osu! does this), and Tab must not also open the hub then.
             AddStep("press tab on the logo", () => InputManager.Key(Key.Tab));
-            AddAssert("hub not opened on the logo", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("band out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
+            AddAssert("hub not opened by that key", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
 
             AddStep("enter menu", () => buttons().State = ButtonSystemState.TopLevel);
-            AddUntilStep("song playing shown top right", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Visible));
+            AddAssert("bar shown with the band", () => bar().State.Value, () => Is.EqualTo(Visibility.Visible));
 
             AddStep("press tab", () => InputManager.Key(Key.Tab));
             AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
-            AddAssert("song playing made way", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("bar stays", () => bar().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddUntilStep("corner cards made way", () => score().Parent!.Alpha, () => Is.EqualTo(0));
 
             AddStep("press escape", () => InputManager.Key(Key.Escape));
             AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
             AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
-            AddAssert("song playing back", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Visible));
             AddUntilStep("corner cards back", () => score().Parent!.Alpha, () => Is.EqualTo(1));
 
             AddStep("press H", () => InputManager.Key(Key.H));
@@ -126,7 +133,26 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddStep("go back to the logo", () => buttons().State = ButtonSystemState.Initial);
             AddAssert("hub closed with the band", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
-            AddAssert("song playing hidden on the logo", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("bar hidden with the band", () => bar().State.Value, () => Is.EqualTo(Visibility.Hidden));
+        }
+
+        [Test]
+        public void TestHubOpensWithTheWheel()
+        {
+            MenuHubSheet hub() => Game.ChildrenOfType<MenuHubSheet>().Single();
+            ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
+
+            AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);
+            AddStep("enter menu", () => buttons().State = ButtonSystemState.TopLevel);
+
+            // Above the band, away from the cards.
+            AddStep("mouse to an empty spot", () => InputManager.MoveMouseTo(Game.ScreenSpaceDrawQuad.TopLeft + Game.ScreenSpaceDrawQuad.Size * new Vector2(0.6f, 0.15f)));
+
+            AddStep("scroll down", () => InputManager.ScrollVerticalBy(-1));
+            AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
+
+            AddStep("scroll up", () => InputManager.ScrollVerticalBy(1));
+            AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
         }
     }
 }

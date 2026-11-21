@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -10,34 +11,44 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Online;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Metadata;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Dashboard;
 using osu.Game.Overlays.ScosuEvent;
 using osu.Game.Users;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Menu.Hub
 {
     /// <summary>
-    /// The hub's bar along the bottom of the sheet: today's gain, the event, who is online, and the song playing with its controls
-    /// (the now playing card in the corner is hidden while the hub is open).
+    /// The menu's bar along the bottom of the screen, shown whenever the band is out: today's gain, the event, who is online,
+    /// your friends, and the song playing with its controls (the now playing card in the corner is hidden while the hub is open).
+    /// Pieces without data are hidden together with their divider. The hub's sheet slides up from behind it.
     /// </summary>
-    public partial class HubBar : CompositeDrawable
+    public partial class HubBar : VisibilityContainer
     {
-        public const float HEIGHT = 46;
+        public const float HEIGHT = 58;
 
-        private const float now_playing_width = 360;
-        private const float cover_size = 32;
+        private const float transition_duration = 500;
+        private const float now_playing_width = 380;
+        private const float cover_size = 40;
+        private const float item_spacing = 32;
+        private const float side_padding = 24;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
 
         [Resolved]
         private ScoreSummaryProvider? scoreProvider { get; set; }
@@ -49,6 +60,9 @@ namespace osu.Game.Screens.Menu.Hub
         private MetadataClient? metadataClient { get; set; }
 
         [Resolved]
+        private DashboardOverlay? dashboard { get; set; }
+
+        [Resolved]
         private Bindable<WorkingBeatmap> beatmap { get; set; } = null!;
 
         [Resolved]
@@ -57,22 +71,76 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly IBindable<APIScoreSummary?> summary = new Bindable<APIScoreSummary?>();
         private readonly IBindable<APIScosuEvent?> currentEvent = new Bindable<APIScosuEvent?>();
         private readonly IBindableDictionary<int, UserPresence> presences = new BindableDictionary<int, UserPresence>();
+        private readonly IBindableDictionary<int, UserPresence> friendPresences = new BindableDictionary<int, UserPresence>();
+        private readonly IBindableList<APIRelation> friends = new BindableList<APIRelation>();
 
+        private Item[] items = Array.Empty<Item>();
         private Item today = null!;
         private Item next = null!;
         private Item eventItem = null!;
         private Item online = null!;
+        private Item friendsItem = null!;
+
+        private Line todayLine = null!;
+        private Line nextLine = null!;
+        private Line eventLine = null!;
+        private Line friendsLine = null!;
+
+        private OnlinePlayersDisplay? onlineDisplay;
+        private FillFlowContainer itemFlow = null!;
 
         private Container cover = null!;
         private OsuSpriteText title = null!;
         private OsuSpriteText artist = null!;
         private IconButton playPauseButton = null!;
 
-        [BackgroundDependencyLoader]
-        private void load()
+        public HubBar()
         {
             RelativeSizeAxes = Axes.X;
             Height = HEIGHT;
+
+            // Tucked below the screen's edge until shown.
+            Y = HEIGHT;
+            Alpha = 0;
+        }
+
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            if (metadataClient != null)
+            {
+                // Its list opens upward from the bar, since the display is anchored to the bottom.
+                onlineDisplay = new OnlinePlayersDisplay
+                {
+                    // Just the dot and the count, like the bar's other text.
+                    Flat = true,
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft,
+                    Y = -6,
+                };
+            }
+
+            today = new Item(todayLine = new Line(null));
+            next = new Item(nextLine = new Line(FontAwesome.Solid.ArrowUp) { Colour = ScosuMenuStyle.VIOLET });
+            eventItem = new Item(eventLine = new Line(null) { Colour = ScosuMenuStyle.ICE });
+            online = new Item(new Container
+            {
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                AutoSizeAxes = Axes.X,
+                Height = HEIGHT,
+                Child = (Drawable?)onlineDisplay ?? Empty(),
+            });
+            friendsItem = new Item(new OsuClickableContainer
+            {
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreLeft,
+                AutoSizeAxes = Axes.Both,
+                Action = openFriends,
+                Child = friendsLine = new Line(null),
+            });
+
+            items = new[] { today, next, eventItem, online, friendsItem };
 
             InternalChildren = new Drawable[]
             {
@@ -81,27 +149,15 @@ namespace osu.Game.Screens.Menu.Hub
                     RelativeSizeAxes = Axes.Both,
                     Colour = ScosuMenuStyle.BAND,
                 },
-                new Container
+                itemFlow = new FillFlowContainer
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Left = 24, Right = now_playing_width + 36 },
-                    // Whatever doesn't fit on a narrow window is cut off rather than overlapping the song.
-                    Masking = true,
-                    Child = new FillFlowContainer
-                    {
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        AutoSizeAxes = Axes.Both,
-                        Direction = FillDirection.Horizontal,
-                        Spacing = new Vector2(26, 0),
-                        Children = new Drawable[]
-                        {
-                            today = new Item(null),
-                            next = new Item(FontAwesome.Solid.ArrowUp) { Colour = ScosuMenuStyle.VIOLET },
-                            eventItem = new Item(null) { Colour = ScosuMenuStyle.ICE },
-                            online = new Item(null, true),
-                        },
-                    },
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    AutoSizeAxes = Axes.Both,
+                    Direction = FillDirection.Horizontal,
+                    Spacing = new Vector2(item_spacing, 0),
+                    Padding = new MarginPadding { Left = side_padding },
+                    Children = items,
                 },
                 new FillFlowContainer
                 {
@@ -109,9 +165,9 @@ namespace osu.Game.Screens.Menu.Hub
                     Origin = Anchor.CentreRight,
                     AutoSizeAxes = Axes.Y,
                     Width = now_playing_width,
-                    Padding = new MarginPadding { Right = 12 },
+                    Padding = new MarginPadding { Right = 16 },
                     Direction = FillDirection.Horizontal,
-                    Spacing = new Vector2(10, 0),
+                    Spacing = new Vector2(12, 0),
                     Children = new Drawable[]
                     {
                         cover = new Container
@@ -120,7 +176,7 @@ namespace osu.Game.Screens.Menu.Hub
                             Origin = Anchor.CentreLeft,
                             Size = new Vector2(cover_size),
                             Masking = true,
-                            CornerRadius = 7,
+                            CornerRadius = 8,
                             Child = new Box
                             {
                                 RelativeSizeAxes = Axes.Both,
@@ -131,7 +187,7 @@ namespace osu.Game.Screens.Menu.Hub
                         {
                             Anchor = Anchor.CentreLeft,
                             Origin = Anchor.CentreLeft,
-                            Width = now_playing_width - 12 - cover_size - 3 * 30 - 3 * 10,
+                            Width = now_playing_width - 16 - cover_size - 3 * 30 - 4 * 12,
                             AutoSizeAxes = Axes.Y,
                             Direction = FillDirection.Vertical,
                             Children = new Drawable[]
@@ -139,12 +195,12 @@ namespace osu.Game.Screens.Menu.Hub
                                 title = new TruncatingSpriteText
                                 {
                                     RelativeSizeAxes = Axes.X,
-                                    Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
+                                    Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
                                 },
                                 artist = new TruncatingSpriteText
                                 {
                                     RelativeSizeAxes = Axes.X,
-                                    Font = ScosuMenuStyle.Body(11),
+                                    Font = ScosuMenuStyle.Body(12),
                                     Colour = ScosuMenuStyle.TEXT_DIM,
                                 },
                             },
@@ -175,8 +231,6 @@ namespace osu.Game.Screens.Menu.Hub
                     },
                 },
             };
-
-            today.Alpha = next.Alpha = eventItem.Alpha = online.Alpha = 0;
         }
 
         protected override void LoadComplete()
@@ -190,12 +244,31 @@ namespace osu.Game.Screens.Menu.Hub
                 currentEvent.BindTo(eventProvider.Event);
 
             if (metadataClient != null)
+            {
                 presences.BindTo(metadataClient.UserPresences);
+                friendPresences.BindTo(metadataClient.FriendPresences);
+            }
+
+            friends.BindTo(api.LocalUserState.Friends);
 
             summary.BindValueChanged(_ => updateSummary(), true);
             currentEvent.BindValueChanged(_ => updateEvent(), true);
             presences.BindCollectionChanged((_, _) => updateOnline(), true);
+            friendPresences.BindCollectionChanged((_, _) => updateFriends());
+            friends.BindCollectionChanged((_, _) => updateFriends(), true);
             beatmap.BindValueChanged(b => Scheduler.AddOnce(() => displayBeatmap(b.NewValue)), true);
+
+            // The online list only watches presence while it is shown, so it follows the bar.
+            State.BindValueChanged(state =>
+            {
+                if (onlineDisplay == null)
+                    return;
+
+                if (state.NewValue == Visibility.Visible)
+                    onlineDisplay.Show();
+                else
+                    onlineDisplay.Hide();
+            }, true);
 
             Scheduler.AddDelayed(updateEvent, 1000, true);
         }
@@ -206,13 +279,52 @@ namespace osu.Game.Screens.Menu.Hub
 
             // The track can be paused from anywhere (the toolbar, media keys), so the icon follows it.
             playPauseButton.Icon = musicController.IsPlaying ? FontAwesome.Solid.Pause : FontAwesome.Solid.Play;
+
+            layoutItems();
+        }
+
+        /// <summary>
+        /// Drops the least important pieces while the window is too narrow for all of them (so they never run into the song),
+        /// and keeps a divider only between pieces that are shown.
+        /// </summary>
+        private void layoutItems()
+        {
+            float available = DrawWidth - side_padding - now_playing_width - item_spacing;
+
+            foreach (var item in items)
+                item.Squeezed = false;
+
+            // Least important first.
+            var droppable = new[] { next, today, friendsItem, eventItem };
+
+            float total() => items.Where(i => i.Wanted && !i.Squeezed).Sum(i => i.NaturalWidth + item_spacing);
+
+            foreach (var item in droppable)
+            {
+                if (total() <= available)
+                    break;
+
+                item.Squeezed = true;
+            }
+
+            bool first = true;
+
+            foreach (var item in items)
+            {
+                item.Alpha = item.Present ? 1 : 0;
+                item.ShowDivider = item.Present && !first;
+                first &= !item.Present;
+
+                if (item.Present)
+                    item.Measure();
+            }
         }
 
         private void updateSummary()
         {
             if (summary.Value is not APIScoreSummary s)
             {
-                today.Alpha = next.Alpha = 0;
+                today.Wanted = next.Wanted = false;
                 return;
             }
 
@@ -221,42 +333,59 @@ namespace osu.Game.Screens.Menu.Hub
             if (s.Rank is int rank)
                 line = LocalisableString.Interpolate($@"{line} · #{rank.ToLocalisableString(@"N0")}");
 
-            today.SetText(line);
-            today.Alpha = 1;
+            todayLine.Set(string.Empty, line);
+            today.Wanted = true;
 
             if (s.Next is APIScoreSummary.NextRank n)
             {
-                next.SetText(ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(n.RankedScoreNeeded), n.Rank.ToLocalisableString(@"N0"), n.Username));
-                next.Alpha = 1;
+                nextLine.Set(string.Empty, ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(n.RankedScoreNeeded), n.Rank.ToLocalisableString(@"N0"), n.Username));
+                next.Wanted = true;
             }
             else
-                next.Alpha = 0;
+                next.Wanted = false;
         }
 
         private void updateEvent()
         {
             if (currentEvent.Value is not APIScosuEvent ev || EventDisplay.CountdownTarget(ev) is not DateTimeOffset target)
             {
-                eventItem.Alpha = 0;
+                eventItem.Wanted = false;
                 return;
             }
 
             string left = EventDisplay.ShortCountdown(target - DateTimeOffset.Now);
 
-            eventItem.SetText(ev.Status == ScosuEventStatus.Upcoming ? MenuHubStrings.EventStartsIn(ev.Title, left) : MenuHubStrings.EventEndsIn(ev.Title, left));
-            eventItem.Alpha = 1;
+            eventLine.Set(ev.Title, ev.Status == ScosuEventStatus.Upcoming ? MenuHubStrings.StartsIn(left) : MenuHubStrings.EndsInLower(left));
+            eventItem.Wanted = true;
         }
 
         private void updateOnline()
         {
-            if (presences.Count == 0)
+            // The list itself hides when nobody else is on; this only decides whether its divider is shown.
+            online.Wanted = onlineDisplay != null && presences.Keys.Any(id => id != api.LocalUser.Value.OnlineID);
+        }
+
+        private void updateFriends()
+        {
+            if (!api.IsLoggedIn || friends.Count == 0)
             {
-                online.Alpha = 0;
+                friendsItem.Wanted = false;
                 return;
             }
 
-            online.SetText(MenuHubStrings.Online(presences.Count.ToString(@"N0")));
-            online.Alpha = 1;
+            int onlineCount = friends.Count(f => friendPresences.ContainsKey(f.TargetID));
+
+            friendsLine.Set(string.Empty, MenuHubStrings.FriendsLine(onlineCount.ToString(@"N0"), friends.Count.ToString(@"N0")));
+            friendsItem.Wanted = true;
+        }
+
+        private void openFriends()
+        {
+            if (dashboard == null)
+                return;
+
+            dashboard.Header.Current.Value = DashboardOverlayTabs.Friends;
+            dashboard.Show();
         }
 
         private void displayBeatmap(WorkingBeatmap working)
@@ -287,14 +416,26 @@ namespace osu.Game.Screens.Menu.Hub
             });
         }
 
+        protected override void PopIn() => this.MoveToY(0, transition_duration, Easing.OutQuint).FadeIn(transition_duration, Easing.OutQuint);
+
+        protected override void PopOut() => this.MoveToY(HEIGHT, transition_duration, Easing.OutQuint).FadeOut(transition_duration, Easing.OutQuint);
+
+        // Hover and clicks stop at the bar; the scroll is left to the menu, which opens and closes the hub with it.
+        protected override bool OnHover(HoverEvent e) => true;
+
+        protected override bool OnMouseDown(MouseDownEvent e) => true;
+
+        protected override bool OnClick(ClickEvent e) => true;
+
         /// <summary>
-        /// One piece of the bar: a line of text, optionally behind an icon or a green dot. Hidden (and so skipped by the layout) at zero alpha.
+        /// A line of text: an optional icon, a bold start and the rest.
         /// </summary>
-        private partial class Item : FillFlowContainer
+        private partial class Line : FillFlowContainer
         {
+            private readonly OsuSpriteText bold;
             private readonly OsuSpriteText text;
 
-            public Item(IconUsage? icon, bool dot = false)
+            public Line(IconUsage? icon)
             {
                 Anchor = Anchor.CentreLeft;
                 Origin = Anchor.CentreLeft;
@@ -309,30 +450,92 @@ namespace osu.Game.Screens.Menu.Hub
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
                         Icon = icon.Value,
-                        Size = new Vector2(10),
+                        Size = new Vector2(11),
                     });
                 }
 
-                if (dot)
+                AddRange(new Drawable[]
                 {
-                    Add(new Circle
+                    bold = new OsuSpriteText
                     {
                         Anchor = Anchor.CentreLeft,
                         Origin = Anchor.CentreLeft,
-                        Size = new Vector2(7),
-                        Colour = Color4Extensions.FromHex(@"7ee2a0"),
-                    });
-                }
-
-                Add(text = new OsuSpriteText
-                {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
+                        Font = ScosuMenuStyle.Body(14, FontWeight.Bold),
+                    },
+                    text = new OsuSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Font = ScosuMenuStyle.Body(14, FontWeight.Regular),
+                    },
                 });
             }
 
-            public void SetText(LocalisableString value) => text.Text = value;
+            public void Set(string boldPart, LocalisableString rest)
+            {
+                bold.Text = boldPart;
+                bold.Alpha = string.IsNullOrEmpty(boldPart) ? 0 : 1;
+                text.Text = rest;
+            }
+        }
+
+        /// <summary>
+        /// One piece of the bar, behind a thin divider (unless it is the first one shown).
+        /// </summary>
+        private partial class Item : FillFlowContainer
+        {
+            private readonly Drawable divider;
+            private readonly Drawable content;
+
+            /// <summary>
+            /// Whether there is anything to show.
+            /// </summary>
+            public bool Wanted;
+
+            /// <summary>
+            /// Whether the bar is too narrow for it right now.
+            /// </summary>
+            public bool Squeezed;
+
+            public bool Present => Wanted && !Squeezed;
+
+            /// <summary>
+            /// Its width when it was last shown, to know whether it would fit again.
+            /// </summary>
+            public float NaturalWidth { get; private set; }
+
+            public bool ShowDivider
+            {
+                set => divider.Alpha = value ? 1 : 0;
+            }
+
+            public Item(Drawable content)
+            {
+                this.content = content;
+
+                Anchor = Anchor.CentreLeft;
+                Origin = Anchor.CentreLeft;
+                AutoSizeAxes = Axes.Both;
+                Direction = FillDirection.Horizontal;
+                Spacing = new Vector2(item_spacing, 0);
+                Alpha = 0;
+
+                InternalChildren = new[]
+                {
+                    divider = new Box
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Width = 1,
+                        Height = HEIGHT * 0.6f,
+                        Colour = osuTK.Graphics.Color4.White.Opacity(0.15f),
+                        Alpha = 0,
+                    },
+                    content,
+                };
+            }
+
+            public void Measure() => NaturalWidth = content.DrawWidth + 1 + item_spacing;
         }
     }
 }

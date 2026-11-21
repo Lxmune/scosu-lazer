@@ -118,15 +118,17 @@ namespace osu.Game.Screens.Menu
                         {
                             bg.RelativeSizeAxes = Axes.Both;
                         }),
+                        // scosu: only the primary button is filled. The others show the band itself, so the band is one even colour,
+                        // also around the logo (a fill on the buttons alone left a darker strip on either side of the circle).
                         fillBox = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = ScosuMenuStyle.FILL,
+                            Alpha = 0,
                         },
                         hoverFill = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = Color4.White.Opacity(0.05f),
+                            Colour = Color4.White.Opacity(0.08f),
                             Alpha = 0,
                         },
                         divider = new Box
@@ -203,6 +205,7 @@ namespace osu.Game.Screens.Menu
             if (IsPrimary)
             {
                 fillBox.Colour = ScosuMenuStyle.PRIMARY;
+                fillBox.Alpha = 1;
                 topLine.Colour = ScosuMenuStyle.VIOLET_INK;
                 topLine.Alpha = 1;
                 divider.Alpha = 0;

@@ -8,9 +8,12 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Graphics;
 using osu.Framework.Localisation;
 using osu.Framework.Extensions.LocalisationExtensions;
+using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.Metadata;
@@ -65,12 +68,12 @@ namespace osu.Game.Screens.Menu.Hub
 
             if (info.Value is not DailyChallengeInfo challenge)
             {
-                ShowPlaceholder(MenuHubStrings.NoDailyChallenge);
+                ShowPlaceholder(FontAwesome.Solid.Clock, MenuHubStrings.NoDailyChallenge);
                 return;
             }
 
             // Until the room arrives, there is nothing worth showing.
-            ShowPlaceholder(MenuHubStrings.TodaysChallenge);
+            ShowPlaceholder(FontAwesome.Solid.Clock, MenuHubStrings.TodaysChallenge);
 
             var req = request = new GetRoomRequest(challenge.RoomID);
 
@@ -90,7 +93,16 @@ namespace osu.Game.Screens.Menu.Hub
 
             var beatmap = r.Playlist.FirstOrDefault()?.Beatmap;
 
-            Body.Clear();
+            ShowContent();
+
+            if (beatmap?.BeatmapSet is APIBeatmapSet set)
+            {
+                SetBackground(new UpdateableOnlineBeatmapSetCover(timeBeforeLoad: 0, timeBeforeUnload: 600_000)
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    OnlineInfo = set,
+                }, 0.55f);
+            }
 
             if (beatmap != null)
             {
@@ -100,13 +112,13 @@ namespace osu.Game.Screens.Menu.Hub
                 {
                     RelativeSizeAxes = Axes.X,
                     Text = new RomanisableString(metadata.TitleUnicode, metadata.Title),
-                    Font = ScosuMenuStyle.Display(16),
+                    Font = ScosuMenuStyle.Display(20),
                 });
                 Body.Add(new TruncatingSpriteText
                 {
                     RelativeSizeAxes = Axes.X,
                     Text = $@"{beatmap.DifficultyName} · {beatmap.StarRating.ToString(@"0.0#", CultureInfo.InvariantCulture)}★",
-                    Font = ScosuMenuStyle.Body(12),
+                    Font = ScosuMenuStyle.Body(13, FontWeight.SemiBold),
                     Colour = ScosuMenuStyle.TEXT_DIM,
                 });
             }
@@ -116,7 +128,7 @@ namespace osu.Game.Screens.Menu.Hub
                 {
                     RelativeSizeAxes = Axes.X,
                     Text = r.Name,
-                    Font = ScosuMenuStyle.Display(16),
+                    Font = ScosuMenuStyle.Display(20),
                 });
             }
 
