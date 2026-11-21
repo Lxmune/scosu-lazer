@@ -90,5 +90,43 @@ namespace osu.Game.Tests.Visual.Menus
 
             AddUntilStep("wait for dialog", () => Game.ChildrenOfType<DialogOverlay>().SingleOrDefault()?.CurrentDialog != null);
         }
+
+        [Test]
+        public void TestHub()
+        {
+            MenuHubSheet hub() => Game.ChildrenOfType<MenuHubSheet>().Single();
+            NowPlayingMenuCard nowPlaying() => Game.ChildrenOfType<NowPlayingMenuCard>().Single();
+            ScoreSummaryDisplay score() => Game.ChildrenOfType<ScoreSummaryDisplay>().Single();
+            ButtonSystem buttons() => Game.ChildrenOfType<ButtonSystem>().Single();
+
+            AddStep("disable return to top on idle", () => buttons().ReturnToTopOnIdle = false);
+
+            AddStep("press tab on the logo", () => InputManager.Key(Key.Tab));
+            AddAssert("hub not opened on the logo", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+
+            AddStep("enter menu", () => buttons().State = ButtonSystemState.TopLevel);
+            AddUntilStep("song playing shown top right", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Visible));
+
+            AddStep("press tab", () => InputManager.Key(Key.Tab));
+            AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
+            AddAssert("song playing made way", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("score card in the hub", () => score().Parent == hub().Columns[0]);
+
+            AddStep("press escape", () => InputManager.Key(Key.Escape));
+            AddAssert("hub closed", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("band still out", () => buttons().State, () => Is.EqualTo(ButtonSystemState.TopLevel));
+            AddAssert("song playing back", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Visible));
+            AddAssert("score card back in its corner", () => score().Parent != hub().Columns[0]);
+
+            AddStep("press H", () => InputManager.Key(Key.H));
+            AddAssert("hub open", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
+
+            AddStep("open play's options", () => buttons().State = ButtonSystemState.Play);
+            AddAssert("hub stays open with the band", () => hub().State.Value, () => Is.EqualTo(Visibility.Visible));
+
+            AddStep("go back to the logo", () => buttons().State = ButtonSystemState.Initial);
+            AddAssert("hub closed with the band", () => hub().State.Value, () => Is.EqualTo(Visibility.Hidden));
+            AddAssert("song playing hidden on the logo", () => nowPlaying().State.Value, () => Is.EqualTo(Visibility.Hidden));
+        }
     }
 }

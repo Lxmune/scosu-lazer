@@ -52,6 +52,16 @@ namespace osu.Game.Screens.Menu
         public Action? OnPlaylists;
         public Action<Room>? OnDailyChallenge;
 
+        /// <summary>
+        /// scosu: opens or closes the menu's hub (see <see cref="MenuHubSheet"/>).
+        /// </summary>
+        public Action? OnHub;
+
+        /// <summary>
+        /// scosu: asked first when going back (Esc). Returns true if it handled it, e.g. by closing the hub.
+        /// </summary>
+        public Func<bool>? OnBack;
+
         private readonly IBindable<bool> isIdle = new BindableBool();
 
         private OsuLogo? logo;
@@ -175,6 +185,7 @@ namespace osu.Game.Screens.Menu
             buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Edit, @"button-play-select", OsuIcon.EditCircle, new Color4(238, 170, 0, 255), (_, _) => State = ButtonSystemState.Edit, Key.E));
             buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Browse, @"button-default-select", OsuIcon.Beatmap, new Color4(165, 204, 0, 255), (_, _) => OnBeatmapListing?.Invoke(), Key.B,
                 Key.D));
+            buttonsTopLevel.Add(new MainMenuButton("hub", @"button-default-select", FontAwesome.Solid.ThLarge, new Color4(120, 90, 220, 255), (_, _) => OnHub?.Invoke(), Key.H));
 
             if (host.CanExit)
                 buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Exit, string.Empty, OsuIcon.CrossCircle, new Color4(238, 51, 153, 255), (_, e) => OnExit?.Invoke(e), Key.Q));
@@ -348,6 +359,9 @@ namespace osu.Game.Screens.Menu
 
         private bool goBack()
         {
+            if (OnBack?.Invoke() == true)
+                return true;
+
             switch (State)
             {
                 case ButtonSystemState.TopLevel:
