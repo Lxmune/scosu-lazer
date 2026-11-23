@@ -33,10 +33,23 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
         public Bindable<int> Current
         {
             get => current.Current;
-            set => current.Current = value;
+            set
+            {
+                current.Current = value;
+                sliderValue.Disabled = false;
+                sliderValue.Default = current.Default;
+                sliderValue.Disabled = current.Disabled;
+            }
         }
 
         private readonly BindableNumberWithCurrent<int> current = new BindableNumberWithCurrent<int>(ScosuMenuStyle.DEFAULT_HUE)
+        {
+            MinValue = 0,
+            MaxValue = 360,
+            Default = ScosuMenuStyle.DEFAULT_HUE,
+        };
+
+        private readonly BindableInt sliderValue = new BindableInt(ScosuMenuStyle.DEFAULT_HUE)
         {
             MinValue = 0,
             MaxValue = 360,
@@ -141,7 +154,12 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
                         {
                             RelativeSizeAxes = Axes.X,
                             Height = 20,
-                            Current = { BindTarget = current },
+                            Current = { BindTarget = sliderValue },
+                            OnCommit = () =>
+                            {
+                                if (!current.Disabled)
+                                    current.Value = sliderValue.Value;
+                            },
                         },
                         swatchRow,
                     },
@@ -155,11 +173,18 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
 
             current.BindValueChanged(e =>
             {
+                sliderValue.Value = e.NewValue;
                 updateDisplay(e.NewValue);
                 ValueChanged?.Invoke();
             }, true);
 
-            current.BindDisabledChanged(_ => updateVisualStyle(), true);
+            sliderValue.BindValueChanged(e => updateDisplay(e.NewValue), true);
+
+            current.BindDisabledChanged(disabled =>
+            {
+                sliderValue.Disabled = disabled;
+                updateVisualStyle();
+            }, true);
         }
 
         private void updateDisplay(int hue)
@@ -256,6 +281,8 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
 
         private partial class HueSpectrumSlider : SliderBar<int>
         {
+            public Action? OnCommit { get; init; }
+
             private readonly CircularContainer nub;
             private readonly Box nubFill;
 
@@ -324,6 +351,16 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
             {
                 nub.MoveToX(value, 60, Easing.OutQuint);
                 nubFill.Colour = ScosuMenuStyle.HueColour(Current.Value, 0.9f, 0.65f);
+            }
+
+            protected override bool Commit()
+            {
+                bool result = base.Commit();
+
+                if (result)
+                    OnCommit?.Invoke();
+
+                return result;
             }
         }
     }
