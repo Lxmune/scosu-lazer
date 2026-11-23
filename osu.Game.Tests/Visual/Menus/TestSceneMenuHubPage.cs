@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Testing;
 using osu.Game.Database;
 using osu.Game.Online;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.API;
@@ -295,6 +296,35 @@ namespace osu.Game.Tests.Visual.Menus
             AddUntilStep("bar hidden", () => bar.Alpha, () => Is.Zero);
             AddStep("close page", () => page.Hide());
             AddUntilStep("panel invisible when closed", () => page.ChildrenOfType<Container>().First(c => c.Y > 0.99f || c.Alpha == 0).Alpha, () => Is.Zero);
+        }
+
+        [Test]
+        public void TestOnlinePlayersShownInBar()
+        {
+            AddStep("respond to user lookups", () => dummyAPI.HandleRequest = request =>
+            {
+                if (request is LookupUsersRequest lookup)
+                {
+                    lookup.TriggerSuccess(new GetUsersResponse
+                    {
+                        Users = lookup.UserIds.Select(id => new APIUser { Id = id, Username = $"Player {id}" }).ToList(),
+                    });
+                    return true;
+                }
+
+                return false;
+            });
+
+            createPage();
+
+            AddStep("other player online", () => metadataClient.UserPresenceUpdated(3001, new UserPresence { Status = UserStatus.Online }));
+            AddUntilStep("bar shows online count", () => barShows("1 online"));
+            AddAssert("flat online chip is unmasked", () =>
+            {
+                var display = bar.ChildrenOfType<OnlinePlayersDisplay>().Single();
+                var chip = display.ChildrenOfType<OsuClickableContainer>().Single(c => c.ChildrenOfType<OsuSpriteText>().Any(t => t.Text.ToString() == "1 online"));
+                return !chip.Masking && chip.CornerRadius == 0;
+            });
         }
     }
 }

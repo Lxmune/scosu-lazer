@@ -174,9 +174,8 @@ namespace osu.Game.Screens.Menu
                             },
                         },
                     },
-                    chip = new ChipButton(toggle)
+                    chip = new ChipButton(toggle, Flat)
                     {
-                        BorderThickness = Flat ? 0 : 1.5f,
                         Children = new Drawable[]
                         {
                             chipBackground = new Box
@@ -400,13 +399,24 @@ namespace osu.Game.Screens.Menu
         /// </summary>
         private partial class ChipButton : OsuClickableContainer
         {
-            public ChipButton(Action action)
+            private readonly bool flat;
+
+            public ChipButton(Action action, bool flat)
             {
+                this.flat = flat;
                 Action = action;
                 AutoSizeAxes = Axes.Both;
-                Masking = true;
-                CornerRadius = 99;
+                Masking = !flat;
+                BorderThickness = flat ? 0 : 1.5f;
                 BorderColour = ScosuMenuStyle.OUTLINE;
+            }
+
+            protected override void Update()
+            {
+                base.Update();
+
+                if (!flat)
+                    CornerRadius = Math.Min(DrawWidth, DrawHeight) / 2f;
             }
         }
 

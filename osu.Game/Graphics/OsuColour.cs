@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -315,12 +315,40 @@ namespace osu.Game.Graphics
         public readonly Color4 PurpleDarker = Color4Extensions.FromHex(@"441188");
 
         // scosu: the "Pink" family is the client's brand accent (slider nubs, dropdowns, back buttons, volume, dialogs),
-        // so it carries scosu's violet instead of osu!'s pink. Pink is the website's --color-violet.
-        public readonly Color4 PinkLighter = Color4Extensions.FromHex(@"e4dafd");
-        public readonly Color4 PinkLight = Color4Extensions.FromHex(@"a88bf5");
-        public readonly Color4 Pink = Color4Extensions.FromHex(@"7856ce");
-        public readonly Color4 PinkDark = Color4Extensions.FromHex(@"6448b8");
-        public readonly Color4 PinkDarker = Color4Extensions.FromHex(@"4e3496");
+        // so it carries scosu's accent colour (violet by default, customisable via OsuSetting.AccentHue).
+        private static readonly Color4 default_pink_lighter = Color4Extensions.FromHex(@"e4dafd");
+        private static readonly Color4 default_pink_light = Color4Extensions.FromHex(@"a88bf5");
+        private static readonly Color4 default_pink = Color4Extensions.FromHex(@"7856ce");
+        private static readonly Color4 default_pink_dark = Color4Extensions.FromHex(@"6448b8");
+        private static readonly Color4 default_pink_darker = Color4Extensions.FromHex(@"4e3496");
+
+        public Color4 PinkLighter { get; private set; } = default_pink_lighter;
+        public Color4 PinkLight { get; private set; } = default_pink_light;
+        public Color4 Pink { get; private set; } = default_pink;
+        public Color4 PinkDark { get; private set; } = default_pink_dark;
+        public Color4 PinkDarker { get; private set; } = default_pink_darker;
+
+        public void ApplyAccentHue(int hue)
+        {
+            int wrapped = ((hue % 360) + 360) % 360;
+
+            if (wrapped == Screens.Menu.ScosuMenuStyle.DEFAULT_HUE)
+            {
+                PinkLighter = default_pink_lighter;
+                PinkLight = default_pink_light;
+                Pink = default_pink;
+                PinkDark = default_pink_dark;
+                PinkDarker = default_pink_darker;
+                return;
+            }
+
+            float h = wrapped / 360f;
+            PinkLighter = Framework.Graphics.Colour4.FromHSL(h, 0.88f, 0.92f);
+            PinkLight = Framework.Graphics.Colour4.FromHSL(h, 0.84f, 0.75f);
+            Pink = Framework.Graphics.Colour4.FromHSL(h, 0.55f, 0.57f);
+            PinkDark = Framework.Graphics.Colour4.FromHSL(h, 0.45f, 0.50f);
+            PinkDarker = Framework.Graphics.Colour4.FromHSL(h, 0.48f, 0.40f);
+        }
 
         public readonly Color4 BlueLighter = Color4Extensions.FromHex(@"ddffff");
         public readonly Color4 BlueLight = Color4Extensions.FromHex(@"99eeff");

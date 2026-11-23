@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -6,6 +6,7 @@
 using System;
 using JetBrains.Annotations;
 using osu.Framework;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -22,6 +23,8 @@ namespace osu.Game.Screens.Menu
 
         private readonly ButtonAreaBackground buttonAreaBackground;
         private readonly Container primaryExtension;
+        private readonly Box primaryExtensionFill;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
         private Visibility state;
 
         public const float BUTTON_AREA_HEIGHT = 100;
@@ -45,19 +48,10 @@ namespace osu.Game.Screens.Menu
                     {
                         RelativeSizeAxes = Axes.Y,
                         Alpha = 0,
-                        Children = new Drawable[]
+                        Child = primaryExtensionFill = new Box
                         {
-                            new Box
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = ScosuMenuStyle.PRIMARY,
-                            },
-                            new Box
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                Height = 3,
-                                Colour = ScosuMenuStyle.VIOLET_INK,
-                            },
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = ScosuMenuStyle.PRIMARY,
                         }
                     },
                     Flow = new FlowContainerWithOrigin
@@ -69,6 +63,17 @@ namespace osu.Game.Screens.Menu
                     }
                 }
             };
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            accentHue.BindValueChanged(_ =>
+            {
+                primaryExtensionFill.Colour = ScosuMenuStyle.PRIMARY;
+                buttonAreaBackground.Colour = ScosuMenuStyle.BAND;
+            }, true);
         }
 
         /// <summary>

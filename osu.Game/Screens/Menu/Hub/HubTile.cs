@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -53,6 +54,7 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly SpriteIcon footIcon;
         private readonly OsuSpriteText eyebrowDetail;
         private readonly OsuSpriteText footText;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected HubTile(Color4? accent = null)
         {
@@ -213,6 +215,13 @@ namespace osu.Game.Screens.Menu.Hub
             }
 
             SetAction(null);
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            accentHue.BindValueChanged(_ => hoverOutline.BorderColour = ScosuMenuStyle.VIOLET, true);
         }
 
         private const float base_fill = 0.045f;

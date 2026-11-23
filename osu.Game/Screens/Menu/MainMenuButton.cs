@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -7,6 +7,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
@@ -75,6 +76,7 @@ namespace osu.Game.Screens.Menu
         private readonly Box divider;
         private readonly SpriteIcon icon;
         private readonly OsuSpriteText label;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private Vector2 initialSize => BaseSize + Padding.Total;
 
@@ -84,7 +86,7 @@ namespace osu.Game.Screens.Menu
         private SampleChannel? sampleChannel;
 
         /// <summary>
-        /// scosu: whether this is the band's main button (play, solo): filled with the violet gradient and a light line on top.
+        /// scosu: whether this is the band's main button (play, solo): filled with the violet gradient.
         /// Set it in the object initialiser.
         /// </summary>
         public bool IsPrimary { get; init; }
@@ -208,21 +210,31 @@ namespace osu.Game.Screens.Menu
         {
             base.LoadComplete();
 
-            // scosu: flat tiles, no shear. The primary button gets the violet gradient and a light top line that is always shown.
+            // scosu: flat tiles, no shear. The primary button gets the accent gradient.
             if (IsPrimary)
             {
-                fillBox.Colour = ScosuMenuStyle.PRIMARY;
                 fillBox.Alpha = 1;
-                topLine.Colour = ScosuMenuStyle.VIOLET_INK;
-                topLine.Alpha = 1;
                 divider.Alpha = 0;
             }
+
+            accentHue.BindValueChanged(_ => applyAccentColour(), true);
 
             if (IsQuiet)
                 setContentDim(true);
 
             animateState();
             FinishTransforms(true);
+        }
+
+        private void applyAccentColour()
+        {
+            if (IsPrimary)
+                fillBox.Colour = ScosuMenuStyle.PRIMARY;
+            else
+                topLine.Colour = ScosuMenuStyle.VIOLET;
+
+            if (IsHovered)
+                icon.Colour = ScosuMenuStyle.VIOLET_INK;
         }
 
         private bool rightward;

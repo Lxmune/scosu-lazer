@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -78,6 +78,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.ToolbarClockDisplayMode, ToolbarClockDisplayMode.Full);
 
             SetDefault(OsuSetting.SongSelectBackgroundBlur, false);
+            SetDefault(OsuSetting.AccentHue, Screens.Menu.ScosuMenuStyle.DEFAULT_HUE, 0, 360);
 
             // Online settings
             SetDefault(OsuSetting.ScosuUsername, string.Empty);
@@ -550,5 +551,10 @@ namespace osu.Game.Configuration
         /// restored when the game starts and when switching back to that ruleset.
         /// </summary>
         ScosuRelaxLeaderboards,
+
+        /// <summary>
+        /// scosu: client UI accent colour hue in degrees (0..360, default 256 for scosu violet).
+        /// </summary>
+        AccentHue,
     }
 }

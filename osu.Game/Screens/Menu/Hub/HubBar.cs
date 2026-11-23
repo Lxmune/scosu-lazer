@@ -78,6 +78,10 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly IBindableDictionary<int, UserPresence> presences = new BindableDictionary<int, UserPresence>();
         private readonly IBindableDictionary<int, UserPresence> friendPresences = new BindableDictionary<int, UserPresence>();
         private readonly IBindableList<APIRelation> friends = new BindableList<APIRelation>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
+        private Box barBackground = null!;
+        private Box coverPlaceholder = null!;
 
         private Item[] items = Array.Empty<Item>();
         private Item today = null!;
@@ -92,6 +96,7 @@ namespace osu.Game.Screens.Menu.Hub
         private Line friendsLine = null!;
 
         private OnlinePlayersDisplay? onlineDisplay;
+        private IDisposable? presenceWatch;
         private FillFlowContainer itemFlow = null!;
 
         private Container cover = null!;
@@ -155,10 +160,10 @@ namespace osu.Game.Screens.Menu.Hub
                     Origin = Anchor.BottomLeft,
                     Colour = ColourInfo.GradientVertical(Color4.Black.Opacity(0), Color4.Black.Opacity(0.28f)),
                 },
-                new Box
+                barBackground = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4Extensions.FromHex(@"120f19").Opacity(0.96f),
+                    Colour = ScosuMenuStyle.BAND.Opacity(0.96f),
                 },
                 new Box
                 {
@@ -194,7 +199,7 @@ namespace osu.Game.Screens.Menu.Hub
                             Size = new Vector2(cover_size),
                             Masking = true,
                             CornerRadius = 8,
-                            Child = new Box
+                            Child = coverPlaceholder = new Box
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Colour = ScosuMenuStyle.VIOLET.Opacity(0.4f),
@@ -274,17 +279,30 @@ namespace osu.Game.Screens.Menu.Hub
             friendPresences.BindCollectionChanged((_, _) => updateFriends());
             friends.BindCollectionChanged((_, _) => updateFriends(), true);
             beatmap.BindValueChanged(b => Scheduler.AddOnce(() => displayBeatmap(b.NewValue)), true);
+            accentHue.BindValueChanged(_ =>
+            {
+                barBackground.Colour = ScosuMenuStyle.BAND.Opacity(0.96f);
+                nextLine.Colour = ScosuMenuStyle.VIOLET;
+                coverPlaceholder.Colour = ScosuMenuStyle.VIOLET.Opacity(0.4f);
+            }, true);
 
-            // The online list only watches presence while it is shown, so it follows the bar.
+            // Watch presence while the bar is shown so onlineDisplay doesn't depend on online.Alpha > 0 to start watching.
             State.BindValueChanged(state =>
             {
                 if (onlineDisplay == null)
                     return;
 
                 if (state.NewValue == Visibility.Visible)
+                {
+                    presenceWatch ??= metadataClient?.BeginWatchingUserPresence();
                     onlineDisplay.Show();
+                }
                 else
+                {
+                    presenceWatch?.Dispose();
+                    presenceWatch = null;
                     onlineDisplay.Hide();
+                }
             }, true);
 
             Scheduler.AddDelayed(updateEvent, 1000, true);
@@ -438,6 +456,14 @@ namespace osu.Game.Screens.Menu.Hub
         protected override void PopIn() => this.MoveToY(0, transition_duration, Easing.OutQuint).FadeIn(transition_duration, Easing.OutQuint);
 
         protected override void PopOut() => this.MoveToY(HEIGHT, transition_duration, Easing.OutQuint).FadeOut(transition_duration, Easing.OutQuint);
+
+        protected override void Dispose(bool isDisposing)
+        {
+            presenceWatch?.Dispose();
+            presenceWatch = null;
+
+            base.Dispose(isDisposing);
+        }
 
         // Hover and clicks stop at the bar; the scroll is left to the menu, which opens and closes the hub with it.
         protected override bool OnHover(HoverEvent e) => true;

@@ -245,6 +245,7 @@ namespace osu.Game
         private readonly BindableNumber<double> globalTrackVolumeAdjust = new BindableNumber<double>(global_track_volume_adjust);
 
         private Bindable<string> frameworkLocale = null!;
+        private Bindable<int> accentHue = null!;
 
         private IBindable<LocalisationParameters> localisationParameters = null!;
 
@@ -376,6 +377,13 @@ namespace osu.Game
             dependencies.Cache(SessionStatics = new SessionStatics());
             dependencies.Cache(hitErrorTracker = new SessionAverageHitErrorTracker());
             dependencies.Cache(Colours = new OsuColour());
+
+            accentHue = LocalConfig.GetBindable<int>(OsuSetting.AccentHue);
+            accentHue.BindValueChanged(h =>
+            {
+                Screens.Menu.ScosuMenuStyle.AccentHue.Value = h.NewValue;
+                Colours.ApplyAccentHue(h.NewValue);
+            }, true);
 
             RegisterImportHandler(BeatmapManager);
             RegisterImportHandler(ScoreManager);

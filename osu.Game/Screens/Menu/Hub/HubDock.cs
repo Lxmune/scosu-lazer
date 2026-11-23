@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -43,6 +44,8 @@ namespace osu.Game.Screens.Menu.Hub
         private readonly IReadOnlyList<Item> trailing;
 
         private Container content = null!;
+        private Box dockBackground = null!;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public HubDock(IReadOnlyList<Item> leading, IReadOnlyList<Item> trailing)
         {
@@ -69,7 +72,7 @@ namespace osu.Game.Screens.Menu.Hub
                         RelativeSizeAxes = Axes.Both,
                         Children = new Drawable[]
                         {
-                            new Box
+                            dockBackground = new Box
                             {
                                 RelativeSizeAxes = Axes.Both,
                                 Colour = ScosuMenuStyle.BAND.Opacity(0.94f),
@@ -115,6 +118,13 @@ namespace osu.Game.Screens.Menu.Hub
                     },
                 },
             };
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            accentHue.BindValueChanged(_ => dockBackground.Colour = ScosuMenuStyle.BAND.Opacity(0.94f), true);
         }
 
         private static Drawable createButton(Item item) => new DockButton(item)
@@ -191,8 +201,10 @@ namespace osu.Game.Screens.Menu.Hub
         {
             public readonly Item Item;
 
+            private Box fill = null!;
             private Box hover = null!;
             private Container pill = null!;
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
             public DockButton(Item item)
             {
@@ -218,7 +230,7 @@ namespace osu.Game.Screens.Menu.Hub
                     CornerRadius = 18,
                     Children = new Drawable[]
                     {
-                        new Box
+                        fill = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = Item.Primary ? ScosuMenuStyle.PRIMARY : Color4.White.Opacity(0.07f),
@@ -256,6 +268,14 @@ namespace osu.Game.Screens.Menu.Hub
                         },
                     },
                 };
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+
+                if (Item.Primary)
+                    accentHue.BindValueChanged(_ => fill.Colour = ScosuMenuStyle.PRIMARY, true);
             }
 
             protected override bool OnHover(HoverEvent e)

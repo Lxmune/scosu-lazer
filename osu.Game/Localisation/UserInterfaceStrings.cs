@@ -40,6 +40,16 @@ namespace osu.Game.Localisation
         public static LocalisableString HoldToConfirmActivationTime => new TranslatableString(getKey(@"hold_to_confirm_activation_time"), @"Hold-to-confirm activation time");
 
         /// <summary>
+        /// "Accent colour"
+        /// </summary>
+        public static LocalisableString AccentColour => new TranslatableString(getKey(@"accent_colour"), @"Accent colour");
+
+        /// <summary>
+        /// "Customises the client's accent hue across menus and UI controls."
+        /// </summary>
+        public static LocalisableString AccentColourDescription => new TranslatableString(getKey(@"accent_colour_description"), @"Customises the client's accent hue across menus and UI controls.");
+
+        /// <summary>
         /// "Main Menu"
         /// </summary>
         public static LocalisableString MainMenuHeader => new TranslatableString(getKey(@"main_menu_header"), @"Main Menu");

@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -19,8 +20,24 @@ namespace osu.Game.Screens.Menu
         private const float slide_distance = 40;
         private const float slide_duration = 500;
 
+        private Box? glassBox;
         private Container? hoverOverlay;
         private Box? pressFlash;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            accentHue.BindValueChanged(_ =>
+            {
+                if (glassBox != null)
+                    glassBox.Colour = ScosuMenuStyle.GLASS;
+
+                if (hoverOverlay != null)
+                    hoverOverlay.BorderColour = ScosuMenuStyle.VIOLET.Opacity(0.4f);
+            }, true);
+        }
 
         /// <summary>
         /// The card's rounded surface; backdrops (a graph, a picture) go in it so they are clipped to its corners.
@@ -41,7 +58,7 @@ namespace osu.Game.Screens.Menu
                 CornerExponent = 2.5f,
                 BorderThickness = 1.5f,
                 BorderColour = ScosuMenuStyle.OUTLINE,
-                Child = new Box
+                Child = glassBox = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = ScosuMenuStyle.GLASS,

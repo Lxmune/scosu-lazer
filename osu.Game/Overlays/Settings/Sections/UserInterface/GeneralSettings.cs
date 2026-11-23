@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
@@ -20,6 +20,15 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
         {
             Children = new Drawable[]
             {
+                new SettingsItemV2(new FormAccentHue
+                {
+                    Caption = UserInterfaceStrings.AccentColour,
+                    HintText = UserInterfaceStrings.AccentColourDescription,
+                    Current = config.GetBindable<int>(OsuSetting.AccentHue),
+                })
+                {
+                    Keywords = [@"accent", @"colour", @"color", @"theme", @"hue", @"violet"],
+                },
                 new SettingsItemV2(new FormCheckBox
                 {
                     Caption = UserInterfaceStrings.CursorRotation,
