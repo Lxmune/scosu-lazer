@@ -5,12 +5,14 @@
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Toolbar
@@ -21,6 +23,7 @@ namespace osu.Game.Overlays.Toolbar
         private OsuSpriteText gameTime;
 
         private FillFlowContainer runningText;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private bool showRuntime = true;
 
@@ -89,6 +92,7 @@ namespace osu.Game.Overlays.Toolbar
                 },
             };
 
+            accentHue.BindValueChanged(_ => runningText.Colour = colours.PinkLight, true);
             updateMetrics();
         }
 

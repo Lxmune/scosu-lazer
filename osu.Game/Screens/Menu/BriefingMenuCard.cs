@@ -65,8 +65,10 @@ namespace osu.Game.Screens.Menu
         private OsuGame? game { get; set; }
 
         private readonly IBindable<APIState> apiState = new Bindable<APIState>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private GetBriefingRequest? request;
+        private OsuSpriteText? eyebrowText;
 
         /// <summary>
         /// Where clicking the card goes (the appeal or standing page), or null to just hide it.
@@ -96,6 +98,11 @@ namespace osu.Game.Screens.Menu
             // The API's state changes on its own thread.
             apiState.BindTo(api.State);
             apiState.BindValueChanged(_ => Schedule(fetch));
+            accentHue.BindValueChanged(_ =>
+            {
+                if (eyebrowText != null)
+                    eyebrowText.Colour = ScosuMenuStyle.VIOLET;
+            });
             ruleset.BindValueChanged(_ => fetch(), true);
         }
 
@@ -203,7 +210,7 @@ namespace osu.Game.Screens.Menu
                     Padding = new MarginPadding(ScosuMenuStyle.CARD_PADDING),
                     Children = new Drawable[]
                     {
-                        new OsuSpriteText
+                        eyebrowText = new OsuSpriteText
                         {
                             Text = ScosuDailyStrings.SinceLastTime.ToUpper(),
                             Font = ScosuMenuStyle.Eyebrow,

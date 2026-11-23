@@ -64,6 +64,12 @@ namespace osu.Game.Screens.Menu.Hub
             profile.User.BindValueChanged(_ => refresh());
         }
 
+        protected override void OnAccentHueChanged()
+        {
+            if (IsLoaded)
+                refresh();
+        }
+
         private void refresh()
         {
             if (summary.Value is not APIScoreSummary s)

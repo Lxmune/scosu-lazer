@@ -21,6 +21,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 using Vector2 = osuTK.Vector2;
 
@@ -144,6 +145,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
         private readonly Bindable<Language> currentLanguage = new Bindable<Language>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public bool TakeFocus() => GetContainingFocusManager()?.ChangeFocus(TextBox) == true;
 
@@ -304,6 +306,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
             currentLanguage.BindValueChanged(_ => Schedule(updateValueDisplay));
             currentNumberInstantaneous.BindDisabledChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState());
             currentNumberInstantaneous.BindValueChanged(e =>
             {
                 if (!TransferValueOnCommit)
@@ -467,6 +470,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             [Resolved]
             private OverlayColourProvider colourProvider { get; set; } = null!;
 
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             [BackgroundDependencyLoader]
             private void load()
             {
@@ -526,7 +531,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             {
                 base.LoadComplete();
 
-                Current.BindDisabledChanged(_ => updateState(), true);
+                Current.BindDisabledChanged(_ => updateState());
+                accentHue.BindValueChanged(_ => updateState(), true);
 
                 Current.DefaultChanged += _ => updateDefaultValue();
                 updateDefaultValue();

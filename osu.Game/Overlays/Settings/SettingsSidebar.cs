@@ -1,8 +1,9 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -13,6 +14,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Settings
@@ -27,6 +29,8 @@ namespace osu.Game.Overlays.Settings
         protected override bool ExpandOnHover => false;
 
         private readonly bool showBackButton;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
 
         public SettingsSidebar(bool showBackButton)
             : base(CONTRACTED_WIDTH, EXPANDED_WIDTH)
@@ -38,12 +42,14 @@ namespace osu.Game.Overlays.Settings
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colourProvider)
         {
-            AddInternal(new Box
+            AddInternal(background = new Box
             {
                 Colour = colourProvider.Background5,
                 RelativeSizeAxes = Axes.Both,
                 Depth = float.MaxValue
             });
+
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background5, true);
 
             if (showBackButton)
             {

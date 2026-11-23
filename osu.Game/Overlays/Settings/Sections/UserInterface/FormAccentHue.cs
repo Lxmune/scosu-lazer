@@ -47,6 +47,7 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
         public LocalisableString HintText { get; init; }
 
         private FormControlBackground background = null!;
+        private FormFieldCaption captionText = null!;
         private Box swatchFill = null!;
         private OsuSpriteText valueLabel = null!;
         private readonly List<PresetSwatch> presetSwatches = new List<PresetSwatch>();
@@ -97,10 +98,11 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
                             AutoSizeAxes = Axes.Y,
                             Children = new Drawable[]
                             {
-                                new FormFieldCaption
+                                captionText = new FormFieldCaption
                                 {
                                     Caption = Caption,
                                     TooltipText = HintText,
+                                    Colour = colourProvider.Content2,
                                 },
                                 new FillFlowContainer
                                 {
@@ -170,6 +172,8 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
             valueLabel.Text = wrapped == ScosuMenuStyle.DEFAULT_HUE
                 ? $@"Default ({wrapped}°)"
                 : $@"{wrapped}°";
+            valueLabel.Colour = colourProvider.Content2;
+            captionText.Colour = current.Disabled ? colourProvider.Background1 : colourProvider.Content2;
 
             foreach (var swatch in presetSwatches)
                 swatch.Selected = swatch.Hue == wrapped;

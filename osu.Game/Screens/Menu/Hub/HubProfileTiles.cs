@@ -70,6 +70,12 @@ namespace osu.Game.Screens.Menu.Hub
             Refresh();
         }
 
+        protected override void OnAccentHueChanged()
+        {
+            if (IsLoaded)
+                Refresh();
+        }
+
         /// <summary>
         /// Calls <see cref="Refresh"/> whenever what the tile shows changes.
         /// </summary>
@@ -465,7 +471,7 @@ namespace osu.Game.Screens.Menu.Hub
                 Colour = ScosuMenuStyle.TEXT_DIM,
             });
 
-            string value = score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : score.TotalScore.ToString(@"N0");
+            string value = !Api.Endpoints.RanksByStableScore && score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : score.TotalScore.ToString(@"N0");
             string mods = score.Mods.Length > 0 ? @" · " + string.Join(@",", score.Mods.Select(m => m.Acronym)) : string.Empty;
 
             Body.Add(new TruncatingSpriteText
@@ -590,7 +596,7 @@ namespace osu.Game.Screens.Menu.Hub
             }
 
             [BackgroundDependencyLoader]
-            private void load()
+            private void load(IAPIProvider api)
             {
                 var beatmap = score.Beatmap;
                 var set = beatmap?.BeatmapSet;
@@ -604,7 +610,7 @@ namespace osu.Game.Screens.Menu.Hub
                 if (score.Mods.Length > 0)
                     details.Add(string.Join(@",", score.Mods.Select(m => m.Acronym)));
 
-                string value = score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : ScosuMenuFormatting.CompactScore(score.TotalScore);
+                string value = !api.Endpoints.RanksByStableScore && score.PP is double pp && pp > 0 ? $@"{pp:N0}pp" : ScosuMenuFormatting.CompactScore(score.TotalScore);
 
                 Masking = true;
                 CornerRadius = 8;

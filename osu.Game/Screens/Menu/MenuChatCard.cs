@@ -40,9 +40,12 @@ namespace osu.Game.Screens.Menu
         private ChatOverlay? chatOverlay { get; set; }
 
         private readonly IBindableList<Channel> joinedChannels = new BindableList<Channel>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private MenuChatDisplay chat = null!;
         private Container content = null!;
+        private Box background = null!;
+        private OsuSpriteText headerText = null!;
 
         [BackgroundDependencyLoader]
         private void load()
@@ -61,7 +64,7 @@ namespace osu.Game.Screens.Menu
                 BorderColour = ScosuMenuStyle.OUTLINE,
                 Children = new Drawable[]
                 {
-                    new Box
+                    background = new Box
                     {
                         RelativeSizeAxes = Axes.Both,
                         Colour = ScosuMenuStyle.GLASS,
@@ -73,7 +76,7 @@ namespace osu.Game.Screens.Menu
                         Padding = new MarginPadding { Left = 12, Right = 4 },
                         Children = new Drawable[]
                         {
-                            new OsuSpriteText
+                            headerText = new OsuSpriteText
                             {
                                 Anchor = Anchor.CentreLeft,
                                 Origin = Anchor.CentreLeft,
@@ -109,6 +112,12 @@ namespace osu.Game.Screens.Menu
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            accentHue.BindValueChanged(_ =>
+            {
+                background.Colour = ScosuMenuStyle.GLASS;
+                headerText.Colour = ScosuMenuStyle.VIOLET;
+            }, true);
 
             if (channelManager == null)
                 return;

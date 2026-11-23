@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -10,6 +10,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -18,6 +19,8 @@ namespace osu.Game.Screens.Footer
     public partial class ScreenBackButton : ShearedButton
     {
         public const float BUTTON_WIDTH = 240;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public sealed override bool ReceivePositionalInputAt(Vector2 screenSpacePos)
         {
@@ -33,7 +36,7 @@ namespace osu.Game.Screens.Footer
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(OsuColour colours)
         {
             Width = BUTTON_WIDTH;
 
@@ -63,10 +66,12 @@ namespace osu.Game.Screens.Footer
                 }
             };
 
-            // scosu: violet like the rest of the client's accent (see OsuColour.Pink).
-            DarkerColour = Color4Extensions.FromHex("#7856CE");
-            LighterColour = Color4Extensions.FromHex("#A88BF5");
             TextColour = Color4.White;
+            accentHue.BindValueChanged(_ =>
+            {
+                DarkerColour = colours.Pink;
+                LighterColour = colours.PinkLight;
+            }, true);
         }
     }
 }

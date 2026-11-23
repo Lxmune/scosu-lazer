@@ -61,6 +61,12 @@ namespace osu.Game.Screens.Menu.Hub
             reports.BindValueChanged(_ => refresh(), true);
         }
 
+        protected override void OnAccentHueChanged()
+        {
+            if (IsLoaded)
+                refresh();
+        }
+
         private void refresh()
         {
             if (reports.Value is not IReadOnlyList<APIWeeklyReport> list)

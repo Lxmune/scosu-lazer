@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -8,6 +8,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
@@ -20,6 +21,7 @@ using osu.Framework.Utils;
 using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Graphics.UserInterface
@@ -80,17 +82,25 @@ namespace osu.Game.Graphics.UserInterface
             Current.DisabledChanged += disabled => { Alpha = disabled ? 0.3f : 1; };
         }
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
         [BackgroundDependencyLoader(true)]
         private void load(OverlayColourProvider? colourProvider, OsuColour colour, AudioManager audio)
         {
-            BackgroundUnfocused = colourProvider?.Background5 ?? Color4.Black.Opacity(0.5f);
-            BackgroundFocused = colourProvider?.Background4 ?? OsuColour.Gray(0.3f).Opacity(0.8f);
-            BackgroundCommit = BorderColour = colourProvider?.Highlight1 ?? colour.Yellow;
-            selectionColour = colourProvider?.Background1 ?? new Color4(249, 90, 255, 255);
+            accentHue.BindValueChanged(_ =>
+            {
+                if (BackgroundUnfocused != Color4.Transparent)
+                    BackgroundUnfocused = colourProvider?.Background5 ?? Color4.Black.Opacity(0.5f);
+                if (BackgroundFocused != Color4.Transparent)
+                    BackgroundFocused = colourProvider?.Background4 ?? OsuColour.Gray(0.3f).Opacity(0.8f);
+                if (BackgroundCommit != Color4.Transparent)
+                    BackgroundCommit = colourProvider?.Highlight1 ?? colour.Yellow;
 
-            caret?.SelectionColour = selectionColour;
-
-            Placeholder.Colour = colourProvider?.Foreground1 ?? new Color4(180, 180, 180, 255);
+                BorderColour = colourProvider?.Highlight1 ?? colour.Yellow;
+                selectionColour = colourProvider?.Background1 ?? new Color4(249, 90, 255, 255);
+                caret?.SelectionColour = selectionColour;
+                Placeholder.Colour = colourProvider?.Foreground1 ?? new Color4(180, 180, 180, 255);
+            }, true);
 
             // Note that `KeyBindingRow` uses similar logic for input feedback, so remember to update there if changing here.
             var textAddedSamples = new Sample?[4];

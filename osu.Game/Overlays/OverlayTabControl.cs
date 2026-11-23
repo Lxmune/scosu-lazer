@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -6,6 +6,7 @@
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
@@ -13,6 +14,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -21,6 +23,7 @@ namespace osu.Game.Overlays
     public abstract partial class OverlayTabControl<T> : OsuTabControl<T>
     {
         private readonly Box bar;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected float BarHeight
         {
@@ -53,7 +56,7 @@ namespace osu.Game.Overlays
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colourProvider)
         {
-            AccentColour = colourProvider.Highlight1;
+            accentHue.BindValueChanged(_ => AccentColour = colourProvider.Highlight1, true);
         }
 
         protected override Dropdown<T> CreateDropdown() => null;

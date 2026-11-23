@@ -221,7 +221,16 @@ namespace osu.Game.Screens.Menu.Hub
         {
             base.LoadComplete();
 
-            accentHue.BindValueChanged(_ => hoverOutline.BorderColour = ScosuMenuStyle.VIOLET, true);
+            hoverOutline.BorderColour = ScosuMenuStyle.VIOLET;
+            accentHue.BindValueChanged(_ =>
+            {
+                hoverOutline.BorderColour = ScosuMenuStyle.VIOLET;
+                OnAccentHueChanged();
+            });
+        }
+
+        protected virtual void OnAccentHueChanged()
+        {
         }
 
         private const float base_fill = 0.045f;

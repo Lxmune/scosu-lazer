@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -21,6 +21,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Settings;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 
 namespace osu.Game.Overlays
@@ -74,6 +75,9 @@ namespace osu.Game.Overlays
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box backgroundBox;
+
         protected SettingsPanel(bool showBackButton)
         {
             this.showBackButton = showBackButton;
@@ -91,7 +95,7 @@ namespace osu.Game.Overlays
                 RelativeSizeAxes = Axes.Y,
                 Children = new Drawable[]
                 {
-                    new Box
+                    backgroundBox = new Box
                     {
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.TopRight,
@@ -106,6 +110,8 @@ namespace osu.Game.Overlays
                     }
                 }
             };
+
+            accentHue.BindValueChanged(_ => backgroundBox.Colour = colourProvider.Background4, true);
 
             Add(new PopoverContainer
             {
@@ -312,6 +318,8 @@ namespace osu.Game.Overlays
                     Direction = FillDirection.Vertical,
                 };
 
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             [BackgroundDependencyLoader]
             private void load(OverlayColourProvider colourProvider)
             {
@@ -320,6 +328,8 @@ namespace osu.Game.Overlays
                     Colour = colourProvider.Background5,
                     RelativeSizeAxes = Axes.Both
                 };
+
+                accentHue.BindValueChanged(_ => HeaderBackground.Colour = colourProvider.Background5, true);
 
                 SearchContainer.FilterCompleted += InvalidateScrollPosition;
             }

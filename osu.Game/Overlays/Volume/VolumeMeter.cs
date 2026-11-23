@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -41,11 +41,12 @@ namespace osu.Game.Overlays.Volume
 
         protected readonly float CircleSize;
 
-        private readonly Color4 meterColour;
+        private Color4 meterColour;
         private readonly LocalisableString name;
 
         private OsuSpriteText text;
         private BufferedContainer maxGlow;
+        private BufferedContainer volumeCircleGlowContainer;
 
         private Container selectedGlowContainer;
 
@@ -167,7 +168,7 @@ namespace osu.Game.Overlays.Volume
                                     Size = new Vector2(progress_start_radius + progress_size / 1.5f),
                                     Rotation = 180,
                                     Padding = new MarginPadding(-Blur.KernelSize(blur_amount)),
-                                    Child = (volumeCircleGlow = new CircularProgress
+                                    Child = volumeCircleGlowContainer = (volumeCircleGlow = new CircularProgress
                                     {
                                         RelativeSizeAxes = Axes.Both,
                                         InnerRadius = progress_size * 0.8f,
@@ -245,6 +246,22 @@ namespace osu.Game.Overlays.Volume
             Bindable.BindValueChanged(volume => { this.TransformTo(nameof(DisplayVolume), volume.NewValue, 400, Easing.OutQuint); }, true);
 
             bgProgress.Progress = 0.75f;
+        }
+
+        public void SetMeterColour(Color4 colour)
+        {
+            meterColour = colour;
+
+            if (!IsLoaded)
+                return;
+
+            volumeCircleGlowContainer.EffectColour = meterColour;
+            var edge = selectedGlowContainer.EdgeEffect;
+            edge.Colour = meterColour.Opacity(0.1f);
+            selectedGlowContainer.EdgeEffect = edge;
+
+            if (displayVolume >= 0.995f)
+                maxGlow.EffectColour = meterColour.Opacity(2f);
         }
 
         private int? displayVolumeInt;

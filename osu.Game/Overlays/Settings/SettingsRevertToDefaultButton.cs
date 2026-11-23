@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
@@ -9,6 +10,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers;
 using osu.Game.Localisation;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Settings
@@ -21,6 +23,8 @@ namespace osu.Game.Overlays.Settings
 
         private Box background = null!;
         private SpriteIcon spriteIcon = null!;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
@@ -62,7 +66,8 @@ namespace osu.Game.Overlays.Settings
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            Enabled.BindValueChanged(_ => updateDisplay(), true);
+            Enabled.BindValueChanged(_ => updateDisplay());
+            accentHue.BindValueChanged(_ => updateDisplay(), true);
         }
 
         public override LocalisableString TooltipText => CommonStrings.RevertToDefault;

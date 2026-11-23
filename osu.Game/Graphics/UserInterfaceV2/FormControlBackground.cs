@@ -3,6 +3,7 @@
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -10,6 +11,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 
 namespace osu.Game.Graphics.UserInterfaceV2
@@ -33,6 +35,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private readonly Box box;
         private readonly Box flashLayer;
@@ -70,7 +74,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
         {
             base.LoadComplete();
 
-            updateStyle();
+            accentHue.BindValueChanged(_ => updateStyle(), true);
             FinishTransforms(true);
         }
 

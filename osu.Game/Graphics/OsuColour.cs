@@ -321,6 +321,16 @@ namespace osu.Game.Graphics
         private static readonly Color4 default_pink = Color4Extensions.FromHex(@"7856ce");
         private static readonly Color4 default_pink_dark = Color4Extensions.FromHex(@"6448b8");
         private static readonly Color4 default_pink_darker = Color4Extensions.FromHex(@"4e3496");
+        private static readonly Color4 default_pink_0 = Color4Extensions.FromHex(@"ff99c7");
+        private static readonly Color4 default_pink_1 = Color4Extensions.FromHex(@"ff66ab");
+        private static readonly Color4 default_pink_2 = Color4Extensions.FromHex(@"eb4791");
+        private static readonly Color4 default_pink_3 = Color4Extensions.FromHex(@"cc3378");
+        private static readonly Color4 default_pink_4 = Color4Extensions.FromHex(@"6b2e49");
+        private static readonly Color4 default_grey_violet_lighter = Color4Extensions.FromHex(@"ebb8fe");
+        private static readonly Color4 default_grey_violet_light = Color4Extensions.FromHex(@"685370");
+        private static readonly Color4 default_grey_violet = Color4Extensions.FromHex(@"46334d");
+        private static readonly Color4 default_grey_violet_dark = Color4Extensions.FromHex(@"2c2230");
+        private static readonly Color4 default_grey_violet_darker = Color4Extensions.FromHex(@"201823");
 
         public Color4 PinkLighter { get; private set; } = default_pink_lighter;
         public Color4 PinkLight { get; private set; } = default_pink_light;
@@ -339,6 +349,16 @@ namespace osu.Game.Graphics
                 Pink = default_pink;
                 PinkDark = default_pink_dark;
                 PinkDarker = default_pink_darker;
+                Pink0 = default_pink_0;
+                Pink1 = default_pink_1;
+                Pink2 = default_pink_2;
+                Pink3 = default_pink_3;
+                Pink4 = default_pink_4;
+                GreyVioletLighter = default_grey_violet_lighter;
+                GreyVioletLight = default_grey_violet_light;
+                GreyViolet = default_grey_violet;
+                GreyVioletDark = default_grey_violet_dark;
+                GreyVioletDarker = default_grey_violet_darker;
                 return;
             }
 
@@ -348,6 +368,16 @@ namespace osu.Game.Graphics
             Pink = Framework.Graphics.Colour4.FromHSL(h, 0.55f, 0.57f);
             PinkDark = Framework.Graphics.Colour4.FromHSL(h, 0.45f, 0.50f);
             PinkDarker = Framework.Graphics.Colour4.FromHSL(h, 0.48f, 0.40f);
+            Pink0 = Framework.Graphics.Colour4.FromHSL(h, 1.0f, 0.80f);
+            Pink1 = Framework.Graphics.Colour4.FromHSL(h, 1.0f, 0.70f);
+            Pink2 = Framework.Graphics.Colour4.FromHSL(h, 0.80f, 0.60f);
+            Pink3 = Framework.Graphics.Colour4.FromHSL(h, 0.60f, 0.50f);
+            Pink4 = Framework.Graphics.Colour4.FromHSL(h, 0.40f, 0.30f);
+            GreyVioletLighter = Framework.Graphics.Colour4.FromHSL(h, 0.96f, 0.86f);
+            GreyVioletLight = Framework.Graphics.Colour4.FromHSL(h, 0.15f, 0.38f);
+            GreyViolet = Framework.Graphics.Colour4.FromHSL(h, 0.20f, 0.25f);
+            GreyVioletDark = Framework.Graphics.Colour4.FromHSL(h, 0.17f, 0.16f);
+            GreyVioletDarker = Framework.Graphics.Colour4.FromHSL(h, 0.19f, 0.12f);
         }
 
         public readonly Color4 BlueLighter = Color4Extensions.FromHex(@"ddffff");
@@ -397,11 +427,11 @@ namespace osu.Game.Graphics
         public readonly Color4 GreyLimeDarker = Color4Extensions.FromHex(@"2e302b");
 
         public readonly Color4 Violet = Color4Extensions.FromHex(@"bf04ff");
-        public readonly Color4 GreyVioletLighter = Color4Extensions.FromHex(@"ebb8fe");
-        public readonly Color4 GreyVioletLight = Color4Extensions.FromHex(@"685370");
-        public readonly Color4 GreyViolet = Color4Extensions.FromHex(@"46334d");
-        public readonly Color4 GreyVioletDark = Color4Extensions.FromHex(@"2c2230");
-        public readonly Color4 GreyVioletDarker = Color4Extensions.FromHex(@"201823");
+        public Color4 GreyVioletLighter { get; private set; } = default_grey_violet_lighter;
+        public Color4 GreyVioletLight { get; private set; } = default_grey_violet_light;
+        public Color4 GreyViolet { get; private set; } = default_grey_violet;
+        public Color4 GreyVioletDark { get; private set; } = default_grey_violet_dark;
+        public Color4 GreyVioletDarker { get; private set; } = default_grey_violet_darker;
 
         public readonly Color4 Carmine = Color4Extensions.FromHex(@"ff0542");
         public readonly Color4 GreyCarmineLighter = Color4Extensions.FromHex(@"deaab4");
@@ -436,11 +466,11 @@ namespace osu.Game.Graphics
         // If the colour in question is supposed to always match the view in which it is displayed theme-wise, use `OverlayColourProvider`.
         // If the colour usage is special and in general differs from the surrounding view in choice of hue, use the `OsuColour` constants.
 
-        public readonly Color4 Pink0 = Color4Extensions.FromHex(@"ff99c7");
-        public readonly Color4 Pink1 = Color4Extensions.FromHex(@"ff66ab");
-        public readonly Color4 Pink2 = Color4Extensions.FromHex(@"eb4791");
-        public readonly Color4 Pink3 = Color4Extensions.FromHex(@"cc3378");
-        public readonly Color4 Pink4 = Color4Extensions.FromHex(@"6b2e49");
+        public Color4 Pink0 { get; private set; } = default_pink_0;
+        public Color4 Pink1 { get; private set; } = default_pink_1;
+        public Color4 Pink2 { get; private set; } = default_pink_2;
+        public Color4 Pink3 { get; private set; } = default_pink_3;
+        public Color4 Pink4 { get; private set; } = default_pink_4;
 
         public readonly Color4 Purple0 = Color4Extensions.FromHex(@"b299ff");
         public readonly Color4 Purple1 = Color4Extensions.FromHex(@"8c66ff");

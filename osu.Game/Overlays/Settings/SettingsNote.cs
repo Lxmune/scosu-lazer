@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 
 namespace osu.Game.Overlays.Settings
@@ -16,6 +17,8 @@ namespace osu.Game.Overlays.Settings
     public sealed partial class SettingsNote : CompositeDrawable
     {
         public readonly Bindable<Data?> Current = new Bindable<Data?>();
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private Box background = null!;
         private OsuTextFlowContainer text = null!;
@@ -67,6 +70,11 @@ namespace osu.Game.Overlays.Settings
             base.LoadComplete();
 
             Current.BindValueChanged(_ => updateDisplay(), true);
+            accentHue.BindValueChanged(_ =>
+            {
+                if (Current.Value != null)
+                    updateDisplay();
+            });
             FinishTransforms(true);
         }
 

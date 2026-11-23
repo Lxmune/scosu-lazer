@@ -52,6 +52,7 @@ namespace osu.Game.Screens.Menu
 
         private readonly IBindable<IReadOnlyList<APIWeeklyReport>?> reports = new Bindable<IReadOnlyList<APIWeeklyReport>?>();
         private readonly Bindable<string> seenWeek = new Bindable<string>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private APIWeeklyReport? shown;
 
@@ -80,6 +81,11 @@ namespace osu.Game.Screens.Menu
             reports.BindTo(provider.Reports);
             reports.BindValueChanged(_ => Scheduler.AddOnce(update));
             seenWeek.BindValueChanged(_ => Scheduler.AddOnce(update));
+            accentHue.BindValueChanged(_ =>
+            {
+                shown = null;
+                Scheduler.AddOnce(update);
+            });
             update();
         }
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Linq;
@@ -19,6 +19,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Volume;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -38,6 +39,7 @@ namespace osu.Game.Overlays
 
         // ReSharper disable once NotAccessedField.Local
         private Bindable<double> volumeGameplay = null!;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private SelectionCycleFillFlowContainer<VolumeMeter> volumeMeters = null!;
 
@@ -88,6 +90,8 @@ namespace osu.Game.Overlays
             volumeMeterEffect.Bindable.BindTo(audio.VolumeSample);
             volumeMeterMusic.Bindable.BindTo(audio.VolumeTrack);
             volumeMeterHitsound.Bindable.BindTo(volumeGameplay = config.GetBindable<double>(OsuSetting.HitsoundVolume));
+
+            accentHue.BindValueChanged(_ => volumeMeterMaster.SetMeterColour(colours.PinkDarker), true);
         }
 
         protected override void LoadComplete()

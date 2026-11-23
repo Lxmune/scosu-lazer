@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -13,6 +13,7 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Volume
@@ -20,6 +21,7 @@ namespace osu.Game.Overlays.Volume
     public partial class MuteButton : OsuButton, IHasCurrentValue<bool>
     {
         private readonly Bindable<bool> current = new Bindable<bool>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public Bindable<bool> Current
         {
@@ -85,6 +87,13 @@ namespace osu.Game.Overlays.Volume
                 icon.Icon = muted.NewValue ? FontAwesome.Solid.VolumeMute : FontAwesome.Solid.VolumeUp;
                 icon.Size = new Vector2(muted.NewValue ? 12 : 16);
                 icon.Margin = new MarginPadding { Right = muted.NewValue ? 2 : 0 };
+            }, true);
+
+            accentHue.BindValueChanged(_ =>
+            {
+                hoveredBorderColour = colours.PinkLight;
+                if (IsHovered)
+                    border.TransformTo(nameof(BorderColour), hoveredBorderColour, 200, Easing.OutQuint);
             }, true);
         }
 

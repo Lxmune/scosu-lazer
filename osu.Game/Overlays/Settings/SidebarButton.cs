@@ -1,10 +1,12 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays.Settings
 {
@@ -14,6 +16,8 @@ namespace osu.Game.Overlays.Settings
 
         [Resolved]
         protected OverlayColourProvider ColourProvider { get; private set; } = null!;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected SidebarButton(HoverSampleSet? hoverSounds = HoverSampleSet.ButtonSidebar)
             : base(hoverSounds)
@@ -30,7 +34,12 @@ namespace osu.Game.Overlays.Settings
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            UpdateState();
+            accentHue.BindValueChanged(_ =>
+            {
+                BackgroundColour = ColourProvider.Background5;
+                Hover.Colour = ColourProvider.Light4;
+                UpdateState();
+            }, true);
             FinishTransforms(true);
         }
 

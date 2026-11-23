@@ -47,7 +47,7 @@ namespace osu.Game.Overlays
                     return 200;
 
                 case OverlayColourScheme.Purple:
-                    return 255;
+                    return Screens.Menu.ScosuMenuStyle.AccentHue.Value;
 
                 case OverlayColourScheme.Plum:
                     return 320;

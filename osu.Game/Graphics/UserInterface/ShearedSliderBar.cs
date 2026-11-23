@@ -5,6 +5,7 @@ using System;
 using System.Numerics;
 using osuTK.Graphics;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -12,6 +13,7 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using Vector2 = osuTK.Vector2;
 
 namespace osu.Game.Graphics.UserInterface
@@ -27,6 +29,7 @@ namespace osu.Game.Graphics.UserInterface
         private readonly HoverClickSounds hoverClickSounds;
 
         private readonly Container mainContent;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected virtual bool FocusIndicator => true;
 
@@ -118,8 +121,11 @@ namespace osu.Game.Graphics.UserInterface
         [BackgroundDependencyLoader(true)]
         private void load(OverlayColourProvider? colourProvider, OsuColour colours)
         {
-            AccentColour = colourProvider?.Highlight1 ?? colours.Pink;
-            BackgroundColour = colourProvider?.Background5 ?? colours.PinkDarker.Darken(1);
+            accentHue.BindValueChanged(_ =>
+            {
+                AccentColour = colourProvider?.Highlight1 ?? colours.Pink;
+                BackgroundColour = colourProvider?.Background5 ?? colours.PinkDarker.Darken(1);
+            }, true);
         }
 
         protected override void Update()

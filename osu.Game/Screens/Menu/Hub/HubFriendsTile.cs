@@ -68,6 +68,12 @@ namespace osu.Game.Screens.Menu.Hub
             refresh();
         }
 
+        protected override void OnAccentHueChanged()
+        {
+            if (IsLoaded)
+                refresh();
+        }
+
         private void refresh()
         {
             if (!api.IsLoggedIn)

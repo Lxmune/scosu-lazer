@@ -23,6 +23,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Music;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -75,6 +76,7 @@ namespace osu.Game.Overlays
 
         private Bindable<bool> allowTrackControl = null!;
         private readonly BindableBool shuffle = new BindableBool(true);
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private static readonly Color4 inactive_colour = new Color4(1f, 1f, 1f, 0.65f);
 
@@ -312,6 +314,17 @@ namespace osu.Game.Overlays
             shuffle.BindTo(musicController.Shuffle);
             shuffle.BindValueChanged(s => shuffleButton.FadeColour(s.NewValue ? colours.PinkLight : inactive_colour, 200, Easing.OutQuint), true);
 
+            accentHue.BindValueChanged(_ =>
+            {
+                elapsedText.Colour = colours.PinkLighter;
+                totalText.Colour = colours.PinkLight;
+                progressBar.FillColour = progressBar.IsHovered ? colours.Violet : colours.PinkLight;
+                progressBar.BackgroundColour = colours.PinkDarker.Opacity(0.6f);
+                shuffleButton.Colour = shuffle.Value ? colours.PinkLight : inactive_colour;
+                if (playlist != null)
+                    playlistButton.Colour = playlist.State.Value == Visibility.Visible ? colours.PinkLight : inactive_colour;
+            }, true);
+
             musicController.TrackChanged += trackChanged;
             trackChanged(beatmap.Value);
         }
@@ -488,6 +501,8 @@ namespace osu.Game.Overlays
 
         private partial class MusicIconButton : IconButton
         {
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             public MusicIconButton()
             {
                 AutoSizeAxes = Axes.Both;
@@ -496,8 +511,11 @@ namespace osu.Game.Overlays
             [BackgroundDependencyLoader]
             private void load(OsuColour colours)
             {
-                HoverColour = colours.Pink.Opacity(0.55f);
-                FlashColour = colours.PinkLighter;
+                accentHue.BindValueChanged(_ =>
+                {
+                    HoverColour = colours.Pink.Opacity(0.55f);
+                    FlashColour = colours.PinkLighter;
+                }, true);
             }
 
             protected override void LoadComplete()

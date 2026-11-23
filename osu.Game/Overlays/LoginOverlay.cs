@@ -1,7 +1,8 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Effects;
@@ -11,12 +12,15 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Overlays.Login;
 using osu.Game.Overlays.Settings;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays
 {
     public partial class LoginOverlay : OsuFocusedOverlayContainer
     {
         private LoginPanel panel = null!;
+        private Box background = null!;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private const float transition_time = 400;
 
@@ -49,7 +53,7 @@ namespace osu.Game.Overlays
                     AutoSizeAxes = Axes.Y,
                     Children = new Drawable[]
                     {
-                        new Box
+                        background = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = colourProvider.Background4,
@@ -70,6 +74,8 @@ namespace osu.Game.Overlays
                     }
                 }
             };
+
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background4, true);
         }
 
         protected override void PopIn()

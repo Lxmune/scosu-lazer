@@ -6,6 +6,7 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -19,6 +20,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Input.Bindings;
 using osu.Game.Overlays;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -60,6 +62,7 @@ namespace osu.Game.Graphics.UserInterface
 
             private Sample? sampleOpen;
             private Sample? sampleClose;
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
             // todo: this uses the same styling as OsuMenu. hopefully we can just use OsuMenu in the future with some refactoring
             public OsuDropdownMenu()
@@ -76,9 +79,12 @@ namespace osu.Game.Graphics.UserInterface
             [BackgroundDependencyLoader(true)]
             private void load(OverlayColourProvider? colourProvider, OsuColour colours, AudioManager audio)
             {
-                BackgroundColour = colourProvider?.Background5 ?? Color4.Black;
-                HoverColour = colourProvider?.Light4 ?? colours.PinkDarker;
-                SelectionColour = colourProvider?.Background3 ?? colours.PinkDarker.Opacity(0.5f);
+                accentHue.BindValueChanged(_ =>
+                {
+                    BackgroundColour = colourProvider?.Background5 ?? Color4.Black;
+                    HoverColour = colourProvider?.Light4 ?? colours.PinkDarker;
+                    SelectionColour = colourProvider?.Background3 ?? colours.PinkDarker.Opacity(0.5f);
+                }, true);
 
                 sampleOpen = audio.Samples.Get(@"UI/dropdown-open");
                 sampleClose = audio.Samples.Get(@"UI/dropdown-close");
@@ -410,6 +416,8 @@ namespace osu.Game.Graphics.UserInterface
             [Resolved]
             private OsuColour colours { get; set; } = null!;
 
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             protected override void LoadComplete()
             {
                 base.LoadComplete();
@@ -419,7 +427,7 @@ namespace osu.Game.Graphics.UserInterface
 
                 SearchBar.State.ValueChanged += _ => updateColour();
                 Enabled.BindValueChanged(_ => updateColour());
-                updateColour();
+                accentHue.BindValueChanged(_ => updateColour(), true);
             }
 
             protected override bool OnHover(HoverEvent e)

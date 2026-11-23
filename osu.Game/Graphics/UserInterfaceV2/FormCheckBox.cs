@@ -11,6 +11,7 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Graphics.UserInterfaceV2
 {
@@ -28,6 +29,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
         public bool ExtendedHeight { get; init; }
 
         private readonly BindableWithCurrent<bool> current = new BindableWithCurrent<bool>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         /// <summary>
         /// Caption describing this control, displayed on top of the controls.
@@ -102,7 +104,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
                 ValueChanged?.Invoke();
             });
-            current.BindDisabledChanged(_ => updateState(), true);
+            current.BindDisabledChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState(), true);
         }
 
         protected override bool OnHover(HoverEvent e)

@@ -27,6 +27,7 @@ using osu.Game.Online.Chat;
 using osu.Game.Overlays.Chat;
 using osu.Game.Overlays.Chat.ChannelList;
 using osu.Game.Overlays.Chat.Listing;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays
 {
@@ -74,6 +75,8 @@ namespace osu.Game.Overlays
 
         private readonly IBindableList<Channel> availableChannels = new BindableList<Channel>();
         private readonly IBindableList<Channel> joinedChannels = new BindableList<Channel>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
 
         public ChatOverlay()
         {
@@ -113,7 +116,7 @@ namespace osu.Game.Overlays
                     Padding = new MarginPadding { Top = top_bar_height },
                     Children = new Drawable[]
                     {
-                        new Box
+                        background = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = colourProvider.Background4,
@@ -176,6 +179,8 @@ namespace osu.Game.Overlays
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background4, true);
 
             config.BindWith(OsuSetting.ChatDisplayHeight, chatHeight);
 

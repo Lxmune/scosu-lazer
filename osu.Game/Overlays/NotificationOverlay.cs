@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -21,6 +21,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 using NotificationsStrings = osu.Game.Localisation.NotificationsStrings;
@@ -52,6 +53,9 @@ namespace osu.Game.Overlays
 
         [Cached]
         private OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos)
         {
@@ -97,7 +101,7 @@ namespace osu.Game.Overlays
                     },
                     Children = new Drawable[]
                     {
-                        new Box
+                        background = new Box
                         {
                             RelativeSizeAxes = Axes.Both,
                             Colour = colourProvider.Background4,
@@ -148,6 +152,8 @@ namespace osu.Game.Overlays
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background4, true);
 
             State.BindValueChanged(_ => updateProcessingMode());
             OverlayActivationMode.BindValueChanged(_ => updateProcessingMode(), true);

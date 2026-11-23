@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -14,6 +14,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Settings
@@ -24,7 +25,9 @@ namespace osu.Game.Overlays.Settings
         protected override Container<Drawable> Content => FlowContent;
 
         private IBindable<SettingsSection> selectedSection;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
+        private Box separator;
         private Box dim;
 
         private const float inactive_alpha = 0.8f;
@@ -88,7 +91,7 @@ namespace osu.Game.Overlays.Settings
         {
             AddRangeInternal(new Drawable[]
             {
-                new Box
+                separator = new Box
                 {
                     Name = "separator",
                     Colour = colourProvider.Background6,
@@ -131,6 +134,12 @@ namespace osu.Game.Overlays.Settings
                     }
                 },
             });
+
+            accentHue.BindValueChanged(_ =>
+            {
+                separator.Colour = colourProvider.Background6;
+                dim.Colour = colourProvider.Background5;
+            }, true);
 
             selectedSection = settingsPanel?.CurrentSection.GetBoundCopy() ?? new Bindable<SettingsSection>(this);
             selectedSection.BindValueChanged(_ => updateContentFade(), true);

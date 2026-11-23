@@ -13,6 +13,7 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Graphics.UserInterface
 {
@@ -26,6 +27,7 @@ namespace osu.Game.Graphics.UserInterface
 
         private readonly Box fill;
         private readonly Container main;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public Nub(float expandedSize = DEFAULT_EXPANDED_SIZE)
         {
@@ -57,10 +59,6 @@ namespace osu.Game.Graphics.UserInterface
         [BackgroundDependencyLoader(true)]
         private void load(OverlayColourProvider? colourProvider, OsuColour colours)
         {
-            AccentColour = colourProvider?.Highlight1 ?? colours.Pink;
-            GlowingAccentColour = colourProvider?.Highlight1.Lighten(0.2f) ?? colours.PinkLighter;
-            GlowColour = colourProvider?.Highlight1 ?? colours.PinkLighter;
-
             main.EdgeEffect = new EdgeEffectParameters
             {
                 Colour = GlowColour.Opacity(0),
@@ -68,6 +66,13 @@ namespace osu.Game.Graphics.UserInterface
                 Radius = 8,
                 Roundness = 4,
             };
+
+            accentHue.BindValueChanged(_ =>
+            {
+                AccentColour = colourProvider?.Highlight1 ?? colours.Pink;
+                GlowingAccentColour = colourProvider?.Highlight1.Lighten(0.2f) ?? colours.PinkLighter;
+                GlowColour = colourProvider?.Highlight1 ?? colours.PinkLighter;
+            }, true);
         }
 
         protected override void LoadComplete()

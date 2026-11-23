@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -10,6 +10,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays.Toolbar
 {
@@ -20,6 +21,7 @@ namespace osu.Game.Overlays.Toolbar
         private OverlayContainer stateContainer;
 
         private readonly Bindable<Visibility> overlayState = new Bindable<Visibility>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public OverlayContainer StateContainer
         {
@@ -57,6 +59,7 @@ namespace osu.Game.Overlays.Toolbar
                 Alpha = 0,
             });
 
+            accentHue.BindValueChanged(_ => stateBackground.Colour = colours.Pink.Opacity(180), true);
             overlayState.ValueChanged += stateChanged;
         }
 

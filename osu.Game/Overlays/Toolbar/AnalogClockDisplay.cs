@@ -5,10 +5,12 @@
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -88,6 +90,9 @@ namespace osu.Game.Overlays.Toolbar
 
         private partial class CentreCircle : CompositeDrawable
         {
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+            private Circle inner;
+
             [BackgroundDependencyLoader]
             private void load(OsuColour colours)
             {
@@ -100,7 +105,7 @@ namespace osu.Game.Overlays.Toolbar
                         Size = new Vector2(hand_thickness),
                         Colour = Color4.White,
                     },
-                    new Circle
+                    inner = new Circle
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
@@ -108,11 +113,16 @@ namespace osu.Game.Overlays.Toolbar
                         Colour = colours.PinkLight,
                     },
                 };
+
+                accentHue.BindValueChanged(_ => inner.Colour = colours.PinkLight, true);
             }
         }
 
         private partial class SecondHand : CompositeDrawable
         {
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+            private Circle hand;
+
             [BackgroundDependencyLoader]
             private void load(OsuColour colours)
             {
@@ -127,12 +137,14 @@ namespace osu.Game.Overlays.Toolbar
 
                 InternalChildren = new Drawable[]
                 {
-                    new Circle
+                    hand = new Circle
                     {
                         Colour = colours.PinkLight,
                         RelativeSizeAxes = Axes.Both,
                     },
                 };
+
+                accentHue.BindValueChanged(_ => hand.Colour = colours.PinkLight, true);
             }
         }
 

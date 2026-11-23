@@ -15,6 +15,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Graphics.UserInterfaceV2
@@ -90,6 +91,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -158,7 +161,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             textBox.Focused.BindValueChanged(_ => updateState());
 
             current.BindValueChanged(_ => ValueChanged?.Invoke());
-            current.BindDisabledChanged(_ => updateState(), true);
+            current.BindDisabledChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState(), true);
         }
 
         protected override bool OnHover(HoverEvent e)

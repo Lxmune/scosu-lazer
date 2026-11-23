@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -68,6 +69,8 @@ namespace osu.Game.Screens.Footer
         // For now it's locked to Blue to match song select (the most prominent usage).
         [Cached]
         private readonly OverlayColourProvider colourProvider = new OverlayColourProvider(OverlayColourScheme.Purple);
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public ScreenFooter(BackReceptor? receptor = null)
         {
@@ -173,6 +176,8 @@ namespace osu.Game.Screens.Footer
                     f.Position = new Vector2(-76, -36);
                 })),
             };
+
+            accentHue.BindValueChanged(_ => updateColourScheme(ActiveOverlay?.ColourProvider.Hue ?? OverlayColourScheme.Purple.GetHue()), true);
         }
 
         private ScheduledDelegate? changeLogoDepthDelegate;

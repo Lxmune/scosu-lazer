@@ -1,7 +1,8 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
@@ -9,6 +10,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Rulesets;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays.Toolbar
 {
@@ -44,6 +46,9 @@ namespace osu.Game.Overlays.Toolbar
             [Resolved]
             private OsuColour colours { get; set; } = null!;
 
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+            private bool active;
+
             public RulesetButton()
             {
                 ButtonContent.Padding = new MarginPadding(PADDING)
@@ -52,12 +57,24 @@ namespace osu.Game.Overlays.Toolbar
                 };
             }
 
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+                accentHue.BindValueChanged(_ => updateColour(), true);
+            }
+
             public bool Active
             {
-                set => Scheduler.AddOnce(() =>
+                set
                 {
-                    IconContainer.Colour = value ? colours.PinkLight : colours.GrayF; // scosu: violet accent (see OsuColour.Pink)
-                });
+                    active = value;
+                    Scheduler.AddOnce(updateColour);
+                }
+            }
+
+            private void updateColour()
+            {
+                IconContainer.Colour = active ? colours.PinkLight : colours.GrayF; // scosu: violet accent (see OsuColour.Pink)
             }
 
             protected override bool OnClick(ClickEvent e)

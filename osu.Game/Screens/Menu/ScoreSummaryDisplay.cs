@@ -45,8 +45,10 @@ namespace osu.Game.Screens.Menu
         private OsuGame? game { get; set; }
 
         private readonly IBindable<APIScoreSummary?> summary = new Bindable<APIScoreSummary?>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private Container content = null!;
+        private OsuSpriteText todayLabel = null!;
         private OsuSpriteText todayScore = null!;
         private OsuSpriteText todayDetails = null!;
         private CornerAreaGraph todayGraph = null!;
@@ -103,7 +105,7 @@ namespace osu.Game.Screens.Menu
                                 Spacing = new Vector2(0, 4),
                                 Children = new Drawable[]
                                 {
-                                    new OsuSpriteText
+                                    todayLabel = new OsuSpriteText
                                     {
                                         Text = ScoreSummaryStrings.Today.ToUpper(),
                                         Font = ScosuMenuStyle.Eyebrow,
@@ -143,6 +145,12 @@ namespace osu.Game.Screens.Menu
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            accentHue.BindValueChanged(_ =>
+            {
+                todayLabel.Colour = ScosuMenuStyle.VIOLET;
+                todayGraph.SetColour(ScosuMenuStyle.VIOLET);
+            }, true);
 
             summary.BindTo(provider.Summary);
             summary.BindValueChanged(s =>

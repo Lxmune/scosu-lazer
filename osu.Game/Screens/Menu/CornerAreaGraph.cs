@@ -40,6 +40,14 @@ namespace osu.Game.Screens.Menu
             AddRange(columns);
         }
 
+        public void SetColour(Color4 colour)
+        {
+            var gradient = ColourInfo.GradientVertical(colour.Opacity(0.04f), colour.Opacity(0.3f));
+
+            foreach (var column in columns)
+                column.Colour = gradient;
+        }
+
         /// <summary>
         /// The values from left to right, linearly interpolated; the graph is as high as the largest of them.
         /// </summary>

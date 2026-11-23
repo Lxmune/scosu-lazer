@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -16,6 +17,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Graphics.UserInterfaceV2
@@ -152,6 +154,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             [Resolved]
             private OverlayColourProvider colourProvider { get; set; } = null!;
 
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             [BackgroundDependencyLoader]
             private void load()
             {
@@ -207,7 +211,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
                 base.LoadComplete();
 
                 Dropdown.Current.BindDisabledChanged(_ => updateState());
-                SearchBar.SearchTerm.BindValueChanged(_ => updateState(), true);
+                SearchBar.SearchTerm.BindValueChanged(_ => updateState());
+                accentHue.BindValueChanged(_ => updateState(), true);
                 Dropdown.Menu.StateChanged += _ =>
                 {
                     updateState();
@@ -289,6 +294,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         private partial class FormDropdownMenu : OsuDropdownMenu
         {
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
             [BackgroundDependencyLoader]
             private void load(OverlayColourProvider colourProvider)
             {
@@ -296,7 +303,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
                 MaskingContainer.BorderThickness = FormControlBackground.BORDER_THICKNESS;
                 MaskingContainer.CornerExponent = FormControlBackground.CORNER_EXPONENT;
-                MaskingContainer.BorderColour = colourProvider.Highlight1;
+                accentHue.BindValueChanged(_ => MaskingContainer.BorderColour = colourProvider.Highlight1, true);
             }
 
             protected override void AnimateOpen()

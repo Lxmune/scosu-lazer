@@ -1,10 +1,12 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 
 namespace osu.Game.Overlays
@@ -33,6 +35,7 @@ namespace osu.Game.Overlays
 
         private readonly Box titleBackground;
         private readonly Container content;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected readonly FillFlowContainer HeaderInfo;
 
@@ -92,7 +95,7 @@ namespace osu.Game.Overlays
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colourProvider)
         {
-            titleBackground.Colour = colourProvider.Dark5;
+            accentHue.BindValueChanged(_ => titleBackground.Colour = colourProvider.Dark5, true);
         }
 
         protected virtual Drawable CreateContent() => Empty();

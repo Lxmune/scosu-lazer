@@ -1,14 +1,16 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osuTK.Graphics;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Input.Events;
 using osu.Framework.Platform;
 using osu.Game.Input.Bindings;
 using osuTK.Input;
 using osu.Framework.Input.Bindings;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Graphics.UserInterface
 {
@@ -50,11 +52,16 @@ namespace osu.Game.Graphics.UserInterface
         [Resolved]
         private GameHost? host { get; set; }
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
         [BackgroundDependencyLoader(true)]
         private void load(OverlayColourProvider? colourProvider)
         {
-            BackgroundUnfocused = colourProvider?.Background5 ?? new Color4(10, 10, 10, 255);
-            BackgroundFocused = colourProvider?.Background5 ?? new Color4(10, 10, 10, 255);
+            accentHue.BindValueChanged(_ =>
+            {
+                BackgroundUnfocused = colourProvider?.Background5 ?? new Color4(10, 10, 10, 255);
+                BackgroundFocused = colourProvider?.Background5 ?? new Color4(10, 10, 10, 255);
+            }, true);
         }
 
         // We may not be focused yet, but we need to handle keyboard input to be able to request focus

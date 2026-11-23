@@ -16,6 +16,7 @@ using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -67,6 +68,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         private FormControlBackground background = null!;
         private OsuTextFlowContainer text = null!;
@@ -139,7 +142,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            Enabled.BindValueChanged(_ => updateState(), true);
+            Enabled.BindValueChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState(), true);
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -186,12 +190,18 @@ namespace osu.Game.Graphics.UserInterfaceV2
             protected override float HoverLayerFinalAlpha => 0;
 
             private Color4? triangleGradientSecondColour;
+            private bool hasCustomBackgroundColour;
+            private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
+            [Resolved]
+            private OverlayColourProvider overlayColourProvider { get; set; } = null!;
 
             public override Color4 BackgroundColour
             {
                 get => base.BackgroundColour;
                 set
                 {
+                    hasCustomBackgroundColour = true;
                     base.BackgroundColour = value;
                     triangleGradientSecondColour = BackgroundColour.Lighten(0.2f);
                     updateColours();
@@ -201,7 +211,7 @@ namespace osu.Game.Graphics.UserInterfaceV2
             public IconUsage Icon { get; init; }
 
             [BackgroundDependencyLoader]
-            private void load(OverlayColourProvider overlayColourProvider)
+            private void load()
             {
                 DefaultBackgroundColour = overlayColourProvider.Colour3;
                 triangleGradientSecondColour ??= DefaultBackgroundColour.Lighten(0.2f);
@@ -233,7 +243,18 @@ namespace osu.Game.Graphics.UserInterfaceV2
                     Depth = float.MaxValue,
                 });
 
-                updateColours();
+                accentHue.BindValueChanged(_ =>
+                {
+                    DefaultBackgroundColour = overlayColourProvider.Colour3;
+
+                    if (!hasCustomBackgroundColour)
+                    {
+                        triangleGradientSecondColour = DefaultBackgroundColour.Lighten(0.2f);
+                        Background.FadeColour(IsHovered ? triangleGradientSecondColour.Value : BackgroundColour, 200, Easing.OutQuint);
+                    }
+
+                    updateColours();
+                }, true);
             }
 
             private void updateColours()

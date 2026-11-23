@@ -1,8 +1,9 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Diagnostics.CodeAnalysis;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -12,6 +13,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
+using osu.Game.Screens.Menu;
 using osuTK.Graphics;
 
 namespace osu.Game.Overlays
@@ -37,6 +39,7 @@ namespace osu.Game.Overlays
 
         private readonly Box background;
         private readonly Container content;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected FullscreenOverlay(OverlayColourScheme colourScheme)
         {
@@ -76,7 +79,7 @@ namespace osu.Game.Overlays
         [BackgroundDependencyLoader]
         private void load()
         {
-            UpdateColours();
+            accentHue.BindValueChanged(_ => UpdateColours(), true);
         }
 
         protected abstract T CreateHeader();

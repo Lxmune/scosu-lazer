@@ -4,6 +4,7 @@
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -12,6 +13,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 using osuTK.Graphics;
 
@@ -26,6 +28,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
 
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public bool ExpandOnCurrent { get; init; } = true;
 
@@ -68,7 +72,8 @@ namespace osu.Game.Graphics.UserInterfaceV2
             base.LoadComplete();
 
             Current.BindDisabledChanged(_ => updateState());
-            Current.BindValueChanged(_ => updateState(), true);
+            Current.BindValueChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState(), true);
 
             FinishTransforms(true);
         }

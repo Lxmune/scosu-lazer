@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
@@ -11,6 +11,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays
 {
@@ -25,6 +26,7 @@ namespace osu.Game.Overlays
 
         private readonly Box controlBackground;
         private readonly BindableWithCurrent<T> current = new BindableWithCurrent<T>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public Bindable<T> Current
         {
@@ -79,7 +81,7 @@ namespace osu.Game.Overlays
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colourProvider)
         {
-            controlBackground.Colour = colourProvider.Dark4;
+            accentHue.BindValueChanged(_ => controlBackground.Colour = colourProvider.Dark4, true);
         }
 
         protected virtual OsuTabControl<T> CreateTabControl() => new OverlayHeaderTabControl();

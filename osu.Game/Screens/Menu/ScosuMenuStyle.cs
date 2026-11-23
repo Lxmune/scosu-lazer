@@ -16,7 +16,7 @@ namespace osu.Game.Screens.Menu
     /// <summary>
     /// scosu: the main menu's look, shared by the band, the corner cards and the hub's tiles.
     /// </summary>
-    public static class ScosuMenuStyle
+    public static partial class ScosuMenuStyle
     {
         /// <summary>
         /// Default accent hue (scosu violet, matching the website's --h = 256).
@@ -114,19 +114,33 @@ namespace osu.Game.Screens.Menu
         /// <summary>
         /// A card's background: <see cref="GLASS"/> with rounded corners and a thin outline. Put it first in a card's children.
         /// </summary>
-        public static Drawable CreateGlassBackground() => new Container
+        public static Drawable CreateGlassBackground() => new GlassBackground();
+
+        private partial class GlassBackground : Container
         {
-            RelativeSizeAxes = Axes.Both,
-            Masking = true,
-            CornerRadius = CORNER_RADIUS,
-            CornerExponent = 2.5f,
-            BorderThickness = 1.5f,
-            BorderColour = OUTLINE,
-            Child = new Box
+            private readonly IBindable<int> accentHue = AccentHue.GetBoundCopy();
+            private readonly Box box;
+
+            public GlassBackground()
             {
-                RelativeSizeAxes = Axes.Both,
-                Colour = GLASS,
-            },
-        };
+                RelativeSizeAxes = Axes.Both;
+                Masking = true;
+                CornerRadius = CORNER_RADIUS;
+                CornerExponent = 2.5f;
+                BorderThickness = 1.5f;
+                BorderColour = OUTLINE;
+                Child = box = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = GLASS,
+                };
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+                accentHue.BindValueChanged(_ => box.Colour = GLASS, true);
+            }
+        }
     }
 }

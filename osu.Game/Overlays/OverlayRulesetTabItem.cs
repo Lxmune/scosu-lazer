@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
@@ -12,17 +12,20 @@ using osuTK;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays
 {
     public partial class OverlayRulesetTabItem : TabItem<RulesetInfo>, IHasTooltip
     {
         private Color4 accentColour;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         protected virtual Color4 AccentColour
         {
@@ -97,7 +100,8 @@ namespace osu.Game.Overlays
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            Enabled.BindValueChanged(_ => updateState(), true);
+            Enabled.BindValueChanged(_ => updateState());
+            accentHue.BindValueChanged(_ => updateState(), true);
         }
 
         public override bool PropagatePositionalInputSubTree => Enabled.Value && base.PropagatePositionalInputSubTree;

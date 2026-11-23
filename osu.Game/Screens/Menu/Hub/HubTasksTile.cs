@@ -43,6 +43,7 @@ namespace osu.Game.Screens.Menu.Hub
 
         private GetDailyTasksRequest? request;
         private DateTimeOffset? lastFetch;
+        private APIDailyTasks? lastTasks;
 
         public HubTasksTile()
         {
@@ -92,6 +93,7 @@ namespace osu.Game.Screens.Menu.Hub
 
                 request = null;
                 lastFetch = DateTimeOffset.Now;
+                lastTasks = tasks;
                 display(tasks);
             });
             req.Failure += _ => Schedule(() =>
@@ -108,8 +110,15 @@ namespace osu.Game.Screens.Menu.Hub
 
         private void showPlaceholder(LocalisableString text)
         {
+            lastTasks = null;
             TooltipText = default;
             ShowPlaceholder(FontAwesome.Solid.CheckSquare, text);
+        }
+
+        protected override void OnAccentHueChanged()
+        {
+            if (IsLoaded && lastTasks != null)
+                display(lastTasks);
         }
 
         private void display(APIDailyTasks tasks)

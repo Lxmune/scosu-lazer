@@ -63,6 +63,7 @@ namespace osu.Game.Screens.Menu
         private OsuColour colours { get; set; } = null!;
 
         private readonly IBindableDictionary<int, UserPresence> presences = new BindableDictionary<int, UserPresence>();
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         /// <summary>
         /// The players online, in the order they came online, once their details have been looked up.
@@ -229,6 +230,12 @@ namespace osu.Game.Screens.Menu
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            accentHue.BindValueChanged(_ =>
+            {
+                chipBackground.Colour = ScosuMenuStyle.GLASS;
+                moreText.Colour = ScosuMenuStyle.VIOLET_INK;
+            }, true);
 
             // Presence is only sent to clients that watch it, so watch it while the menu shows the list.
             State.BindValueChanged(state =>

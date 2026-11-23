@@ -3,6 +3,7 @@
 
 using System;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
@@ -13,6 +14,7 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Overlays;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Graphics.UserInterface
@@ -47,6 +49,7 @@ namespace osu.Game.Graphics.UserInterface
         private readonly OsuSpriteText titleSpriteText;
         private readonly OsuTextFlowContainer descriptionText;
         private readonly IconButton closeButton;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
 
         public ShearedOverlayHeader()
         {
@@ -142,13 +145,16 @@ namespace osu.Game.Graphics.UserInterface
         [BackgroundDependencyLoader]
         private void load(OverlayColourProvider colourProvider)
         {
-            underlayContainer.BorderColour = ColourInfo.GradientVertical(Colour4.Black, colourProvider.Dark4);
-            underlayBackground.Colour = colourProvider.Dark4;
+            accentHue.BindValueChanged(_ =>
+            {
+                underlayContainer.BorderColour = ColourInfo.GradientVertical(Colour4.Black, colourProvider.Dark4);
+                underlayBackground.Colour = colourProvider.Dark4;
 
-            contentContainer.BorderColour = ColourInfo.GradientVertical(colourProvider.Dark3, colourProvider.Dark1);
-            contentBackground.Colour = colourProvider.Dark3;
+                contentContainer.BorderColour = ColourInfo.GradientVertical(colourProvider.Dark3, colourProvider.Dark1);
+                contentBackground.Colour = colourProvider.Dark3;
 
-            closeButton.IconHoverColour = colourProvider.Highlight1;
+                closeButton.IconHoverColour = colourProvider.Highlight1;
+            }, true);
         }
     }
 }
