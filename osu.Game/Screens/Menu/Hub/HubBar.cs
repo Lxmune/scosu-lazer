@@ -311,8 +311,8 @@ namespace osu.Game.Screens.Menu.Hub
             foreach (var item in items)
                 item.Squeezed = false;
 
-            // Least important first.
-            var droppable = new[] { next, today, friendsItem, eventItem };
+            // Least important first. The rank to pass outlasts the friends count: it is what the bar is mostly for.
+            var droppable = new[] { friendsItem, next, today, eventItem };
 
             float total() => items.Where(i => i.Wanted && !i.Squeezed).Sum(i => i.NaturalWidth + item_spacing);
 
@@ -352,11 +352,13 @@ namespace osu.Game.Screens.Menu.Hub
 
             todayLine.Set(ScoreSummaryStrings.Today, $@"+{s.Today.RankedScore:N0}", tail);
             today.Wanted = true;
+            today.ContentChanged();
 
             if (s.Next is APIScoreSummary.NextRank n)
             {
                 nextLine.Set(default, ScoreSummaryStrings.ScoreToNextRank(ScosuMenuFormatting.CompactScore(n.RankedScoreNeeded), n.Rank.ToLocalisableString(@"N0"), n.Username), default);
                 next.Wanted = true;
+                next.ContentChanged();
             }
             else
                 next.Wanted = false;
@@ -566,7 +568,7 @@ namespace osu.Game.Screens.Menu.Hub
             public bool Present => Wanted && !Squeezed;
 
             /// <summary>
-            /// Its width when it was last shown, to know whether it would fit again.
+            /// Its width when it was last shown, to know whether it would fit again (0 once its content changed: unknown).
             /// </summary>
             public float NaturalWidth { get; private set; }
 
@@ -602,6 +604,12 @@ namespace osu.Game.Screens.Menu.Hub
             }
 
             public void Measure() => NaturalWidth = content.DrawWidth + 1 + item_spacing;
+
+            /// <summary>
+            /// Its content changed while it may be hidden: it is tried again (shown for a frame, measured, and squeezed out
+            /// again only if it still doesn't fit), rather than kept out by the width of what it showed before.
+            /// </summary>
+            public void ContentChanged() => NaturalWidth = 0;
         }
     }
 }

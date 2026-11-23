@@ -2,6 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
@@ -14,6 +17,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Overlays.Settings;
 using osu.Game.Resources.Localisation.Web;
@@ -129,15 +133,79 @@ namespace osu.Game.Overlays.Login
                 }
             };
 
-            forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, $"{api.Endpoints.WebsiteUrl}/home/password-reset");
+            // scosu: point to scosu-web's routes and provide quick links to register and Discord.
+            string forgotUrl = api.Endpoints.RanksByStableScore
+                ? $@"{api.Endpoints.WebsiteUrl}/forgot-password"
+                : $@"{api.Endpoints.WebsiteUrl}/home/password-reset";
+
+            forgottenPasswordLink.AddLink(LayoutStrings.PopupLoginLoginForgot, forgotUrl);
+            forgottenPasswordLink.AddText(@" · ");
+            forgottenPasswordLink.AddLink(ScosuMenuStrings.RegisterOnWebsite, $@"{api.Endpoints.WebsiteUrl}/register");
+            forgottenPasswordLink.AddText(@" · ");
+            forgottenPasswordLink.AddLink(ScosuMenuStrings.Discord, ProductionEndpointConfiguration.DISCORD_URL);
 
             password.OnCommit += (_, _) => performLogin();
 
-            if (api.LastLoginError?.Message is string error)
+            if (api.LastLoginError is Exception loginError)
             {
                 errorText.Alpha = 1;
-                errorText.AddErrors(new[] { error });
+
+                if (IsUnreachableError(loginError))
+                {
+                    errorText.AddErrors(new[] { ScosuMenuStrings.ServerUnreachable.ToString() });
+                    forgottenPasswordLink.NewParagraph();
+                    forgottenPasswordLink.AddText(@"Status & help: ");
+                    forgottenPasswordLink.AddLink(ScosuMenuStrings.Discord, ProductionEndpointConfiguration.DISCORD_URL);
+                }
+                else if (loginError.Message is string error)
+                {
+                    errorText.AddErrors(new[] { error });
+                }
             }
+        }
+
+        /// <summary>
+        /// scosu: whether a login failure looks like the server or network being unreachable (DNS/socket/timeout, 5xx or Cloudflare tunnel errors)
+        /// rather than wrong credentials.
+        /// </summary>
+        internal static bool IsUnreachableError(Exception? error)
+        {
+            for (var current = error; current != null; current = current.InnerException)
+            {
+                if (current is APIException { StatusCode: HttpStatusCode status })
+                    return (int)status >= 500;
+
+                if (current is WebException webException)
+                {
+                    if (webException.Response is HttpWebResponse response)
+                        return (int)response.StatusCode >= 500;
+
+                    if (webException.Status != WebExceptionStatus.ProtocolError)
+                        return true;
+                }
+
+                if (current is HttpRequestException httpException)
+                    return httpException.StatusCode == null || (int)httpException.StatusCode >= 500;
+
+                if (current is TaskCanceledException or TimeoutException)
+                    return true;
+
+                string msg = current.Message;
+
+                if (msg.Contains(@"502", StringComparison.Ordinal)
+                    || msg.Contains(@"503", StringComparison.Ordinal)
+                    || msg.Contains(@"504", StringComparison.Ordinal)
+                    || msg.Contains(@"1033", StringComparison.Ordinal)
+                    || msg.Contains(@"Unable to connect", StringComparison.OrdinalIgnoreCase)
+                    || msg.Contains(@"timed out", StringComparison.OrdinalIgnoreCase)
+                    || msg.Contains(@"Name or service not known", StringComparison.OrdinalIgnoreCase)
+                    || msg.Contains(@"No such host", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void performLogin()

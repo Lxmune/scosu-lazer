@@ -219,6 +219,12 @@ namespace osu.Game.Screens.OnlinePlay.Lounge.Components
                                                                         Anchor = Anchor.CentreLeft,
                                                                         Origin = Anchor.CentreLeft
                                                                     },
+                                                                    // scosu: accuracy or combo matches say so.
+                                                                    new WinConditionStatusPill(Room)
+                                                                    {
+                                                                        Anchor = Anchor.CentreLeft,
+                                                                        Origin = Anchor.CentreLeft
+                                                                    },
                                                                     endDateInfo = new EndDateInfo(Room)
                                                                     {
                                                                         Anchor = Anchor.CentreLeft,

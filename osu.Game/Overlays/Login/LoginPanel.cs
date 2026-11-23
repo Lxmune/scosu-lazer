@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -140,11 +140,17 @@ namespace osu.Game.Overlays.Login
                     }
                     else if (state.NewValue == APIState.Failing)
                     {
-                        linkFlow.AddParagraph(state.NewValue == APIState.Failing ? ToolbarStrings.AttemptingToReconnect : ToolbarStrings.Connecting, s =>
+                        // scosu: make it obvious when the server cannot be reached and point players to Discord/website.
+                        linkFlow.AddParagraph(ScosuMenuStrings.ServerUnreachable.ToUpper(), s =>
                         {
                             s.Font = OsuFont.Style.Caption2.With(weight: FontWeight.Bold);
                             s.Colour = Colour4.Orange;
                         });
+                        linkFlow.AddParagraph(ToolbarStrings.AttemptingToReconnect, s => s.Font = OsuFont.Style.Caption1);
+                        linkFlow.NewParagraph();
+                        linkFlow.AddLink(ScosuMenuStrings.Discord, Online.ProductionEndpointConfiguration.DISCORD_URL, s => s.Font = OsuFont.Style.Caption2);
+                        linkFlow.AddText(@" · ", s => s.Font = OsuFont.Style.Caption2);
+                        linkFlow.AddLink(@"scosu.net", api.Endpoints.WebsiteUrl, s => s.Font = OsuFont.Style.Caption2);
                     }
                     else
                     {

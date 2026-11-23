@@ -1,4 +1,4 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 #nullable disable
@@ -1279,6 +1279,8 @@ namespace osu.Game
             Add(externalLinkOpener = new ExternalLinkOpener());
             Add(new MusicKeyBindingHandler());
             Add(new OnlineStatusNotifier(() => ScreenStack.CurrentScreen));
+            // scosu: chooses the Relax or Autopilot leaderboard the player last played on again.
+            Add(new RelaxLeaderboardMemory(() => ScreenStack.CurrentScreen));
             Add(new FriendPresenceNotifier());
 
             // side overlays which cancel each other.

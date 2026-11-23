@@ -141,15 +141,21 @@ namespace osu.Game.Screens.Menu
         private ScoreSummaryDisplay scoreSummaryDisplay;
         private EventMenuCard eventMenuCard;
         private WeeklyReportMenuCard weeklyReportCard;
+        private BriefingMenuCard briefingCard;
         private FillFlowContainer leftDisplays;
         private FillFlowContainer rightDisplays;
         private FillFlowContainer bottomLeftDisplays;
+        private FillFlowContainer bottomRightDisplays;
+        private MenuChatCard chatCard;
         private HubBar hubBar;
 
         private Sample reappearSampleSwoosh;
 
         [Resolved(canBeNull: true)]
         private SkinEditorOverlay skinEditor { get; set; }
+
+        [Resolved(canBeNull: true)]
+        private VolumeOverlay volumeOverlay { get; set; }
 
         [CanBeNull]
         private IDisposable logoProxy;
@@ -286,6 +292,21 @@ namespace osu.Game.Screens.Menu
                                 Origin = Anchor.BottomLeft,
                             },
                         },
+                        // scosu: #general bottom right, above the bar.
+                        bottomRightDisplays = new FillFlowContainer
+                        {
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            RelativePositionAxes = Axes.Y,
+                            Anchor = Anchor.BottomRight,
+                            Origin = Anchor.BottomRight,
+                            Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 10 },
+                            Child = chatCard = new MenuChatCard
+                            {
+                                Anchor = Anchor.BottomRight,
+                                Origin = Anchor.BottomRight,
+                            },
+                        },
                         rightDisplays = new FillFlowContainer
                         {
                             AutoSizeAxes = Axes.Both,
@@ -297,6 +318,12 @@ namespace osu.Game.Screens.Menu
                             Children = new Drawable[]
                             {
                                 weeklyReportCard = new WeeklyReportMenuCard
+                                {
+                                    Anchor = Anchor.TopRight,
+                                    Origin = Anchor.TopRight,
+                                },
+                                // scosu: what changed since the last session, once after logging in.
+                                briefingCard = new BriefingMenuCard
                                 {
                                     Anchor = Anchor.TopRight,
                                     Origin = Anchor.TopRight,
@@ -324,7 +351,7 @@ namespace osu.Game.Screens.Menu
                             Margin = new MarginPadding { Bottom = HubBar.HEIGHT + 4 },
                             Alpha = 0,
                             Action = () => setHub(true),
-                            Scrolled = up => setHub(!up),
+                            Scrolled = onHubScroll,
                         },
                         // The band, docked along the top while the hub is open.
                         hubDock = new HubDock(new[]
@@ -367,6 +394,8 @@ namespace osu.Game.Screens.Menu
                         onlineMenuBanner.State.Value = Visibility.Hidden;
                         eventMenuCard.Hide();
                         weeklyReportCard.Hide();
+                        briefingCard.Hide();
+                        chatCard.Hide();
                         scoreSummaryDisplay.Hide();
                         hubBar.Hide();
                         break;
@@ -376,6 +405,8 @@ namespace osu.Game.Screens.Menu
                         onlineMenuBanner.State.Value = Visibility.Visible;
                         eventMenuCard.Show();
                         weeklyReportCard.Show();
+                        briefingCard.Show();
+                        chatCard.Show();
                         scoreSummaryDisplay.Show();
                         hubBar.Show();
                         break;
@@ -431,7 +462,7 @@ namespace osu.Game.Screens.Menu
 
             float y = open ? -1 : 0;
 
-            foreach (var drawable in new Drawable[] { buttonsContainer, leftDisplays, rightDisplays, bottomLeftDisplays, bottomElementsFlow, hubHint })
+            foreach (var drawable in new Drawable[] { buttonsContainer, leftDisplays, rightDisplays, bottomLeftDisplays, bottomRightDisplays, bottomElementsFlow, hubHint })
                 drawable.MoveToY(y, MenuHubPage.SCROLL_DURATION, Easing.OutQuint);
 
             ApplyToBackground(b => b.MoveToY(open ? -hub_background_parallax : 0, MenuHubPage.SCROLL_DURATION, Easing.OutQuint));
@@ -775,18 +806,54 @@ namespace osu.Game.Screens.Menu
 
         private void loadRankedPlay() => this.Push(new OnlinePlay.Matchmaking.Intro.ScreenIntro(MatchmakingPoolType.RankedPlay));
 
+        internal enum MainMenuScrollAction
+        {
+            PassToVolume,
+            OpenHub,
+            CloseHub,
+            Consume,
+        }
+
+        /// <summary>
+        /// scosu: decides how a main-menu wheel event is routed between the hub and the volume overlay.
+        /// In the base menu state (hub closed, volume overlay hidden), scrolling down opens the hub while scrolling up
+        /// enters volume mode by letting <see cref="ScrollAdjustsVolume"/> show <see cref="VolumeOverlay"/>.
+        /// While the volume overlay is visible, both scroll directions adjust volume until it auto-hides.
+        /// </summary>
+        internal static MainMenuScrollAction ResolveHubScroll(bool bandIsOut, bool hubOpen, bool volumeOverlayVisible, bool altPressed, float scrollDeltaY)
+        {
+            if (!bandIsOut || altPressed || volumeOverlayVisible)
+                return MainMenuScrollAction.PassToVolume;
+
+            if (scrollDeltaY == 0)
+                return MainMenuScrollAction.Consume;
+
+            if (hubOpen)
+                return scrollDeltaY > 0 ? MainMenuScrollAction.CloseHub : MainMenuScrollAction.Consume;
+
+            return scrollDeltaY < 0 ? MainMenuScrollAction.OpenHub : MainMenuScrollAction.PassToVolume;
+        }
+
         private bool onHubScroll(ScrollEvent e)
         {
-            // Alt + wheel still changes the volume everywhere.
-            if (!bandIsOut || e.AltPressed)
-                return false;
+            bool volumeVisible = volumeOverlay?.State.Value == Visibility.Visible;
 
-            if (e.ScrollDelta.Y < 0)
-                setHub(true);
-            else if (e.ScrollDelta.Y > 0)
-                setHub(false);
+            switch (ResolveHubScroll(bandIsOut, hubOpen, volumeVisible, e.AltPressed, e.ScrollDelta.Y))
+            {
+                case MainMenuScrollAction.PassToVolume:
+                    return false;
 
-            return true;
+                case MainMenuScrollAction.OpenHub:
+                    setHub(true);
+                    return true;
+
+                case MainMenuScrollAction.CloseHub:
+                    setHub(false);
+                    return true;
+
+                default:
+                    return true;
+            }
         }
 
         /// <summary>

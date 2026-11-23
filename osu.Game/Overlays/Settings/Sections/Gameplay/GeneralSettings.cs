@@ -29,6 +29,13 @@ namespace osu.Game.Overlays.Settings.Sections.Gameplay
                     Caption = GameplaySettingsStrings.StarFountains,
                     Current = config.GetBindable<bool>(OsuSetting.StarFountains)
                 }),
+                // scosu: a second press for retry and quit late in a play.
+                new SettingsItemV2(new FormCheckBox
+                {
+                    Caption = ScosuDailyStrings.ConfirmRetryQuit,
+                    HintText = ScosuDailyStrings.ConfirmRetryQuitTooltip,
+                    Current = config.GetBindable<bool>(OsuSetting.ScosuConfirmRetryQuit)
+                }),
             };
         }
     }

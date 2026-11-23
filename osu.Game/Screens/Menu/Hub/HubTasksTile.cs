@@ -1,0 +1,201 @@
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+using System;
+using osu.Framework.Allocation;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.LocalisationExtensions;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Localisation;
+using osu.Game.Online.API;
+using osu.Game.Online.API.Requests;
+using osu.Game.Online.API.Requests.Responses;
+using osuTK;
+
+namespace osu.Game.Screens.Menu.Hub
+{
+    /// <summary>
+    /// scosu: today's daily tasks, each with its progress, and how many are done. Opens the Daily tasks page on the website
+    /// (where one task a day can be swapped). Plays complete the tasks on the server, so it asks again whenever the hub opens.
+    /// </summary>
+    public partial class HubTasksTile : HubTile
+    {
+        /// <summary>
+        /// Opening the hub again within this doesn't ask again.
+        /// </summary>
+        private static readonly TimeSpan refresh_interval = TimeSpan.FromSeconds(30);
+
+        private const float row_height = 14;
+        private const float bar_width = 64;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private OsuGame? game { get; set; }
+
+        private readonly IBindable<APIState> apiState = new Bindable<APIState>();
+
+        private GetDailyTasksRequest? request;
+        private DateTimeOffset? lastFetch;
+
+        public HubTasksTile()
+        {
+            Eyebrow.Text = ScosuDailyStrings.DailyTasks.ToUpper();
+            showPlaceholder(ScosuDailyStrings.LogInForTasks);
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            // The API's state changes on its own thread.
+            apiState.BindTo(api.State);
+            apiState.BindValueChanged(state => Schedule(() =>
+            {
+                lastFetch = null;
+
+                if (state.NewValue == APIState.Online)
+                    RefreshIfStale();
+                else
+                {
+                    request?.Cancel();
+                    request = null;
+                    showPlaceholder(api.IsLoggedIn ? ScosuDailyStrings.TasksUnavailable : ScosuDailyStrings.LogInForTasks);
+                }
+            }), true);
+        }
+
+        /// <summary>
+        /// Fetches today's tasks, unless that was done a moment ago.
+        /// </summary>
+        public void RefreshIfStale()
+        {
+            // Only scosu servers have daily tasks.
+            if (request != null || api.State.Value != APIState.Online || !api.Endpoints.RanksByStableScore)
+                return;
+
+            if (lastFetch != null && DateTimeOffset.Now - lastFetch < refresh_interval)
+                return;
+
+            var req = request = new GetDailyTasksRequest();
+
+            req.Success += tasks => Schedule(() =>
+            {
+                if (req != request)
+                    return;
+
+                request = null;
+                lastFetch = DateTimeOffset.Now;
+                display(tasks);
+            });
+            req.Failure += _ => Schedule(() =>
+            {
+                if (req != request)
+                    return;
+
+                request = null;
+                showPlaceholder(ScosuDailyStrings.TasksUnavailable);
+            });
+
+            api.Queue(req);
+        }
+
+        private void showPlaceholder(LocalisableString text)
+        {
+            TooltipText = default;
+            ShowPlaceholder(FontAwesome.Solid.CheckSquare, text);
+        }
+
+        private void display(APIDailyTasks tasks)
+        {
+            if (tasks.Tasks.Count == 0)
+            {
+                showPlaceholder(ScosuDailyStrings.TasksUnavailable);
+                return;
+            }
+
+            ShowContent();
+            SetEyebrowDetail(ScosuDailyStrings.TasksDone(tasks.CompletedCount, tasks.Tasks.Count));
+
+            foreach (var task in tasks.Tasks)
+                Body.Add(createRow(task));
+
+            SetFoot(null, default);
+            SetAction(() => game?.OpenUrlExternally($@"{api.Endpoints.WebsiteUrl}/daily-tasks"));
+
+            TooltipText = tasks.DayComplete
+                ? LocalisableString.Interpolate($@"{ScosuDailyStrings.DayCounts} · {ScosuDailyStrings.DayStreak(tasks.Streaks.Daily)}")
+                : ScosuDailyStrings.DayStreak(tasks.Streaks.Daily);
+        }
+
+        /// <summary>
+        /// A tick, the task in words and its progress bar on the right.
+        /// </summary>
+        private static Drawable createRow(APIDailyTasks.DailyTask task) => new Container
+        {
+            RelativeSizeAxes = Axes.X,
+            Height = row_height,
+            Children = new Drawable[]
+            {
+                new SpriteIcon
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreLeft,
+                    Icon = FontAwesome.Solid.Check,
+                    Size = new Vector2(9),
+                    Colour = task.Completed ? ScosuMenuStyle.VIOLET : ScosuMenuStyle.TEXT_DIM,
+                    Alpha = task.Completed ? 1 : 0.25f,
+                },
+                new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Padding = new MarginPadding { Left = 16, Right = bar_width + 10 },
+                    Child = new TruncatingSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        RelativeSizeAxes = Axes.X,
+                        Text = DailyTaskFormatting.Describe(task),
+                        Font = ScosuMenuStyle.Body(12),
+                        Colour = task.Completed ? ScosuMenuStyle.TEXT_DIM : osuTK.Graphics.Color4.White,
+                    },
+                },
+                new Container
+                {
+                    Anchor = Anchor.CentreRight,
+                    Origin = Anchor.CentreRight,
+                    Width = bar_width,
+                    Height = 4,
+                    Masking = true,
+                    CornerRadius = 2,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = ScosuMenuStyle.FILL,
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Width = DailyTaskFormatting.Progress(task),
+                            Colour = task.Completed ? ScosuMenuStyle.VIOLET_INK : ScosuMenuStyle.VIOLET,
+                        },
+                    },
+                },
+            },
+        };
+
+        protected override void Dispose(bool isDisposing)
+        {
+            request?.Cancel();
+            base.Dispose(isDisposing);
+        }
+    }
+}

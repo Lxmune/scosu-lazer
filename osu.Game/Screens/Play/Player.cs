@@ -228,6 +228,8 @@ namespace osu.Game.Screens.Play
         [BackgroundDependencyLoader(true)]
         private void load(OsuConfigManager config, OsuGameBase game, CancellationToken cancellationToken)
         {
+            confirmRetryQuit = config.GetBindable<bool>(OsuSetting.ScosuConfirmRetryQuit);
+
             var gameplayMods = Mods.Value.Select(m => m.DeepClone()).ToArray();
 
             if (gameplayMods.Any(m => m is UnknownMod))
@@ -325,6 +327,7 @@ namespace osu.Game.Screens.Play
                     SaveReplay = Configuration.AllowUserInteraction ? async () => await prepareAndImportScoreAsync(true).ConfigureAwait(false) : null,
                     OnRetry = Configuration.AllowUserInteraction ? () => Restart() : null,
                     OnQuit = () => PerformExitWithConfirmation(),
+                    NeedsSecondPress = needsSecondPress,
                 },
             });
 
@@ -334,6 +337,7 @@ namespace osu.Game.Screens.Play
             GameplayClockContainer.Add(exitOverlay = new HotkeyExitOverlay
             {
                 Depth = float.MinValue,
+                NeedsSecondPress = needsSecondPress,
                 Action = () =>
                 {
                     if (!this.IsCurrentScreen()) return;
@@ -347,6 +351,7 @@ namespace osu.Game.Screens.Play
                 GameplayClockContainer.Add(retryOverlay = new HotkeyRetryOverlay
                 {
                     Depth = float.MinValue,
+                    NeedsSecondPress = needsSecondPress,
                     Action = () =>
                     {
                         if (!this.IsCurrentScreen()) return;
@@ -525,6 +530,7 @@ namespace osu.Game.Screens.Play
                         Retries = RestartCount,
                         OnRetry = () => Restart(),
                         OnQuit = () => PerformExitWithConfirmation(),
+                        NeedsSecondPress = needsSecondPress,
                     },
                 },
             };
@@ -539,6 +545,21 @@ namespace osu.Game.Screens.Play
         }
 
         protected virtual SkipOverlay CreateSkipOverlay(double startTime) => new SkipOverlay(startTime);
+
+        private Bindable<bool> confirmRetryQuit;
+
+        /// <summary>
+        /// scosu: retry and quit ask for a second press once a minute of the map has been played (see <see cref="SecondPressGate"/>
+        /// and <see cref="OsuSetting.ScosuConfirmRetryQuit"/>). Continue never does.
+        /// </summary>
+        private bool needsSecondPress()
+        {
+            if (confirmRetryQuit?.Value != true || GameplayState == null || DrawableRuleset == null)
+                return false;
+
+            double firstHitTime = GameplayState.Beatmap.HitObjects.FirstOrDefault()?.StartTime ?? 0;
+            return DrawableRuleset.FrameStableClock.CurrentTime - firstHitTime >= SecondPressGate.MIN_PLAYED;
+        }
 
         private void onBreakTimeChanged(ValueChangedEvent<bool> isBreakTime)
         {

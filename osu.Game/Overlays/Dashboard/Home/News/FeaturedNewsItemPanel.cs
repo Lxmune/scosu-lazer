@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -13,6 +13,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.News;
 using osuTK;
@@ -117,7 +118,7 @@ namespace osu.Game.Overlays.Dashboard.Home.News
             }
 
             [BackgroundDependencyLoader]
-            private void load(GameHost host)
+            private void load(GameHost host, IAPIProvider api)
             {
                 Child = new DelayedLoadUnloadWrapper(() => new NewsPostBackground(post.FirstImage)
                 {
@@ -131,7 +132,7 @@ namespace osu.Game.Overlays.Dashboard.Home.News
                 };
 
                 TooltipText = CommonStrings.ViewInBrowser;
-                Action = () => host.OpenUrlExternally("https://osu.ppy.sh/home/news/" + post.Slug);
+                Action = () => host.OpenUrlExternally($@"{api.Endpoints.WebsiteUrl}/home/news/{post.Slug}");
 
                 HoverColour = Color4.White;
             }

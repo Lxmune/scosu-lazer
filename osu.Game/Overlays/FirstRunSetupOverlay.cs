@@ -72,6 +72,10 @@ namespace osu.Game.Overlays
         {
             base.PopOut();
 
+            // scosu: shown on launch only until it is first closed, finished or not: closing it part way used to bring it back
+            // on every launch. It can still be resumed from the notification below or from settings.
+            showFirstRunSetup.Value = false;
+
             if (CurrentStepIndex != null)
             {
                 notificationOverlay.Post(new SimpleNotification

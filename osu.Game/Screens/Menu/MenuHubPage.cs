@@ -19,7 +19,8 @@ namespace osu.Game.Screens.Menu
 {
     /// <summary>
     /// scosu: the main menu's hub, its second screen: "On scosu now" and a grid of tiles (your score, the event, the daily challenge,
-    /// friends, the weekly report, news, then your profile's plays, accuracy, country rank, medals, best and recent plays).
+    /// friends, the weekly report, news, then your profile's plays, accuracy, country rank, medals, best and recent plays, and
+    /// today's daily tasks).
     /// The menu scrolls down to it (the band, the logo and the corner cards leave at the top while it comes in from below),
     /// and back up (see MainMenu.setHub()).
     /// </summary>
@@ -70,6 +71,7 @@ namespace osu.Game.Screens.Menu
         [Resolved]
         private WeeklyReportProvider? reportProvider { get; set; }
         private readonly HubNewsTile newsTile;
+        private readonly HubTasksTile tasksTile;
         private readonly HubProfileProvider profile;
 
         public MenuHubPage()
@@ -92,6 +94,7 @@ namespace osu.Game.Screens.Menu
             var medals = new HubMedalsTile(profile);
             var best = new HubBestTile(profile);
             var recent = new HubRecentTile(profile);
+            tasksTile = new HubTasksTile();
 
             // Six columns by four rows, all on the page unless the window is too small for them.
             // With an event, its tile takes a 2×2 block in the middle of the first two rows.
@@ -108,10 +111,11 @@ namespace osu.Game.Screens.Menu
                 (country, 4, 2, 1, 1),
                 (medals, 5, 2, 1, 1),
                 (best, 0, 3, 2, 1),
-                (recent, 2, 3, 4, 1),
+                (recent, 2, 3, 2, 1),
+                (tasksTile, 4, 3, 2, 1),
             };
 
-            // Without one, its tile is gone and the others close up: the plays get wider, and the recent plays the whole last row.
+            // Without one, its tile is gone and the others close up: the plays get wider, and the recent plays most of the last row.
             withoutEvent = new (HubTile, int, int, int, int)[]
             {
                 (score, 0, 0, 3, 1),
@@ -124,7 +128,8 @@ namespace osu.Game.Screens.Menu
                 (country, 2, 2, 1, 1),
                 (medals, 3, 2, 1, 1),
                 (best, 4, 2, 2, 1),
-                (recent, 0, 3, 6, 1),
+                (recent, 0, 3, 4, 1),
+                (tasksTile, 4, 3, 2, 1),
             };
 
             // Without a weekly report, its tile is left out too (an empty tile only takes room), and its neighbours widen.
@@ -140,7 +145,8 @@ namespace osu.Game.Screens.Menu
                 (accuracy, 2, 2, 2, 1),
                 (country, 4, 2, 2, 1),
                 (best, 0, 3, 2, 1),
-                (recent, 2, 3, 4, 1),
+                (recent, 2, 3, 2, 1),
+                (tasksTile, 4, 3, 2, 1),
             };
 
             withoutEventNoReport = new (HubTile, int, int, int, int)[]
@@ -154,7 +160,8 @@ namespace osu.Game.Screens.Menu
                 (country, 2, 2, 1, 1),
                 (medals, 3, 2, 1, 1),
                 (best, 4, 2, 2, 1),
-                (recent, 0, 3, 6, 1),
+                (recent, 0, 3, 4, 1),
+                (tasksTile, 4, 3, 2, 1),
             };
 
             tiles = withEvent.Select(l => l.tile).ToArray();
@@ -273,6 +280,7 @@ namespace osu.Game.Screens.Menu
 
             scroll.ScrollToStart(false);
             newsTile.RefreshIfStale();
+            tasksTile.RefreshIfStale();
             profile.RefreshIfStale();
 
             // The tiles settle in with the page, a touch after one another (all within ~0.4s).

@@ -223,6 +223,24 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty(@"profile_order")]
         public string[] ProfileOrder;
 
+        // scosu: the "me!" page, shown in the profile's "me!" section.
+        [JsonProperty(@"page")]
+        [CanBeNull]
+        public UserPage Page;
+
+        /// <summary>
+        /// A user's "me!" page (osu-web's shape). <see cref="Raw"/> is the Markdown; the server
+        /// leaves out what it doesn't allow (pictures from unknown hosts, raw HTML) for other players.
+        /// </summary>
+        public class UserPage
+        {
+            [JsonProperty(@"html")]
+            public string Html;
+
+            [JsonProperty(@"raw")]
+            public string Raw;
+        }
+
         [JsonProperty(@"kudosu")]
         public KudosuCount Kudosu;
 

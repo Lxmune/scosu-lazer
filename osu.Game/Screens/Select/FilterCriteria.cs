@@ -30,6 +30,11 @@ namespace osu.Game.Screens.Select
         public OptionalRange<double> Length;
         public OptionalRange<double> BPM;
         public OptionalRange<int> BeatDivisor;
+
+        /// <summary>
+        /// scosu: the number of hit objects (<see cref="BeatmapInfo.TotalObjectCount"/>).
+        /// </summary>
+        public OptionalRange<int> ObjectCount;
         public OptionalSet<BeatmapOnlineStatus> OnlineStatus = new OptionalSet<BeatmapOnlineStatus>();
         public OptionalRange<DateTimeOffset> LastPlayed;
         public OptionalRange<DateTimeOffset> DateRanked;

@@ -66,6 +66,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
 
         private readonly Bindable<bool> freestyle = new Bindable<bool>(true);
 
+        // scosu: what decides the item's results.
+        private readonly Bindable<WinCondition> winCondition = new Bindable<WinCondition>();
+
         private readonly PlaylistItem? initialItem;
         private readonly FreeModSelectOverlay freeModSelect;
 
@@ -137,6 +140,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 }
 
                 freestyle.Value = initialItem.Freestyle;
+                winCondition.Value = initialItem.WinCondition;
             }
 
             Mods.BindValueChanged(_ => updateValidMods());
@@ -215,7 +219,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 RulesetID = Ruleset.Value.OnlineID,
                 RequiredMods = Mods.Value.Select(m => new APIMod(m)).ToArray(),
                 AllowedMods = FreeMods.Value.Select(m => new APIMod(m)).ToArray(),
-                Freestyle = freestyle.Value
+                Freestyle = freestyle.Value,
+                WinCondition = winCondition.Value,
             };
 
             selectItem(item);
@@ -243,7 +248,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                     RulesetID = item.RulesetID,
                     RequiredMods = item.RequiredMods.ToArray(),
                     AllowedMods = item.AllowedMods.ToArray(),
-                    Freestyle = item.Freestyle
+                    Freestyle = item.Freestyle,
+                    WinCondition = item.WinCondition,
                 };
 
                 Task task = itemToEdit != null ? client.EditPlaylistItem(multiplayerItem) : client.AddPlaylistItem(multiplayerItem);
@@ -310,6 +316,11 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 new FooterButtonFreestyle
                 {
                     Freestyle = { BindTarget = freestyle }
+                },
+                // scosu: the host picks what decides the results.
+                new FooterButtonWinCondition
+                {
+                    Condition = { BindTarget = winCondition }
                 }
             ]);
 

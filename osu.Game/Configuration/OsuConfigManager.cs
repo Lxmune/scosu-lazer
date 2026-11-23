@@ -49,7 +49,8 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.Ruleset, string.Empty);
             SetDefault(OsuSetting.Skin, SkinInfo.ARGON_SKIN.ToString());
 
-            SetDefault(OsuSetting.BeatmapDetailTab, BeatmapDetailTab.Local);
+            // scosu: the server's leaderboard first (saved choices are kept).
+            SetDefault(OsuSetting.BeatmapDetailTab, BeatmapDetailTab.Global);
             SetDefault(OsuSetting.BeatmapLeaderboardSortMode, LeaderboardSortMode.Score);
             SetDefault(OsuSetting.BeatmapDetailModsFilter, false);
 
@@ -58,8 +59,10 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.DisplayStarsMaximum, 10.1, 0, 10.1, 0.1);
 
             SetDefault(OsuSetting.SongSelectGroupMode, GroupMode.None);
-            SetDefault(OsuSetting.SongSelectSortingMode, SortMode.Title);
+            // scosu: newest beatmaps first (saved choices are kept).
+            SetDefault(OsuSetting.SongSelectSortingMode, SortMode.DateAdded);
             SetDefault(OsuSetting.SongSelectCollectionFilter, string.Empty);
+            SetDefault(OsuSetting.ScosuRelaxLeaderboards, string.Empty);
 
             SetDefault(OsuSetting.RandomSelectAlgorithm, RandomSelectAlgorithm.RandomPermutation);
             SetDefault(OsuSetting.ModSelectHotkeyStyle, ModSelectHotkeyStyle.Sequential);
@@ -165,7 +168,8 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.HUDVisibilityMode, HUDVisibilityMode.Always);
             SetDefault(OsuSetting.ShowHealthDisplayWhenCantFail, true);
             SetDefault(OsuSetting.FadePlayfieldWhenHealthLow, true);
-            SetDefault(OsuSetting.KeyOverlay, false);
+            // scosu: the key overlay is shown unless turned off.
+            SetDefault(OsuSetting.KeyOverlay, true);
             SetDefault(OsuSetting.ReplaySettingsOverlay, true);
             SetDefault(OsuSetting.ReplayPlaybackControlsExpanded, true);
             SetDefault(OsuSetting.GameplayLeaderboard, true);
@@ -185,6 +189,7 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.ShowScosuFirstRunSetup, true);
             SetDefault(OsuSetting.ScosuSeenWeeklyReport, string.Empty);
+            SetDefault(OsuSetting.ScosuConfirmRetryQuit, true);
             SetDefault(OsuSetting.ShowMobileDisclaimer, RuntimeInfo.IsMobile);
 
             SetDefault(OsuSetting.ScreenshotFormat, ScreenshotFormat.Jpg);
@@ -441,6 +446,11 @@ namespace osu.Game.Configuration
         /// </summary>
         ScosuSeenWeeklyReport,
 
+        /// <summary>
+        /// scosu: after a minute of play, retrying or quitting (pause and fail menus, quick retry and quick exit) needs a second press.
+        /// </summary>
+        ScosuConfirmRetryQuit,
+
         ShowConvertedBeatmaps,
         Skin,
         ScreenshotFormat,
@@ -534,5 +544,11 @@ namespace osu.Game.Configuration
         /// The HTTPS address of the server to connect to. Empty for the scosu server (see <see cref="Online.ProductionEndpointConfiguration.DEFAULT_SERVER_URL"/>).
         /// </summary>
         CustomServerUrl,
+
+        /// <summary>
+        /// scosu: the Relax or Autopilot leaderboard last chosen in song select, per ruleset (see <see cref="Rulesets.RelaxLeaderboardMemory"/>),
+        /// restored when the game starts and when switching back to that ruleset.
+        /// </summary>
+        ScosuRelaxLeaderboards,
     }
 }

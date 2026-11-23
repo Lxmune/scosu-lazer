@@ -165,6 +165,42 @@ namespace osu.Game.Online.Solo
         }
 
         /// <summary>
+        /// scosu: triggers an immediate retry of a saved submission (e.g. when the player clicks the failure notice).
+        /// </summary>
+        public void RetryNow(long token)
+        {
+            lock (fileLock)
+            {
+                string file = fileName(token);
+
+                if (!pending.Exists(file))
+                    return;
+
+                try
+                {
+                    PendingScoreSubmission? submission;
+
+                    using (var stream = pending.GetStream(file))
+                    using (var reader = new StreamReader(stream!))
+                        submission = JsonConvert.DeserializeObject<PendingScoreSubmission>(reader.ReadToEnd());
+
+                    if (submission == null)
+                        return;
+
+                    submission.NextAttemptAt = DateTimeOffset.MinValue;
+                    write(submission);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, $"Could not schedule immediate retry for score submission {token}");
+                    return;
+                }
+            }
+
+            ProcessAsync(retryNow: true).FireAndForget();
+        }
+
+        /// <summary>
         /// Sends the submissions that are due, one at a time, until one fails for network reasons.
         /// </summary>
         /// <param name="retryNow">Ignore the retry delay of submissions that were already retried.</param>

@@ -20,6 +20,7 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Multiplayer.MatchTypes.TeamVersus;
+using osu.Game.Online.Rooms;
 using osu.Game.Online.Spectator;
 using osu.Game.Rulesets.Scoring;
 using osuTK.Graphics;
@@ -39,6 +40,11 @@ namespace osu.Game.Screens.Play.Leaderboards
 
         private readonly MultiplayerRoomUser[] users;
 
+        /// <summary>
+        /// scosu: what orders the players (accuracy or max combo first when the item says so, then score).
+        /// </summary>
+        private readonly WinCondition winCondition;
+
         private readonly Bindable<ScoringMode> scoringMode = new Bindable<ScoringMode>();
         private readonly IBindableList<int> playingUserIds = new BindableList<int>();
 
@@ -56,9 +62,10 @@ namespace osu.Game.Screens.Play.Leaderboards
 
         private readonly Cached sorting = new Cached();
 
-        public MultiplayerLeaderboardProvider(MultiplayerRoomUser[] users)
+        public MultiplayerLeaderboardProvider(MultiplayerRoomUser[] users, WinCondition winCondition = WinCondition.Score)
         {
             this.users = users;
+            this.winCondition = winCondition;
         }
 
         [BackgroundDependencyLoader]
@@ -97,12 +104,15 @@ namespace osu.Game.Screens.Play.Leaderboards
                                            user,
                                            trackedUser.ScoreProcessor,
                                            user.Id == api.LocalUser.Value.Id,
-                                           GameplayLeaderboardScore.ComboDisplayMode.Current)
+                                           // scosu: combo matches are decided by max combo, so show (and sort by) that.
+                                           winCondition == WinCondition.Combo ? GameplayLeaderboardScore.ComboDisplayMode.Highest : GameplayLeaderboardScore.ComboDisplayMode.Current)
                                        {
                                            HasQuit = { BindTarget = trackedUser.UserQuit },
                                            TeamColour = UserScores[user.OnlineID].Team is int team ? getTeamColour(team) : null,
                                        };
                                        leaderboardScore.TotalScore.BindValueChanged(_ => sorting.Invalidate());
+                                       leaderboardScore.Accuracy.BindValueChanged(_ => sorting.Invalidate());
+                                       leaderboardScore.Combo.BindValueChanged(_ => sorting.Invalidate());
                                        leaderboardScore.DisplayOrder.BindValueChanged(_ => sorting.Invalidate(), true);
                                        scores.Add(leaderboardScore);
                                    }
@@ -184,10 +194,25 @@ namespace osu.Game.Screens.Play.Leaderboards
             if (sorting.IsValid)
                 return;
 
-            var orderedByScore = scores
-                                 .OrderByDescending(i => i.TotalScore.Value)
-                                 .ThenBy(i => i.TotalScoreTiebreaker)
-                                 .ToList();
+            IOrderedEnumerable<GameplayLeaderboardScore> ordered;
+
+            // scosu: the item's win condition comes first, then score.
+            switch (winCondition)
+            {
+                case WinCondition.Accuracy:
+                    ordered = scores.OrderByDescending(i => i.Accuracy.Value).ThenByDescending(i => i.TotalScore.Value);
+                    break;
+
+                case WinCondition.Combo:
+                    ordered = scores.OrderByDescending(i => i.Combo.Value).ThenByDescending(i => i.TotalScore.Value);
+                    break;
+
+                default:
+                    ordered = scores.OrderByDescending(i => i.TotalScore.Value);
+                    break;
+            }
+
+            var orderedByScore = ordered.ThenBy(i => i.TotalScoreTiebreaker).ToList();
 
             for (int i = 0; i < orderedByScore.Count; i++)
             {

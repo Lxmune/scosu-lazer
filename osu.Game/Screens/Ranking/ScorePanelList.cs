@@ -13,6 +13,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
+using osu.Game.Online.Rooms;
 using osu.Game.Scoring;
 using osuTK;
 using osuTK.Input;
@@ -66,6 +67,15 @@ namespace osu.Game.Screens.Ranking
         public Action? PostExpandAction;
 
         public readonly Bindable<ScoreInfo?> SelectedScore = new Bindable<ScoreInfo?>();
+
+        /// <summary>
+        /// scosu: what orders the panels: accuracy or max combo first when a multiplayer item is decided by it, then score.
+        /// </summary>
+        public WinCondition WinCondition
+        {
+            get => flow.WinCondition;
+            set => flow.WinCondition = value;
+        }
 
         private readonly CancellationTokenSource loadCancellationSource = new CancellationTokenSource();
         private readonly Flow flow;
@@ -330,9 +340,45 @@ namespace osu.Game.Screens.Ranking
 
             public ScoreInfo? GetNextScore(ScoreInfo score) => applySorting(Children).SkipWhile(s => !s.Panel.Score.Equals(score)).ElementAtOrDefault(1)?.Panel.Score;
 
-            private IEnumerable<ScorePanelTrackingContainer> applySorting(IEnumerable<Drawable> drawables) => drawables.OfType<ScorePanelTrackingContainer>()
-                                                                                                                       .OrderByDescending(s => s.Panel.Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore))
-                                                                                                                       .ThenBy(s => s.Panel.Score.OnlineID);
+            private WinCondition winCondition;
+
+            public WinCondition WinCondition
+            {
+                get => winCondition;
+                set
+                {
+                    if (winCondition == value)
+                        return;
+
+                    winCondition = value;
+                    InvalidateLayout();
+                }
+            }
+
+            private IEnumerable<ScorePanelTrackingContainer> applySorting(IEnumerable<Drawable> drawables)
+            {
+                var panels = drawables.OfType<ScorePanelTrackingContainer>();
+                IOrderedEnumerable<ScorePanelTrackingContainer> ordered;
+
+                switch (winCondition)
+                {
+                    case WinCondition.Accuracy:
+                        ordered = panels.OrderByDescending(s => s.Panel.Score.Accuracy)
+                                        .ThenByDescending(s => s.Panel.Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore));
+                        break;
+
+                    case WinCondition.Combo:
+                        ordered = panels.OrderByDescending(s => s.Panel.Score.MaxCombo)
+                                        .ThenByDescending(s => s.Panel.Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore));
+                        break;
+
+                    default:
+                        ordered = panels.OrderByDescending(s => s.Panel.Score.GetLeaderboardTotalScore(api.Endpoints.RanksByStableScore));
+                        break;
+                }
+
+                return ordered.ThenBy(s => s.Panel.Score.OnlineID);
+            }
         }
 
         private partial class Scroll : OsuScrollContainer

@@ -362,13 +362,21 @@ namespace osu.Game.Screens.Play
 
             request.Failure += e =>
             {
+                LocalisableString reason = getUserFacingAPIError(e);
+
                 if (queued && !ScoreSubmissionQueue.IsPermanentFailure(e))
                 {
                     Logger.Log($"Score submission failed, it will be retried (token:{submittedToken}): {e.Message}");
-                    notifications?.Post(new SimpleNotification
+                    string detail = string.IsNullOrWhiteSpace(reason.ToString()) ? string.Empty : $" ({reason})";
+                    notifications?.Post(new SimpleErrorNotification
                     {
-                        Text = "Your score couldn't be submitted. It's saved and will be submitted once the connection is back.",
+                        Text = $"Your score couldn't be submitted{detail}. It's saved and will retry automatically — click to retry now.",
                         Icon = FontAwesome.Solid.Unlink,
+                        Activated = () =>
+                        {
+                            submissionQueue?.RetryNow(submittedToken);
+                            return true;
+                        },
                     });
                 }
                 else
@@ -376,7 +384,8 @@ namespace osu.Game.Screens.Play
                     if (queued)
                         submissionQueue.Remove(submittedToken);
 
-                    Logger.Error(e, $"{getUserFacingAPIError(e)}\n\nScore was not submitted (id: {token.Value})");
+                    Logger.Error(e, $"{reason}\n\nScore was not submitted (id: {token.Value})");
+                    notifications?.Post(new ScoreSubmissionFailureNotification(NotificationsStrings.ScoreWillNotBeSubmitted, reason));
                 }
 
                 scoreSubmissionSource.SetResult(false);

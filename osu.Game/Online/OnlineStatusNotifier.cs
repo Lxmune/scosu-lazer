@@ -42,6 +42,12 @@ namespace osu.Game.Online
         [Resolved]
         private INotificationOverlay? notificationOverlay { get; set; }
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private OsuGame? game { get; set; }
+
         private IBindable<APIState> apiState = null!;
         private IBindable<bool> multiplayerState = null!;
         private IBindable<bool> spectatorState = null!;
@@ -50,6 +56,11 @@ namespace osu.Game.Online
         /// This flag will be set to <c>true</c> when the user has been notified so we don't show more than one notification.
         /// </summary>
         private bool userNotified;
+
+        /// <summary>
+        /// scosu: set once per outage while the API is failing so the unreachable notice is shown once until reconnected.
+        /// </summary>
+        private bool serverUnreachableNotified;
 
         public OnlineStatusNotifier(Func<IScreen> getCurrentScreen)
         {
@@ -74,20 +85,25 @@ namespace osu.Game.Online
         {
             base.LoadComplete();
 
-            apiState.BindValueChanged(state =>
+            apiState.BindValueChanged(state => Schedule(() =>
             {
                 switch (state.NewValue)
                 {
                     case APIState.Online:
                         userNotified = false;
+                        serverUnreachableNotified = false;
                         return;
+
+                    case APIState.Failing:
+                        notifyServerUnreachable();
+                        break;
 
                     case APIState.Offline:
                         if (getCurrentScreen() is OnlinePlayScreen)
                             notifyApiDisconnection();
                         break;
                 }
-            });
+            }));
 
             multiplayerState.BindValueChanged(connected => Schedule(() =>
             {
@@ -117,6 +133,28 @@ namespace osu.Game.Online
                         break;
                 }
             }));
+        }
+
+        private void notifyServerUnreachable()
+        {
+            if (serverUnreachableNotified)
+                return;
+
+            // If the liveness probe already posted a specific outage message, don't post a duplicate notice.
+            if (api.UserFacingOutageMessage.Value is { } outage && !string.IsNullOrEmpty(outage.ToString()))
+                return;
+
+            serverUnreachableNotified = true;
+            notificationOverlay?.Post(new SimpleErrorNotification
+            {
+                Icon = FontAwesome.Solid.ExclamationCircle,
+                Text = ScosuMenuStrings.ServerUnreachableNotification,
+                Activated = () =>
+                {
+                    game?.OpenUrlExternally(ProductionEndpointConfiguration.DISCORD_URL);
+                    return true;
+                },
+            });
         }
 
         private void notifyApiDisconnection()

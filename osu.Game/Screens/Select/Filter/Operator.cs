@@ -13,6 +13,11 @@ namespace osu.Game.Screens.Select.Filter
         Equal,
         NotEqual,
         GreaterOrEqual,
-        Greater
+        Greater,
+
+        /// <summary>
+        /// scosu: within 10% of the value either way (<c>bpm~200</c> is 180 to 220 BPM).
+        /// </summary>
+        Approximately
     }
 }

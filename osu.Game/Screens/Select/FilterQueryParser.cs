@@ -16,8 +16,13 @@ namespace osu.Game.Screens.Select
     /// </summary>
     public static class FilterQueryParser
     {
+        /// <summary>
+        /// scosu: how far from the value <see cref="Operator.Approximately"/> reaches, as a fraction of the value.
+        /// </summary>
+        private const double approximate_fraction = 0.1;
+
         private static readonly Regex query_syntax_regex = new Regex(
-            @"\b(?<key>\w+)(?<op>(!?(:|=)|(>|<)(:|=)?))(?<value>("".*?""[!]?)|(\S*))",
+            @"\b(?<key>\w+)(?<op>(!?(:|=)|(>|<)(:|=)?|~))(?<value>("".*?""[!]?)|(\S*))",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         internal static void ApplyQueries(FilterCriteria criteria, string query)
@@ -107,6 +112,11 @@ namespace osu.Game.Screens.Select
                 case "divisor":
                     return TryUpdateCriteriaRange(ref criteria.BeatDivisor, op, value, tryParseInt);
 
+                // scosu: the number of hit objects.
+                case "obj":
+                case "objects":
+                    return tryUpdateCountRange(ref criteria.ObjectCount, op, value);
+
                 case "status":
                     return TryUpdateCriteriaSet(ref criteria.OnlineStatus, op, value);
 
@@ -163,6 +173,9 @@ namespace osu.Game.Screens.Select
                 case ">=":
                 case ">:":
                     return Operator.GreaterOrEqual;
+
+                case "~":
+                    return Operator.Approximately;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value), $"Unsupported operator {value}");
@@ -313,6 +326,13 @@ namespace osu.Game.Screens.Select
                 case Operator.LessOrEqual:
                     range.Max = value + tolerance;
                     break;
+
+                case Operator.Approximately:
+                    float margin = Math.Abs(value) * (float)approximate_fraction;
+                    range.Min = value - margin;
+                    range.Max = value + margin;
+                    range.IsLowerInclusive = range.IsUpperInclusive = true;
+                    break;
             }
 
             return true;
@@ -372,6 +392,13 @@ namespace osu.Game.Screens.Select
                     range.Max = value + tolerance;
                     if (tolerance == 0)
                         range.IsUpperInclusive = true;
+                    break;
+
+                case Operator.Approximately:
+                    double margin = Math.Abs(value) * approximate_fraction;
+                    range.Min = value - margin;
+                    range.Max = value + margin;
+                    range.IsLowerInclusive = range.IsUpperInclusive = true;
                     break;
             }
 
@@ -526,6 +553,25 @@ namespace osu.Game.Screens.Select
                     break;
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// scosu: a whole-number count, like the number of objects. <see cref="Operator.Approximately"/> rounds outwards
+        /// (<c>obj~1000</c> is 900 to 1100).
+        /// </summary>
+        private static bool tryUpdateCountRange(ref FilterCriteria.OptionalRange<int> range, Operator op, string val)
+        {
+            if (!tryParseInt(val, out int value))
+                return false;
+
+            if (op != Operator.Approximately)
+                return tryUpdateCriteriaRange(ref range, op, value);
+
+            double margin = value * approximate_fraction;
+            range.Min = (int)Math.Floor(value - margin);
+            range.Max = (int)Math.Ceiling(value + margin);
+            range.IsLowerInclusive = range.IsUpperInclusive = true;
             return true;
         }
 

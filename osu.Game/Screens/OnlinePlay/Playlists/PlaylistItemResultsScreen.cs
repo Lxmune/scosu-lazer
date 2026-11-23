@@ -65,6 +65,9 @@ namespace osu.Game.Screens.OnlinePlay.Playlists
             var localBeatmap = beatmapManager.QueryOnlineBeatmapId(PlaylistItem.Beatmap.OnlineID);
             itemBeatmap = beatmapManager.GetWorkingBeatmap(localBeatmap);
 
+            // scosu: the panels follow what decides the item's results (the server ranks the scores the same way).
+            ScorePanelList.WinCondition = PlaylistItem.WinCondition;
+
             AddInternal(new Container
             {
                 RelativeSizeAxes = Axes.Both,

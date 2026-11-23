@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
@@ -14,6 +16,7 @@ using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Overlays.Profile.Header.Components;
 using osu.Game.Resources.Localisation.Web;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osuTK;
 
 namespace osu.Game.Users
@@ -51,6 +54,14 @@ namespace osu.Game.Users
         [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; } = null!;
 
+        [Resolved]
+        private IBindable<IReadOnlyList<Mod>> mods { get; set; } = null!;
+
+        /// <summary>
+        /// scosu: the leaderboard the selected ruleset and mods play on (Relax and Autopilot have their own, see <see cref="RelaxLeaderboards"/>).
+        /// </summary>
+        private RulesetInfo leaderboard => ruleset.Value.GetLeaderboardRuleset(mods.Value.Select(m => m.Acronym));
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -59,17 +70,18 @@ namespace osu.Game.Users
                 statisticsProvider.StatisticsUpdated += onStatisticsUpdated;
 
             ruleset.BindValueChanged(_ => updateDisplay(), true);
+            mods.BindValueChanged(_ => updateDisplay());
         }
 
         private void onStatisticsUpdated(UserStatisticsUpdate update)
         {
-            if (update.Ruleset.Equals(ruleset.Value))
+            if (update.Ruleset.ShortName == leaderboard.ShortName)
                 updateDisplay();
         }
 
         private void updateDisplay()
         {
-            var statistics = statisticsProvider?.GetStatisticsFor(ruleset.Value);
+            var statistics = statisticsProvider?.GetStatisticsFor(leaderboard);
 
             loadingLayer.State.Value = statistics == null ? Visibility.Visible : Visibility.Hidden;
 

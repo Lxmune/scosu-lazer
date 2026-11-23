@@ -58,6 +58,46 @@ namespace osu.Game.Localisation
         public static LocalisableString AccountSettings => new TranslatableString(getKey(@"account_settings"), @"Account settings");
 
         /// <summary>
+        /// "scosu server unreachable"
+        /// </summary>
+        public static LocalisableString ServerUnreachable => new TranslatableString(getKey(@"server_unreachable"), @"scosu server unreachable");
+
+        /// <summary>
+        /// "scosu server unreachable. Click to check Discord for status updates."
+        /// </summary>
+        public static LocalisableString ServerUnreachableNotification => new TranslatableString(getKey(@"server_unreachable_notification"), @"scosu server unreachable. Click to check Discord for status updates.");
+
+        /// <summary>
+        /// "Discord"
+        /// </summary>
+        public static LocalisableString Discord => new TranslatableString(getKey(@"discord"), @"Discord");
+
+        /// <summary>
+        /// "Register"
+        /// </summary>
+        public static LocalisableString RegisterOnWebsite => new TranslatableString(getKey(@"register_on_website"), @"Register");
+
+        /// <summary>
+        /// "{0} online"
+        /// </summary>
+        public static LocalisableString PlayersOnlineCount(int count) => new TranslatableString(getKey(@"players_online_count"), @"{0} online", count);
+
+        /// <summary>
+        /// "Offline"
+        /// </summary>
+        public static LocalisableString ServerStatusOffline => new TranslatableString(getKey(@"server_status_offline"), @"Offline");
+
+        /// <summary>
+        /// "Connecting"
+        /// </summary>
+        public static LocalisableString ServerStatusConnecting => new TranslatableString(getKey(@"server_status_connecting"), @"Connecting");
+
+        /// <summary>
+        /// "Unreachable"
+        /// </summary>
+        public static LocalisableString ServerStatusUnreachable => new TranslatableString(getKey(@"server_status_unreachable"), @"Unreachable");
+
+        /// <summary>
         /// The name of a weekly report highlight's measure (<c>ur</c>, <c>accuracy</c>, ...), or the measure itself if it isn't known.
         /// </summary>
         public static LocalisableString MeasureName(string measure) => measure switch

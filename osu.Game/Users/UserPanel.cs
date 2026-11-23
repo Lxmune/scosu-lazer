@@ -92,6 +92,9 @@ namespace osu.Game.Users
         [Resolved]
         private QueueController? queueController { get; set; }
 
+        [Resolved]
+        private OsuGame? game { get; set; }
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -169,6 +172,9 @@ namespace osu.Game.Users
                 {
                     new OsuMenuItem(ContextMenuStrings.ViewProfile, MenuItemType.Highlighted, ViewProfile)
                 };
+
+                if (User.OnlineID > 1)
+                    items.Add(new OsuMenuItem(Localisation.CommonStrings.CopyLink, MenuItemType.Standard, () => game?.CopyToClipboard($@"{api.Endpoints.WebsiteUrl}/users/{User.OnlineID}")));
 
                 if (User.Equals(api.LocalUser.Value))
                     return items.ToArray();

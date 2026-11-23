@@ -46,6 +46,18 @@ namespace osu.Game.Screens.Play
         public Action? OnQuit { get; init; }
 
         /// <summary>
+        /// scosu: whether retry and quit need a second press right now (see <see cref="SecondPressGate"/>); continue never does.
+        /// </summary>
+        public Func<bool>? NeedsSecondPress { get; init; }
+
+        private readonly SecondPressGate secondPress = new SecondPressGate();
+
+        /// <summary>
+        /// The button waiting for its second press, with its own text (it says "press again" meanwhile).
+        /// </summary>
+        private (DialogButton button, LocalisableString text)? armedButton;
+
+        /// <summary>
         /// Action that is invoked when <see cref="GlobalAction.Back"/> is triggered.
         /// </summary>
         protected virtual Action BackAction => () =>
@@ -160,12 +172,18 @@ namespace osu.Game.Screens.Play
                 AddButton(GameplayMenuOverlayStrings.Continue, colours.Green, () => OnResume.Invoke());
 
             if (OnRetry != null)
-                AddButton(GameplayMenuOverlayStrings.Retry, colours.YellowDark, () => OnRetry.Invoke());
+                AddButton(GameplayMenuOverlayStrings.Retry, colours.YellowDark, () => OnRetry.Invoke(), true);
 
             if (OnQuit != null)
-                AddButton(GameplayMenuOverlayStrings.Quit, new Color4(170, 27, 39, 255), () => OnQuit.Invoke());
+                AddButton(GameplayMenuOverlayStrings.Quit, new Color4(170, 27, 39, 255), () => OnQuit.Invoke(), true);
 
-            State.ValueChanged += _ => InternalButtons.Deselect();
+            State.ValueChanged += _ =>
+            {
+                InternalButtons.Deselect();
+                // Opening or closing the menu starts afresh: a press before doesn't count as the first one.
+                disarm();
+                secondPress.Reset();
+            };
 
             updateInfoText();
 
@@ -203,9 +221,15 @@ namespace osu.Game.Screens.Play
             stopPauseLoop();
         }
 
-        protected void AddButton(LocalisableString text, Color4 colour, Action? action)
+        /// <param name="text">The button's text.</param>
+        /// <param name="colour">The button's colour.</param>
+        /// <param name="action">What the button does.</param>
+        /// <param name="needsConfirmation">scosu: whether it may need a second press (see <see cref="NeedsSecondPress"/>).</param>
+        protected void AddButton(LocalisableString text, Color4 colour, Action? action, bool needsConfirmation = false)
         {
-            var button = new Button
+            Button button = null!;
+
+            button = new Button
             {
                 Text = text,
                 ButtonColour = colour,
@@ -214,12 +238,61 @@ namespace osu.Game.Screens.Play
                 Height = button_height,
                 Action = delegate
                 {
+                    if (needsConfirmation && !confirmPress(button, text))
+                        return;
+
                     action?.Invoke();
                     Hide();
                 }
             };
 
             InternalButtons.Add(button);
+        }
+
+        /// <summary>
+        /// scosu: a press of a button that may need a second one. False when it only asked for that second press.
+        /// </summary>
+        private bool confirmPress(DialogButton button, LocalisableString text)
+        {
+            if (NeedsSecondPress?.Invoke() != true)
+                return true;
+
+            bool goesAhead = secondPress.Press(button, Environment.TickCount64);
+
+            disarm();
+
+            if (!goesAhead)
+            {
+                armedButton = (button, text);
+                button.Text = ScosuDailyStrings.PressAgainToConfirm;
+            }
+
+            return goesAhead;
+        }
+
+        /// <summary>
+        /// Gives the button waiting for its second press its text back.
+        /// </summary>
+        private void disarm()
+        {
+            if (armedButton == null)
+                return;
+
+            var (button, text) = armedButton.Value;
+            armedButton = null;
+            button.Text = text;
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+
+            // The second press didn't come in time.
+            if (armedButton != null && !secondPress.IsArmed(armedButton.Value.button, Environment.TickCount64))
+            {
+                disarm();
+                secondPress.Reset();
+            }
         }
 
         public virtual bool OnPressed(KeyBindingPressEvent<GlobalAction> e)

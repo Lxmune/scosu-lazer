@@ -171,7 +171,8 @@ namespace osu.Desktop
 
             // scosu: the leaderboard the play counts for, e.g. "osu! (RX)" with the RX mod.
             var leaderboard = ruleset.Value.GetLeaderboardRuleset(selectedMods.Value.Select(m => m.Acronym));
-            var buttons = new List<Button>();
+            // scosu: Discord shows at most two buttons: the player's profile (or the beatmap, when the profile is hidden) and the website.
+            Button? beatmapButton = null;
 
             // user activity
             if (userActivity.Value != null)
@@ -181,11 +182,11 @@ namespace osu.Desktop
 
                 if (userActivity.Value.GetBeatmapID(hideIdentifiableInformation) is int beatmapId && beatmapId > 0)
                 {
-                    buttons.Add(new Button
+                    beatmapButton = new Button
                     {
                         Label = "View beatmap",
                         Url = $@"{api.Endpoints.WebsiteUrl}/beatmaps/{beatmapId}?mode={ruleset.Value.ShortName}"
-                    });
+                    };
                 }
             }
             else
@@ -194,17 +195,7 @@ namespace osu.Desktop
                 presence.Details = string.Empty;
             }
 
-            // scosu: a second button to the player's profile, on the leaderboard they're playing.
-            if (!hideIdentifiableInformation && user.Value.Id > 1)
-            {
-                buttons.Add(new Button
-                {
-                    Label = "View profile",
-                    Url = $@"{api.Endpoints.WebsiteUrl}/users/{user.Value.Id}/{leaderboard.ShortName}"
-                });
-            }
-
-            presence.Buttons = buttons.Count > 0 ? buttons.ToArray() : null;
+            presence.Buttons = CreateButtons(api.Endpoints.WebsiteUrl, api.IsLoggedIn && !hideIdentifiableInformation ? user.Value.Id : null, leaderboard.ShortName, beatmapButton);
 
             // user party
             if (!hideIdentifiableInformation && multiplayerClient.Room != null && !multiplayerClient.Room.Settings.MatchType.IsMatchmakingType())
@@ -252,6 +243,38 @@ namespace osu.Desktop
             // small image: the ruleset's icon (Relax and Autopilot are played in it), named after the leaderboard.
             presence.Assets.SmallImageKey = ruleset.Value.IsLegacyRuleset() ? $"mode_{ruleset.Value.OnlineID}" : "mode_custom";
             presence.Assets.SmallImageText = leaderboard.Name;
+        }
+
+        /// <summary>
+        /// scosu: "View profile" (the logged-in player's profile, on the leaderboard they're playing) and "Join scosu" (the website's home page).
+        /// Without a profile to show, the beatmap being played takes its place, when there is one.
+        /// </summary>
+        /// <param name="websiteUrl">The website's root, without a trailing slash.</param>
+        /// <param name="userId">The logged-in player, or <see langword="null"/> when nobody is logged in or the profile is hidden.</param>
+        /// <param name="leaderboard">The short name of the leaderboard being played ("osu", "osurx", ...).</param>
+        /// <param name="fallback">The button to show instead of the profile's.</param>
+        internal static Button[] CreateButtons(string websiteUrl, int? userId, string leaderboard, Button? fallback)
+        {
+            var buttons = new List<Button>();
+
+            if (userId > 1)
+            {
+                buttons.Add(new Button
+                {
+                    Label = "View profile",
+                    Url = $@"{websiteUrl}/users/{userId}/{leaderboard}"
+                });
+            }
+            else if (fallback != null)
+                buttons.Add(fallback);
+
+            buttons.Add(new Button
+            {
+                Label = "Join scosu",
+                Url = $@"{websiteUrl}/"
+            });
+
+            return buttons.ToArray();
         }
 
         private void onJoin(object sender, JoinMessage args) => Scheduler.AddOnce(() =>

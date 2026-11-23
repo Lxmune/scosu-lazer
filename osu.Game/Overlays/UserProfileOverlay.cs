@@ -115,7 +115,8 @@ namespace osu.Game.Overlays
             sections = !user.IsBot
                 ? new ProfileSection[]
                 {
-                    //new AboutSection(),
+                    // scosu: the "me!" page (the server sends `page`).
+                    new AboutSection(),
                     new RecentSection(),
                     new RanksSection(),
                     //new MedalsSection(),

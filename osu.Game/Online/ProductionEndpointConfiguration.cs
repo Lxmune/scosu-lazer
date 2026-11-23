@@ -12,6 +12,11 @@ namespace osu.Game.Online
         /// </summary>
         public const string DEFAULT_SERVER_URL = @"https://scosu.net";
 
+        /// <summary>
+        /// scosu: the community Discord invite, used for outage notices and login screen links.
+        /// </summary>
+        public const string DISCORD_URL = @"https://discord.gg/zXvV8Mm8JY";
+
         /// <param name="serverUrl">
         /// The root URL of the server to connect to, or <see langword="null"/> or empty for <see cref="DEFAULT_SERVER_URL"/>.
         /// Must be accepted by <see cref="TryNormaliseServerUrl"/>, otherwise <see cref="DEFAULT_SERVER_URL"/> is used.

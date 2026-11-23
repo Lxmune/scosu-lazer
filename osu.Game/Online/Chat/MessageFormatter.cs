@@ -77,6 +77,28 @@ namespace osu.Game.Online.Chat
 
         private static string websiteRootUrl = "osu.ppy.sh";
 
+        /// <summary>
+        /// scosu: the scosu website's domain, whose links open in the game whichever server is set.
+        /// </summary>
+        private static readonly string scosu_website_host = new Uri(ProductionEndpointConfiguration.DEFAULT_SERVER_URL).Host;
+
+        /// <summary>
+        /// scosu: whether a link's host (with its port, if any) is the website's (see <see cref="WebsiteRootUrl"/>) or scosu.net's, or one of their subdomains.
+        /// </summary>
+        public static bool IsWebsiteHost(string host) => isHostOf(host, WebsiteRootUrl) || isHostOf(host, scosu_website_host);
+
+        private static bool isHostOf(string host, string root)
+        {
+            if (string.IsNullOrEmpty(root))
+                return false;
+
+            if (!host.EndsWith(root, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // Not "notscosu.net" for "scosu.net".
+            return host.Length == root.Length || host[host.Length - root.Length - 1] == '.';
+        }
+
         private static void handleMatches(Regex regex, string display, string link, MessageFormatterResult result, int startIndex = 0, LinkAction? linkActionOverride = null,
                                           char[]? escapeChars = null)
         {
@@ -158,7 +180,8 @@ namespace osu.Game.Online.Chat
                 case @"http":
                 case @"https":
                     // length > 3 since all these links need another argument to work
-                    if (args.Length > 3 && args[1].EndsWith(WebsiteRootUrl, StringComparison.OrdinalIgnoreCase))
+                    // scosu: links to scosu.net open in the game too when connected to another server.
+                    if (args.Length > 3 && IsWebsiteHost(args[1]))
                     {
                         string mainArg = args[3];
 

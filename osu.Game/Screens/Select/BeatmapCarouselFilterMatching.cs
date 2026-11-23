@@ -90,6 +90,8 @@ namespace osu.Game.Screens.Select
             match &= !criteria.BPM.HasFilter || criteria.BPM.IsInRange(beatmap.BPM);
 
             match &= !criteria.BeatDivisor.HasFilter || criteria.BeatDivisor.IsInRange(beatmap.BeatDivisor);
+            // scosu: maps whose objects weren't counted yet (-1) don't match an object count filter.
+            match &= !criteria.ObjectCount.HasFilter || (beatmap.TotalObjectCount >= 0 && criteria.ObjectCount.IsInRange(beatmap.TotalObjectCount));
             match &= !criteria.OnlineStatus.HasFilter || criteria.OnlineStatus.IsInRange(beatmap.Status);
 
             if (!match) return false;

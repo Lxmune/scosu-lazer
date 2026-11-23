@@ -272,6 +272,95 @@ namespace osu.Game.Tests.NonVisual.Filtering
             ClassicAssert.True(filterCriteria.BeatDivisor.IsUpperInclusive);
         }
 
+        // scosu: `~` matches within 10% either way.
+        [Test]
+        public void TestApplyApproximateQueries()
+        {
+            const string query = "bpm~200 stars~5.5 length~180 jumps";
+            var filterCriteria = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(filterCriteria, query);
+            ClassicAssert.AreEqual("jumps", filterCriteria.SearchText.Trim());
+            ClassicAssert.AreEqual(1, filterCriteria.SearchTerms.Length);
+
+            Assert.That(filterCriteria.BPM.Min, Is.EqualTo(180).Within(0.001));
+            Assert.That(filterCriteria.BPM.Max, Is.EqualTo(220).Within(0.001));
+            ClassicAssert.True(filterCriteria.BPM.IsLowerInclusive);
+            ClassicAssert.True(filterCriteria.BPM.IsUpperInclusive);
+            ClassicAssert.False(filterCriteria.BPM.InvertRange);
+
+            Assert.That(filterCriteria.StarDifficulty.Min, Is.EqualTo(4.95).Within(0.0001));
+            Assert.That(filterCriteria.StarDifficulty.Max, Is.EqualTo(6.05).Within(0.0001));
+
+            // Lengths are in milliseconds.
+            Assert.That(filterCriteria.Length.Min, Is.EqualTo(162_000).Within(0.001));
+            Assert.That(filterCriteria.Length.Max, Is.EqualTo(198_000).Within(0.001));
+        }
+
+        [Test]
+        public void TestApplyApproximateFloatQuery()
+        {
+            const string query = "ar~9";
+            var filterCriteria = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(filterCriteria, query);
+            Assert.That(filterCriteria.ApproachRate.Min, Is.EqualTo(8.1f).Within(0.0001f));
+            Assert.That(filterCriteria.ApproachRate.Max, Is.EqualTo(9.9f).Within(0.0001f));
+        }
+
+        [TestCase("obj")]
+        [TestCase("objects")]
+        public void TestApplyObjectCountQueries(string variant)
+        {
+            string query = $"{variant}>500 marathon";
+            var filterCriteria = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(filterCriteria, query);
+            ClassicAssert.AreEqual("marathon", filterCriteria.SearchText.Trim());
+            ClassicAssert.AreEqual(500, filterCriteria.ObjectCount.Min);
+            ClassicAssert.False(filterCriteria.ObjectCount.IsLowerInclusive);
+            ClassicAssert.Null(filterCriteria.ObjectCount.Max);
+        }
+
+        [Test]
+        public void TestApplyExactAndApproximateObjectCountQueries()
+        {
+            var exact = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(exact, "obj=1000");
+            ClassicAssert.AreEqual(1000, exact.ObjectCount.Min);
+            ClassicAssert.AreEqual(1000, exact.ObjectCount.Max);
+            ClassicAssert.True(exact.ObjectCount.IsInRange(1000));
+            ClassicAssert.False(exact.ObjectCount.IsInRange(1001));
+
+            var approximate = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(approximate, "obj~1000");
+            ClassicAssert.AreEqual(900, approximate.ObjectCount.Min);
+            ClassicAssert.AreEqual(1100, approximate.ObjectCount.Max);
+            ClassicAssert.True(approximate.ObjectCount.IsInRange(900));
+            ClassicAssert.True(approximate.ObjectCount.IsInRange(1100));
+            ClassicAssert.False(approximate.ObjectCount.IsInRange(1101));
+        }
+
+        [TestCase("obj>lots")]
+        [TestCase("status~ranked")]
+        [TestCase("artist~someone")]
+        [TestCase("lastplayed~5d")]
+        public void TestApproximateOrInvalidQueriesThatDontApplyAreIgnored(string query)
+        {
+            var filterCriteria = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(filterCriteria, query);
+            ClassicAssert.AreEqual(query, filterCriteria.SearchText);
+        }
+
+        [Test]
+        public void TestObjectCountFilterMatchesCountedMapsOnly()
+        {
+            var criteria = new FilterCriteria();
+            FilterQueryParser.ApplyQueries(criteria, "obj<100");
+
+            var counted = new BeatmapInfo { TotalObjectCount = 50 };
+            var uncounted = new BeatmapInfo { TotalObjectCount = -1 };
+            ClassicAssert.True(BeatmapCarouselFilterMatching.CheckCriteriaMatch(counted, criteria));
+            ClassicAssert.False(BeatmapCarouselFilterMatching.CheckCriteriaMatch(uncounted, criteria));
+        }
+
         [Test]
         public void TestPartialStatusMatch()
         {

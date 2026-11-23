@@ -79,7 +79,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             this.room = room;
 
             instances = new PlayerArea[Users.Count];
-            leaderboardProvider = new MultiSpectatorLeaderboardProvider(users);
+            leaderboardProvider = new MultiSpectatorLeaderboardProvider(users, room.CurrentPlaylistItem?.WinCondition ?? WinCondition.Score);
         }
 
         [BackgroundDependencyLoader]

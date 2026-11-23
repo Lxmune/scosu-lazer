@@ -25,9 +25,9 @@ namespace osu.Game.Screens.Menu.Hub
         public const float HEIGHT = 36;
 
         /// <summary>
-        /// Called when the hint is scrolled on, with whether it was scrolled up.
+        /// Called when the hint is scrolled on; returns whether the scroll was handled (returning false lets volume scrolling run).
         /// </summary>
-        public Action<bool>? Scrolled;
+        public Func<ScrollEvent, bool>? Scrolled;
 
         private OsuSpriteText label = null!;
         private SpriteIcon chevron = null!;
@@ -95,10 +95,6 @@ namespace osu.Game.Screens.Menu.Hub
             base.OnHoverLost(e);
         }
 
-        protected override bool OnScroll(ScrollEvent e)
-        {
-            Scrolled?.Invoke(e.ScrollDelta.Y > 0);
-            return true;
-        }
+        protected override bool OnScroll(ScrollEvent e) => Scrolled?.Invoke(e) ?? false;
     }
 }

@@ -77,6 +77,15 @@ namespace osu.Game.Online.Rooms
         public bool Freestyle { get; set; }
 
         /// <summary>
+        /// scosu: what decides this item's results (score by default, or accuracy / combo with ties broken by score).
+        /// </summary>
+        /// <remarks>
+        /// A trailing key added by scosu: servers and clients that don't know it skip it, and a missing value reads as score.
+        /// </remarks>
+        [Key(12)]
+        public WinCondition WinCondition { get; set; }
+
+        /// <summary>
         /// Creates a new <see cref="MultiplayerPlaylistItem"/>.
         /// </summary>
         [SerializationConstructor]
@@ -104,6 +113,7 @@ namespace osu.Game.Online.Rooms
             PlayedAt = item.PlayedAt;
             StarRating = item.Beatmap.StarRating;
             Freestyle = item.Freestyle;
+            WinCondition = item.WinCondition;
         }
 
         /// <summary>
@@ -133,7 +143,8 @@ namespace osu.Game.Online.Rooms
                && PlaylistOrder == other.PlaylistOrder
                && PlayedAt == other.PlayedAt
                && StarRating == other.StarRating
-               && Freestyle == other.Freestyle;
+               && Freestyle == other.Freestyle
+               && WinCondition == other.WinCondition;
 
         public override bool Equals(object? obj)
             => obj is MultiplayerPlaylistItem other && Equals(other);
@@ -154,6 +165,7 @@ namespace osu.Game.Online.Rooms
             hashCode.Add(PlayedAt);
             hashCode.Add(StarRating);
             hashCode.Add(Freestyle);
+            hashCode.Add(WinCondition);
             return hashCode.ToHashCode();
         }
     }
