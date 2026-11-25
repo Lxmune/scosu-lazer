@@ -85,6 +85,21 @@ namespace osu.Game.Localisation
         public static LocalisableString HistoryTooltip => new TranslatableString(getKey(@"history_tooltip"),
             @"Your history on this beatmap in the selected mode: plays, pass rate, unfinished starts, the closest attempt to a full combo, and the estimated ranked score beating your best would add.");
 
+        /// <summary>
+        /// "Copy the score's link"
+        /// </summary>
+        public static LocalisableString ShareScore => new TranslatableString(getKey(@"share_score"), @"Copy the score's link");
+
+        /// <summary>
+        /// "Score link copied: paste it in Discord or anywhere to show your score card."
+        /// </summary>
+        public static LocalisableString ShareScoreCopied => new TranslatableString(getKey(@"share_score_copied"), @"Score link copied: paste it in Discord or anywhere to show your score card.");
+
+        /// <summary>
+        /// "This score isn't on the server yet, so it has no link. Try again in a moment."
+        /// </summary>
+        public static LocalisableString ShareScoreNotSubmitted => new TranslatableString(getKey(@"share_score_not_submitted"), @"This score isn't on the server yet, so it has no link. Try again in a moment.");
+
         private static string getKey(string key) => $@"{prefix}:{key}";
     }
 }

@@ -56,7 +56,11 @@ namespace osu.Game.Online
 
         private readonly DateTimeOffset sessionStart = DateTimeOffset.Now;
         private DateTimeOffset lastSummary = DateTimeOffset.Now;
-        private int scoresAtLastSummary;
+
+        /// <summary>
+        /// Session passes per ruleset at the last summary (summaries are per ruleset, see <see cref="sessionScores"/>).
+        /// </summary>
+        private readonly Dictionary<string, int> scoresAtLastSummary = new Dictionary<string, int>();
 
         private GetScoreSummaryRequest? request;
 
@@ -73,11 +77,12 @@ namespace osu.Game.Online
                 return;
 
             var scores = sessionScores();
-            if (scores.Count - scoresAtLastSummary < MIN_NEW_SCORES)
+            string mode = ruleset.Value.ShortName;
+            if (scores.Count - scoresAtLastSummary.GetValueOrDefault(mode) < MIN_NEW_SCORES)
                 return;
 
             lastSummary = now;
-            scoresAtLastSummary = scores.Count;
+            scoresAtLastSummary[mode] = scores.Count;
 
             if (!ruleset.Value.IsLegacyRuleset())
             {
@@ -100,19 +105,24 @@ namespace osu.Game.Online
         }
 
         /// <summary>
-        /// The local user's scores (passes) set since the game started, any mode.
+        /// The local user's scores (passes) set since the game started, in the selected ruleset: the server's plays and
+        /// ranked score are for that ruleset, so every number of one summary describes the same mode.
         /// </summary>
         private List<ScoreInfo> sessionScores()
         {
             int userId = api.LocalUser.Value.Id;
+            string mode = ruleset.Value.ShortName;
 
-            return realm.Run(r => r.All<ScoreInfo>()
-                                   .Where(s => s.Date >= sessionStart && !s.DeletePending)
-                                   .AsEnumerable()
-                                   .Where(s => s.User.OnlineID == userId)
-                                   .Select(s => s.Detach())
-                                   .ToList());
+            return realm.Run(r => ScoresOf(r.All<ScoreInfo>().Where(s => s.Date >= sessionStart && !s.DeletePending), userId, mode)
+                                  .Select(s => s.Detach())
+                                  .ToList());
         }
+
+        /// <summary>
+        /// The scores of <paramref name="userId"/> in the ruleset <paramref name="rulesetShortName"/>.
+        /// </summary>
+        public static IEnumerable<ScoreInfo> ScoresOf(IEnumerable<ScoreInfo> scores, int userId, string rulesetShortName)
+            => scores.AsEnumerable().Where(s => s.User.OnlineID == userId && s.Ruleset.ShortName == rulesetShortName);
 
         private void post(SessionStats stats) => Schedule(() =>
         {
@@ -143,7 +153,8 @@ namespace osu.Game.Online
         public class SessionStats
         {
             /// <summary>
-            /// Plays submitted in the selected mode (passed or not), when the server said.
+            /// Plays submitted in the selected mode (passed or not), when the server said. Never fewer than <see cref="Passes"/>:
+            /// every pass is also a play, and the server may not have processed the latest ones yet.
             /// </summary>
             public readonly int? Plays;
 
@@ -163,9 +174,9 @@ namespace osu.Game.Online
 
             public SessionStats(IReadOnlyCollection<ScoreInfo> scores, int? plays, long? rankedScoreGained)
             {
-                Plays = plays;
-                RankedScoreGained = rankedScoreGained;
                 Passes = scores.Count;
+                Plays = plays is int count ? Math.Max(count, Passes) : null;
+                RankedScoreGained = rankedScoreGained;
                 FullCombos = scores.Count(s => s.IsPerfect());
                 SRanks = scores.Count(s => s.Rank >= ScoreRank.S);
                 Best = scores.OrderByDescending(s => s.PP ?? 0).ThenByDescending(s => s.TotalScore).FirstOrDefault();

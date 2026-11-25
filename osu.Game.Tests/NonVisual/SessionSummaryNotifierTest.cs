@@ -2,9 +2,13 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using osu.Game.Beatmaps;
 using osu.Game.Online;
+using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mania;
 using osu.Game.Rulesets.Osu;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
@@ -118,6 +122,36 @@ namespace osu.Game.Tests.NonVisual
 
             Assert.That(text, Does.StartWith("This session: 1 play."));
             Assert.That(text, Does.Not.Contain("full combo").And.Not.Contain("S rank"));
+        }
+
+        [Test]
+        public void TestServerPlaysNeverBelowPasses()
+        {
+            // The server had not counted the session's plays yet (or counted another mode): "0 plays" next to a best play.
+            var stats = new SessionSummaryNotifier.SessionStats(new[] { score(), score(), score() }, 0, 0);
+
+            Assert.That(stats.Plays, Is.EqualTo(3));
+            Assert.That(stats.Describe("osu!").ToString(), Does.StartWith("This session: 3 plays · +0 ranked score (osu!)."));
+        }
+
+        [Test]
+        public void TestScoresOfKeepsOneRulesetAndUser()
+        {
+            ScoreInfo play(RulesetInfo ruleset, int userId)
+            {
+                var s = score();
+                s.Ruleset = ruleset;
+                s.User = new APIUser { Id = userId };
+                return s;
+            }
+
+            var osu = new OsuRuleset().RulesetInfo;
+            var mania = new ManiaRuleset().RulesetInfo;
+            var mine = play(osu, 1);
+            var scores = new[] { mine, play(mania, 1), play(osu, 2) };
+
+            Assert.That(SessionSummaryNotifier.ScoresOf(scores, 1, osu.ShortName).ToList(), Is.EqualTo(new[] { mine }));
+            Assert.That(SessionSummaryNotifier.ScoresOf(scores, 1, "taiko"), Is.Empty);
         }
     }
 }
