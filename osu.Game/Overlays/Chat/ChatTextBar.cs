@@ -13,6 +13,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.Chat;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Chat
@@ -32,29 +33,33 @@ namespace osu.Game.Overlays.Chat
         public void TextBoxKillFocus() => chatTextBox.KillFocus();
 
         [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        [Resolved]
         private Bindable<Channel> currentChannel { get; set; } = null!;
 
         private Container chattingTextContainer = null!;
         private OsuSpriteText chattingText = null!;
         private Container searchIconContainer = null!;
         private ChatTextBox chatTextBox = null!;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
 
         private const float chatting_text_width = 220;
         private const float search_icon_width = 40;
         private const float padding = 5;
 
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colourProvider)
+        private void load()
         {
             RelativeSizeAxes = Axes.X;
             Height = HEIGHT;
 
             Children = new Drawable[]
             {
-                new Box
+                background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = colourProvider.Background5,
                 },
                 new GridContainer
                 {
@@ -79,7 +84,6 @@ namespace osu.Game.Overlays.Chat
                                 {
                                     MaxWidth = chatting_text_width - padding * 2,
                                     Font = OsuFont.Torus,
-                                    Colour = colourProvider.Background1,
                                     Anchor = Anchor.CentreRight,
                                     Origin = Anchor.CentreRight,
                                 },
@@ -121,6 +125,13 @@ namespace osu.Game.Overlays.Chat
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            // scosu: follows the accent colour live, as the rest of the chat overlay does.
+            accentHue.BindValueChanged(_ =>
+            {
+                background.Colour = colourProvider.Background5;
+                chattingText.Colour = colourProvider.Background1;
+            }, true);
 
             chatTextBox.Current.ValueChanged += chatTextBoxChange;
             chatTextBox.OnCommit += chatTextBoxCommit;

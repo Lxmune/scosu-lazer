@@ -5,17 +5,12 @@ using System;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
-using osuTK;
 
 namespace osu.Game.Screens.Menu.Hub
 {
@@ -29,9 +24,6 @@ namespace osu.Game.Screens.Menu.Hub
         /// Opening the hub again within this doesn't ask again.
         /// </summary>
         private static readonly TimeSpan refresh_interval = TimeSpan.FromSeconds(30);
-
-        private const float row_height = 14;
-        private const float bar_width = 64;
 
         [Resolved]
         private IAPIProvider api { get; set; } = null!;
@@ -133,7 +125,7 @@ namespace osu.Game.Screens.Menu.Hub
             SetEyebrowDetail(ScosuDailyStrings.TasksDone(tasks.CompletedCount, tasks.Tasks.Count));
 
             foreach (var task in tasks.Tasks)
-                Body.Add(createRow(task));
+                Body.Add(new DailyTaskRow(task));
 
             SetFoot(null, default);
             SetAction(() => game?.OpenUrlExternally($@"{api.Endpoints.WebsiteUrl}/daily-tasks"));
@@ -142,64 +134,6 @@ namespace osu.Game.Screens.Menu.Hub
                 ? LocalisableString.Interpolate($@"{ScosuDailyStrings.DayCounts} · {ScosuDailyStrings.DayStreak(tasks.Streaks.Daily)}")
                 : ScosuDailyStrings.DayStreak(tasks.Streaks.Daily);
         }
-
-        /// <summary>
-        /// A tick, the task in words and its progress bar on the right.
-        /// </summary>
-        private static Drawable createRow(APIDailyTasks.DailyTask task) => new Container
-        {
-            RelativeSizeAxes = Axes.X,
-            Height = row_height,
-            Children = new Drawable[]
-            {
-                new SpriteIcon
-                {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreLeft,
-                    Icon = FontAwesome.Solid.Check,
-                    Size = new Vector2(9),
-                    Colour = task.Completed ? ScosuMenuStyle.VIOLET : ScosuMenuStyle.TEXT_DIM,
-                    Alpha = task.Completed ? 1 : 0.25f,
-                },
-                new Container
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Padding = new MarginPadding { Left = 16, Right = bar_width + 10 },
-                    Child = new TruncatingSpriteText
-                    {
-                        Anchor = Anchor.CentreLeft,
-                        Origin = Anchor.CentreLeft,
-                        RelativeSizeAxes = Axes.X,
-                        Text = DailyTaskFormatting.Describe(task),
-                        Font = ScosuMenuStyle.Body(12),
-                        Colour = task.Completed ? ScosuMenuStyle.TEXT_DIM : osuTK.Graphics.Color4.White,
-                    },
-                },
-                new Container
-                {
-                    Anchor = Anchor.CentreRight,
-                    Origin = Anchor.CentreRight,
-                    Width = bar_width,
-                    Height = 4,
-                    Masking = true,
-                    CornerRadius = 2,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = ScosuMenuStyle.FILL,
-                        },
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Width = DailyTaskFormatting.Progress(task),
-                            Colour = task.Completed ? ScosuMenuStyle.VIOLET_INK : ScosuMenuStyle.VIOLET,
-                        },
-                    },
-                },
-            },
-        };
 
         protected override void Dispose(bool isDisposing)
         {

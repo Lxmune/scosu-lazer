@@ -44,6 +44,14 @@ namespace osu.Game.Database
         /// <returns>The request object.</returns>
         protected abstract ArchiveDownloadRequest<T> CreateDownloadRequest(T model, bool minimiseDownloadSize);
 
+        /// <summary>
+        /// scosu: called with what a download imported as, before the download is over, to tie it to the <paramref name="model"/> it was
+        /// downloaded for.
+        /// </summary>
+        protected virtual void PostImport(T model, IReadOnlyList<Live<TModel>> imported)
+        {
+        }
+
         protected bool Download(T model, bool minimiseDownloadSize, TModel? originalModel)
         {
             if (!canDownload(model)) return false;
@@ -72,7 +80,13 @@ namespace osu.Game.Database
                         if (originalModel != null)
                             importSuccessful = (await importer.ImportAsUpdate(notification, new ImportTask(filename), originalModel).ConfigureAwait(false)) != null;
                         else
-                            importSuccessful = (await importer.Import(notification, new[] { new ImportTask(filename) }).ConfigureAwait(false)).Any();
+                        {
+                            var imported = (await importer.Import(notification, new[] { new ImportTask(filename) }).ConfigureAwait(false)).ToList();
+                            importSuccessful = imported.Any();
+
+                            if (importSuccessful)
+                                PostImport(request.Model, imported);
+                        }
                     }
                     finally
                     {

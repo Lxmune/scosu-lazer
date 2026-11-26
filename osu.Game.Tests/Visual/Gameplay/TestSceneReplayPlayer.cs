@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Screens;
@@ -263,6 +264,33 @@ namespace osu.Game.Tests.Visual.Gameplay
             });
             AddWaitStep("wait some", 5);
             AddAssert("rate changed", () => lastRate != Player.GameplayClockContainer.Rate);
+        }
+
+        /// <summary>
+        /// scosu: watching from a combo break shows gameplay from <see cref="ReplayPlayer.StartAt"/>: the clock waits while
+        /// frame-stable playback catches up to it, instead of running past it meanwhile.
+        /// </summary>
+        [Test]
+        public void TestStartAt()
+        {
+            const double start_at = 20000;
+            double latestClockBeforeShown = 0;
+
+            AddStep("create player", () =>
+            {
+                CreatePlayer(new OsuRuleset());
+                Player = new TestReplayPlayer(false) { StartAt = start_at };
+                // Every frame: how far the clock got while what is shown hadn't reached the start time yet.
+                Player.OnUpdate += _ =>
+                {
+                    if (Player.IsLoaded && Player.DrawableRuleset.FrameStableClock.CurrentTime < start_at - 1)
+                        latestClockBeforeShown = Math.Max(latestClockBeforeShown, Player.GameplayClockContainer.CurrentTime);
+                };
+            });
+            AddStep("Load player", () => LoadScreen(Player));
+            AddUntilStep("playback runs past start time", () => Player.IsLoaded && Player.GameplayClockContainer.IsRunning
+                                                               && Player.DrawableRuleset.FrameStableClock.CurrentTime > start_at + 500);
+            AddAssert("clock waited at start time", () => latestClockBeforeShown, () => Is.EqualTo(start_at).Within(20));
         }
 
         private void loadPlayerWithBeatmap(IBeatmap? beatmap = null)

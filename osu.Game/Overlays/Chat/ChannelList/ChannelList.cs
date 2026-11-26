@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -20,6 +21,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.Chat;
 using osu.Game.Overlays.Chat.Listing;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Chat.ChannelList
@@ -48,16 +50,28 @@ namespace osu.Game.Overlays.Chat.ChannelList
 
         private ChannelListItem selector = null!;
         private TextBox searchTextBox = null!;
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
+
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            // scosu: follows the accent colour live, as the rest of the chat overlay does.
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background6, true);
+        }
 
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colourProvider)
+        private void load()
         {
             Children = new Drawable[]
             {
-                new Box
+                background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = colourProvider.Background6,
                 },
                 scroll = new OsuScrollContainer
                 {

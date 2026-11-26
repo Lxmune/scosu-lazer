@@ -231,6 +231,12 @@ namespace osu.Game.Scoring
         [Ignored]
         public List<HitEvent> HitEvents { get; set; } = new List<HitEvent>();
 
+        /// <summary>
+        /// scosu: what the play did, as the server answered its submission. Only set on a play just submitted, for its results screen.
+        /// </summary>
+        [Ignored]
+        public APIPlayOutcome? ScosuOutcome { get; set; }
+
         [Ignored]
         public List<HealthValue> HealthGraph { get; set; } = new List<HealthValue>();
 

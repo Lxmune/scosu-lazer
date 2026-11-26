@@ -56,6 +56,11 @@ namespace osu.Game.Screens.Play
 
         public ReplayOverlay ReplayOverlay { get; private set; } = null!;
 
+        /// <summary>
+        /// scosu: where to start watching (from the results screen's "watch from" on a combo break), instead of the beginning.
+        /// </summary>
+        public double? StartAt { get; init; }
+
         protected override bool CheckModsAllowFailure()
         {
             // autoplay should be able to fail if the beatmap is not humanly beatable
@@ -163,6 +168,34 @@ namespace osu.Game.Screens.Play
             config.BindWith(OsuSetting.BeatmapSkins, rulesetSkinProvider.BeatmapSkins);
             config.BindWith(OsuSetting.BeatmapColours, rulesetSkinProvider.BeatmapColours);
             config.BindWith(OsuSetting.BeatmapHitsounds, rulesetSkinProvider.BeatmapHitsounds);
+        }
+
+        protected override void StartGameplay()
+        {
+            base.StartGameplay();
+
+            if (StartAt is double time)
+            {
+                // Frame-stable playback simulates everything up to the seek target first, a few frames' worth each update.
+                // The clock waits for that to finish: running meanwhile, it could pass the target (and what it leads up to)
+                // before anything is shown.
+                GameplayClockContainer.Stop();
+                Seek(Math.Clamp(time, GameplayClockContainer.StartTime, GameplayState.Beatmap.GetLastObjectTime()));
+                waitingForStartAt = true;
+            }
+        }
+
+        private bool waitingForStartAt;
+
+        protected override void Update()
+        {
+            base.Update();
+
+            if (waitingForStartAt && DrawableRuleset.FrameStableClock.CurrentTime >= GameplayClockContainer.CurrentTime - 1)
+            {
+                waitingForStartAt = false;
+                GameplayClockContainer.Start();
+            }
         }
 
         protected override void PrepareReplay()

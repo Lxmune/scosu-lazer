@@ -179,7 +179,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Match.BeatmapSelect
                                                         d.AutoSizeAxes = Axes.Both;
                                                         d.Margin = new MarginPadding { Top = 1 };
                                                         d.AddText("mapped by ", t => t.Colour = colourProvider.Content2);
-                                                        d.AddUserLink(beatmapSet.Author);
+                                                        d.AddOsuProfileLink(beatmapSet.Author);
                                                     }),
                                                     beatmapAttributesText = new OsuTextFlowContainer
                                                     {

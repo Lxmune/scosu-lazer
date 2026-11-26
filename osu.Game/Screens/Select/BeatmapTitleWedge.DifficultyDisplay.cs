@@ -247,7 +247,7 @@ namespace osu.Game.Screens.Select
                 {
                     ratingAndNameContainer.FadeIn(300, Easing.OutQuint);
                     difficultyText.Text = beatmap.Value.BeatmapInfo.DifficultyName;
-                    mapperLink.Action = () => linkHandler?.HandleLink(new LinkDetails(LinkAction.OpenUserProfile, beatmap.Value.Metadata.Author));
+                    mapperLink.Action = () => linkHandler?.HandleLink(OsuWebsiteProfile.LinkFor(beatmap.Value.Metadata.Author));
                     mapperText.Text = beatmap.Value.Metadata.Author.Username;
                 }
 

@@ -13,9 +13,32 @@ namespace osu.Game.Localisation
         private const string prefix = @"osu.Game.Resources.Localisation.ScosuResults";
 
         /// <summary>
-        /// "Score lost"
+        /// "Score Lost"
         /// </summary>
-        public static LocalisableString ScoreLostHeader => new TranslatableString(getKey(@"score_lost_header"), @"Score lost");
+        public static LocalisableString ScoreLostHeader => new TranslatableString(getKey(@"score_lost_header"), @"Score Lost");
+
+        /// <summary>
+        /// "Where each circle was hit, turned so the arrow points the way the cursor came from. Brighter: more hits there. ×: hits outside the circle."
+        /// </summary>
+        public static LocalisableString HeatmapLegend => new TranslatableString(getKey(@"heatmap_legend"),
+            @"Where each circle was hit, turned so the arrow points the way the cursor came from. Brighter: more hits there. ×: hits outside the circle.");
+
+        /// <summary>
+        /// "This play's judgements don't say where its circles were hit, so there's nothing to place on the heatmap."
+        /// </summary>
+        public static LocalisableString HeatmapUnavailable => new TranslatableString(getKey(@"heatmap_unavailable"),
+            @"This play's judgements don't say where its circles were hit, so there's nothing to place on the heatmap.");
+
+        /// <summary>
+        /// "Early / Late"
+        /// </summary>
+        public static LocalisableString EarlyLateTitle => new TranslatableString(getKey(@"early_late_title"), @"Early / Late");
+
+        /// <summary>
+        /// "{0} early · {1} late"
+        /// </summary>
+        public static LocalisableString EarlyLateShares(LocalisableString early, LocalisableString late) => new TranslatableString(getKey(@"early_late_shares"),
+            @"{0} early · {1} late", early, late);
 
         /// <summary>
         /// "Of the maximum"

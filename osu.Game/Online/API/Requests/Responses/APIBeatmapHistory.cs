@@ -69,8 +69,17 @@ namespace osu.Game.Online.API.Requests.Responses
             [JsonProperty("beatmap_max_combo")]
             public int BeatmapMaxCombo { get; set; }
 
+            /// <summary>
+            /// Circles and slider heads missed.
+            /// </summary>
             [JsonProperty("misses")]
             public long Misses { get; set; }
+
+            /// <summary>
+            /// Slider ticks and repeats missed (counted with <see cref="Misses"/> by servers before 2026.11.26).
+            /// </summary>
+            [JsonProperty("slider_breaks")]
+            public long SliderBreaks { get; set; }
 
             [JsonProperty("full_combo")]
             public bool FullCombo { get; set; }

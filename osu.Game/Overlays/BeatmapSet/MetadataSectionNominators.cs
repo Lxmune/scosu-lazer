@@ -46,7 +46,7 @@ namespace osu.Game.Overlays.BeatmapSet
 
                     nominatorsFound++;
 
-                    loaded.AddUserLink(new APIUser
+                    loaded.AddOsuProfileLink(new APIUser
                     {
                         Username = user.Username,
                         Id = nominatorId,

@@ -1,20 +1,26 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Database;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Localisation;
+using osu.Game.Online.API;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play.HUD;
@@ -40,6 +46,30 @@ namespace osu.Game.Screens.Ranking.Expanded
 
         [Resolved]
         private ScoreManager scoreManager { get; set; } = null!;
+
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        /// <summary>
+        /// scosu: where the play's combo broke, when its judgements are known.
+        /// </summary>
+        private ComboBreakStrip? breakStrip;
+
+        /// <summary>
+        /// scosu: the accuracy circle's full height, which it gives up some of when the statistics need the room (see <see cref="UpdateAfterChildren"/>).
+        /// </summary>
+        private const float accuracy_circle_height = 230;
+
+        private const float accuracy_circle_min_height = 150;
+
+        /// <summary>
+        /// scosu: the space kept between the last row of statistics and the "Played on" line.
+        /// </summary>
+        private const float played_on_gap = 6;
+
+        private Container accuracyCircleContainer = null!;
+        private FillFlowContainer statisticsFlow = null!;
+        private Drawable? playedOn;
 
         /// <summary>
         /// Creates a new <see cref="ExpandedPanelMiddleContent"/>.
@@ -75,16 +105,38 @@ namespace osu.Game.Screens.Ranking.Expanded
             {
                 new AccuracyStatistic(score.Accuracy),
                 new ComboStatistic(score.MaxCombo, score.GetMaximumAchievableCombo()),
-                new PerformanceStatistic(score),
             };
+
+            // scosu: a play just submitted shows the ranked score it added (scosu ranks by score); its pp move to the line under the panel.
+            // Other plays show no pp on a server that ranks by score: it isn't what the play is ranked by there.
+            if (score.ScosuOutcome is APIPlayOutcome outcome)
+                topStatistics.Add(new RankedScoreStatistic(outcome));
+            else if (!api.Endpoints.RanksByStableScore)
+                topStatistics.Add(new PerformanceStatistic(score));
 
             var bottomStatistics = new List<HitResultStatistic>();
 
             foreach (var result in score.GetStatisticsForDisplay())
                 bottomStatistics.Add(new HitResultStatistic(result));
 
+            var judgementStatistics = bottomStatistics.Where(s => s.Result <= HitResult.Perfect).Cast<StatisticDisplay>().ToList();
+
+            // scosu: osu! plays count their slider breaks as a judgement, as osu!stable players do.
+            if (api.Endpoints.RanksByStableScore && score.Ruleset.OnlineID == 0)
+                judgementStatistics.Add(new SliderBreakStatistic(score.Statistics));
+
             statisticDisplays.AddRange(topStatistics);
-            statisticDisplays.AddRange(bottomStatistics);
+            statisticDisplays.AddRange(judgementStatistics);
+            statisticDisplays.AddRange(bottomStatistics.Where(s => s.Result > HitResult.Perfect));
+
+            // scosu: where the combo broke, for a play whose judgements are known (one just played, or a replay just watched).
+            if (score.HitEvents.Count > 0 && score.Ruleset.IsLegacyRuleset())
+            {
+                var analysis = ComboBreakAnalysis.FromHitEvents(score.HitEvents);
+
+                if (analysis.Breaks.Count > 0)
+                    breakStrip = new ComboBreakStrip(score, analysis);
+            }
 
             AddInternal(new FillFlowContainer
             {
@@ -103,13 +155,13 @@ namespace osu.Game.Screens.Ranking.Expanded
                         Children = new Drawable[]
                         {
                             new ClickableMetadata(beatmap.OnlineID, metadata),
-                            new Container
+                            accuracyCircleContainer = new Container
                             {
                                 Anchor = Anchor.TopCentre,
                                 Origin = Anchor.TopCentre,
                                 Margin = new MarginPadding { Top = 40 },
                                 RelativeSizeAxes = Axes.X,
-                                Height = 230,
+                                Height = accuracy_circle_height,
                                 Child = new AccuracyCircle(score, withFlair)
                                 {
                                     Anchor = Anchor.Centre,
@@ -125,6 +177,15 @@ namespace osu.Game.Screens.Ranking.Expanded
                                 Alpha = 0,
                                 AlwaysPresent = true
                             },
+                            // scosu: the score against the beatmap's maximum, and what breaks and judgements cost.
+                            ScoreShareBar.IsAvailable(score, api)
+                                ? new ScoreShareBar(score, withFlair)
+                                {
+                                    Anchor = Anchor.TopCentre,
+                                    Origin = Anchor.TopCentre,
+                                    Margin = new MarginPadding { Bottom = 8 },
+                                }
+                                : Empty(),
                             new FillFlowContainer
                             {
                                 Anchor = Anchor.TopCentre,
@@ -189,7 +250,7 @@ namespace osu.Game.Screens.Ranking.Expanded
                             },
                         }
                     },
-                    new FillFlowContainer
+                    statisticsFlow = new FillFlowContainer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
@@ -197,6 +258,7 @@ namespace osu.Game.Screens.Ranking.Expanded
                         Spacing = new Vector2(0, 5),
                         Children = new Drawable[]
                         {
+                            breakStrip?.With(s => s.Margin = new MarginPadding { Bottom = 2 }) ?? Empty(),
                             new GridContainer
                             {
                                 RelativeSizeAxes = Axes.X,
@@ -211,7 +273,7 @@ namespace osu.Game.Screens.Ranking.Expanded
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
-                                Content = new[] { bottomStatistics.Where(s => s.Result <= HitResult.Perfect).ToArray() },
+                                Content = new[] { judgementStatistics.Cast<Drawable>().ToArray() },
                                 RowDimensions = new[]
                                 {
                                     new Dimension(GridSizeMode.AutoSize),
@@ -233,7 +295,74 @@ namespace osu.Game.Screens.Ranking.Expanded
             });
 
             if (score.Date != default)
-                AddInternal(new PlayedOnText(score.Date, true));
+            {
+                if (score.ScosuOutcome == null)
+                    AddInternal(playedOn = new PlayedOnText(score.Date, true));
+                else
+                    AddInternal(playedOn = createPlayedOnWithPerformance(beatmapDifficultyCache));
+            }
+        }
+
+        /// <summary>
+        /// scosu: "Played on ... · 312 pp", for a play whose ranked score took the pp's place.
+        /// </summary>
+        private Drawable createPlayedOnWithPerformance(BeatmapDifficultyCache difficultyCache)
+        {
+            OsuSpriteText performance;
+
+            var line = new FillFlowContainer
+            {
+                Anchor = Anchor.BottomCentre,
+                Origin = Anchor.BottomCentre,
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Horizontal,
+                Children = new Drawable[]
+                {
+                    new PlayedOnText(score.Date, true)
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                    },
+                    performance = new OsuSpriteText
+                    {
+                        Anchor = Anchor.CentreLeft,
+                        Origin = Anchor.CentreLeft,
+                        Font = OsuFont.GetFont(size: 10, weight: FontWeight.SemiBold),
+                    },
+                }
+            };
+
+            ScorePerformance.CalculateAsync(score, difficultyCache).ContinueWith(task =>
+            {
+                if (task.IsCompletedSuccessfully && task.GetResultSafely() is double pp)
+                {
+                    Schedule(() => performance.Text = LocalisableString.Interpolate(
+                        $@" · {ScosuOutcomeStrings.Performance(Math.Round(pp, MidpointRounding.AwayFromZero).ToLocalisableString(@"N0"))}"));
+                }
+            });
+
+            return line;
+        }
+
+        /// <summary>
+        /// scosu: the panel is a fixed size, and the score bar and break strip take room that its statistics need (osu! plays with slider ticks have
+        /// a third row of them). The accuracy circle gives up as much height as it takes for the last row to end above the "Played on" line,
+        /// and takes it back when there is room.
+        /// </summary>
+        protected override void UpdateAfterChildren()
+        {
+            base.UpdateAfterChildren();
+
+            float statisticsBottom = statisticsFlow.ToSpaceOfOtherDrawable(new Vector2(0, statisticsFlow.DrawHeight), this).Y;
+            float limit = playedOn != null
+                ? playedOn.ToSpaceOfOtherDrawable(Vector2.Zero, this).Y - played_on_gap
+                : DrawHeight - Padding.Bottom;
+
+            float height = Math.Clamp(accuracyCircleContainer.Height - (statisticsBottom - limit), accuracy_circle_min_height, accuracy_circle_height);
+
+            // Half a pixel either way is settled: the layout converges in a frame or two, before the content fades in.
+            if (Math.Abs(height - accuracyCircleContainer.Height) > 0.5f)
+                accuracyCircleContainer.Height = height;
         }
 
         protected override void LoadComplete()
@@ -249,6 +378,8 @@ namespace osu.Game.Screens.Ranking.Expanded
                     scoreCounter.Current = scoreManager.GetBindableTotalScore(score);
 
                     double delay = 0;
+
+                    breakStrip?.Appear();
 
                     foreach (var stat in statisticDisplays)
                     {

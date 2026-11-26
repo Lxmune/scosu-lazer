@@ -1101,9 +1101,8 @@ namespace osu.Game.Tests.Visual.Navigation
             }, 15);
 
             AddAssert("all notifications = 15", () => Game.Notifications.AllNotifications.Count(), () => Is.EqualTo(15));
-            AddStep("Hold escape", () => InputManager.PressKey(Key.Escape));
+            pushEscape();
             AddUntilStep("confirmation dialog shown", () => Game.ChildrenOfType<DialogOverlay>().Single().CurrentDialog is ConfirmExitDialog);
-            AddStep("Release escape", () => InputManager.ReleaseKey(Key.Escape));
 
             AddStep("cancel exit", () => InputManager.Key(Key.Escape));
             AddAssert("dialog dismissed", () => Game.ChildrenOfType<DialogOverlay>().Single().CurrentDialog == null);
@@ -1117,11 +1116,7 @@ namespace osu.Game.Tests.Visual.Navigation
                 });
             });
 
-            AddStep("Hold escape", () => InputManager.PressKey(Key.Escape));
-            AddUntilStep("Wait for intro", () => Game.ScreenStack.CurrentScreen is IntroScreen);
-            AddStep("Release escape", () => InputManager.ReleaseKey(Key.Escape));
-
-            AddUntilStep("Wait for game exit", () => Game.ScreenStack.CurrentScreen == null);
+            exitGameViaEscapeAndDialog();
         }
 
         [Test]
@@ -1152,29 +1147,25 @@ namespace osu.Game.Tests.Visual.Navigation
 
             pushEscape(); // returns to osu! logo
 
-            AddStep("Hold escape", () => InputManager.PressKey(Key.Escape));
-            AddUntilStep("Wait for intro", () => Game.ScreenStack.CurrentScreen is IntroScreen);
-            AddStep("Release escape", () => InputManager.ReleaseKey(Key.Escape));
-            AddUntilStep("Wait for game exit", () => Game.ScreenStack.CurrentScreen == null);
+            exitGameViaEscapeAndDialog();
             AddStep("test dispose doesn't crash", () => Game.Dispose());
         }
 
+        /// <summary>
+        /// scosu: escape at the logo asks before exiting (no hold-to-exit), and escape again keeps playing.
+        /// </summary>
         [Test]
-        public void TestExitWithHoldDisabled()
+        public void TestEscapeAtLogoAsksToExit()
         {
             AddUntilStep("wait for dialog overlay", () => Game.ChildrenOfType<DialogOverlay>().SingleOrDefault() != null);
 
-            AddStep("set hold delay to 0", () => Game.LocalConfig.SetValue(OsuSetting.UIHoldActivationDelay, 0.0));
-
-            AddStep("press escape twice rapidly", () =>
-            {
-                InputManager.Key(Key.Escape);
-                Schedule(InputManager.Key, Key.Escape);
-            });
+            pushEscape();
+            AddUntilStep("exit dialog is shown", () => Game.ChildrenOfType<DialogOverlay>().Single().CurrentDialog is ConfirmExitDialog);
+            AddAssert("still in the menu", () => Game.ScreenStack.CurrentScreen is MainMenu);
 
             pushEscape();
-
-            AddAssert("exit dialog is shown", () => Game.Dependencies.Get<IDialogOverlay>().CurrentDialog is ConfirmExitDialog);
+            AddUntilStep("dialog dismissed", () => Game.ChildrenOfType<DialogOverlay>().Single().CurrentDialog == null);
+            AddAssert("still in the menu", () => Game.ScreenStack.CurrentScreen is MainMenu);
         }
 
         [Test]
@@ -1423,6 +1414,15 @@ namespace osu.Game.Tests.Visual.Navigation
 
         private void pushEscape() =>
             AddStep("Press escape", () => InputManager.Key(Key.Escape));
+
+        private void exitGameViaEscapeAndDialog()
+        {
+            pushEscape();
+            AddUntilStep("exit dialog is shown", () => Game.ChildrenOfType<DialogOverlay>().Single().CurrentDialog is ConfirmExitDialog);
+            AddStep("let me out", () => InputManager.Key(Key.Enter));
+            AddUntilStep("Wait for intro", () => Game.ScreenStack.CurrentScreen is IntroScreen);
+            AddUntilStep("Wait for game exit", () => Game.ScreenStack.CurrentScreen == null);
+        }
 
         private void exitViaEscapeAndConfirm()
         {

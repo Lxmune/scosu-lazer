@@ -3,6 +3,7 @@
 
 using osu.Framework;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -11,6 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Menu;
 using osuTK;
 
 namespace osu.Game.Overlays.Chat
@@ -19,15 +21,20 @@ namespace osu.Game.Overlays.Chat
     {
         public Drawable DragBar { get; private set; } = null!;
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
+
+        [Resolved]
+        private OverlayColourProvider colourProvider { get; set; } = null!;
+
         [BackgroundDependencyLoader]
-        private void load(OverlayColourProvider colourProvider)
+        private void load()
         {
             Children = new[]
             {
-                new Box
+                background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = colourProvider.Background3,
                 },
                 new GridContainer
                 {
@@ -65,9 +72,20 @@ namespace osu.Game.Overlays.Chat
                     Alpha = RuntimeInfo.IsMobile ? 1 : 0,
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    Colour = colourProvider.Background4,
                 }
             };
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            // scosu: follows the accent colour live, as the rest of the chat overlay does.
+            accentHue.BindValueChanged(_ =>
+            {
+                background.Colour = colourProvider.Background3;
+                DragBar.Colour = colourProvider.Background4;
+            }, true);
         }
 
         protected override bool OnHover(HoverEvent e)

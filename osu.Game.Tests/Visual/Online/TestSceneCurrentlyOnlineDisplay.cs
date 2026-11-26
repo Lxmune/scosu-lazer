@@ -13,6 +13,8 @@ using osu.Game.Online.Metadata;
 using osu.Game.Online.Spectator;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dashboard.CurrentlyOnline;
+using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.OnlinePlay.Match.Components;
 using osu.Game.Tests.Visual.Metadata;
 using osu.Game.Tests.Visual.Spectator;
 using osu.Game.Users;
@@ -118,6 +120,49 @@ namespace osu.Game.Tests.Visual.Online
 
             AddStep("Remove playing user", () => metadataClient.UserPresenceUpdated(streamingUser.Id, null));
             AddUntilStep("Panel no longer present", () => !currentlyOnline.ChildrenOfType<OnlineUserPanel>().Any());
+            AddStep("End watching user presence", () => token.Dispose());
+        }
+
+        /// <summary>
+        /// scosu: other players' panels offer to message them, next to spectate.
+        /// </summary>
+        [Test]
+        public void TestSendMessageButton()
+        {
+            IDisposable token = null!;
+
+            AddStep("Begin watching user presence", () => token = metadataClient.BeginWatchingUserPresence());
+            AddStep("Add online user", () => metadataClient.UserPresenceUpdated(streamingUser.Id, new UserPresence { Status = UserStatus.Online, Activity = new UserActivity.ChoosingBeatmap() }));
+            AddUntilStep("player can be messaged", () => messageButtonsOf(streamingUser.Id) == 1);
+            AddStep("End watching user presence", () => token.Dispose());
+        }
+
+        private OnlineUserPanel? panelOf(int userId) => currentlyOnline.ChildrenOfType<OnlineUserPanel>().FirstOrDefault(p => p.User.Id == userId);
+
+        private int messageButtonsOf(int userId) => panelOf(userId)?.ChildrenOfType<PurpleRoundedButton>().Count(b => b.Text.Equals(UsersStrings.CardSendMessage)) ?? 0;
+
+        /// <summary>
+        /// scosu: players show as soon as they are looked up (not on a 2 second timer), with the loading spinner up until then.
+        /// </summary>
+        [Test]
+        public void TestPlayersShownPromptlyWithLoadingUntilThen()
+        {
+            IDisposable token = null!;
+            double addedAt = 0;
+
+            AddUntilStep("list loaded", () => currentlyOnline.ChildrenOfType<RealtimeUserList>().Any());
+            AddAssert("loading while no players are shown", () => currentlyOnline.Loading.Value);
+
+            AddStep("Begin watching user presence", () => token = metadataClient.BeginWatchingUserPresence());
+            AddStep("Add online users", () =>
+            {
+                addedAt = Time.Current;
+                for (int id = 2; id < 6; id++)
+                    metadataClient.UserPresenceUpdated(id, new UserPresence { Status = UserStatus.Online, Activity = new UserActivity.ChoosingBeatmap() });
+            });
+            AddUntilStep("all panels shown", () => currentlyOnline.ChildrenOfType<OnlineUserPanel>().Count() == 4);
+            AddAssert("shown well within the old 2 second wait", () => Time.Current - addedAt, () => Is.LessThan(1000));
+            AddAssert("no longer loading", () => currentlyOnline.Loading.Value, () => Is.False);
             AddStep("End watching user presence", () => token.Dispose());
         }
 

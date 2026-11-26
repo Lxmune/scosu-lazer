@@ -351,6 +351,7 @@ namespace osu.Game.Screens.Play
                     // The server computes the osu!stable score and pp of every play itself, and those are the ones its leaderboards use.
                     score.ScoreInfo.LegacyTotalScore = s.TotalScore;
                     score.ScoreInfo.PP = s.PP;
+                    score.ScoreInfo.ScosuOutcome = s.ScosuOutcome;
                 }
 
                 if (queued)

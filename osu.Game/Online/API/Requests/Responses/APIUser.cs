@@ -131,6 +131,12 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty(@"is_online")]
         public bool WasRecentlyOnline;
 
+        /// <summary>
+        /// scosu: whether the player is restricted (osu-web's field). Their profile stays visible, with a banner saying so.
+        /// </summary>
+        [JsonProperty(@"is_restricted")]
+        public bool IsRestricted;
+
         [JsonProperty(@"pm_friends_only")]
         public bool PMFriendsOnly;
 

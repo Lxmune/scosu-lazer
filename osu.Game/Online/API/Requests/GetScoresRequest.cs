@@ -22,6 +22,11 @@ namespace osu.Game.Online.API.Requests
 
         public int ScoresRequested { get; }
 
+        /// <summary>
+        /// Whose scores are asked for.
+        /// </summary>
+        public BeatmapLeaderboardScope Scope => scope;
+
         private readonly IBeatmapInfo beatmapInfo;
         private readonly BeatmapLeaderboardScope scope;
         private readonly IRulesetInfo ruleset;

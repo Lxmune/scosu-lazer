@@ -838,7 +838,10 @@ namespace osu.Game
         /// Present a score's replay immediately.
         /// The user should have already requested this interactively.
         /// </summary>
-        public void PresentScore(IScoreInfo score, ScorePresentType presentType = ScorePresentType.Results)
+        /// <param name="score">The score to show.</param>
+        /// <param name="presentType">Whether to show its results or watch its replay.</param>
+        /// <param name="replayStartTime">scosu: when watching the replay, where to start (see <see cref="ReplayPlayer.StartAt"/>).</param>
+        public void PresentScore(IScoreInfo score, ScorePresentType presentType = ScorePresentType.Results, double? replayStartTime = null)
         {
             Logger.Log($"Beginning {nameof(PresentScore)} with score {score}");
 
@@ -918,7 +921,7 @@ namespace osu.Game
                 switch (presentType)
                 {
                     case ScorePresentType.Gameplay:
-                        screen.Push(new ReplayPlayerLoader(databasedScore));
+                        screen.Push(new ReplayPlayerLoader(databasedScore, replayStartTime));
                         break;
 
                     case ScorePresentType.Results:
@@ -1413,6 +1416,13 @@ namespace osu.Game
                 // leave the migration but just stop telling users about it. if they haven't been playing for this long they are more likely
                 // to setup offset again, or even have different hardware.
                 dialogOverlay.Push(new MigrateNewAudioDialog(wasAlreadyUsing));
+            }
+
+            if (combined < 20261126)
+            {
+                // scosu: mod select's search box no longer starts active, so mod hotkeys work by default.
+                // Older builds saved the previous default (on), which would keep taking the keys.
+                LocalConfig.SetValue(OsuSetting.ModSelectTextSearchStartsActive, false);
             }
 
             if (combined < 20260728)

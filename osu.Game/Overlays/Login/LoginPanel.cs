@@ -204,11 +204,6 @@ namespace osu.Game.Overlays.Login
                                 dropdown.StatusColour = colours.Red;
                                 break;
 
-                            case UserAction.AppearOffline:
-                                configUserStatus.Value = UserStatus.Offline;
-                                dropdown.StatusColour = colours.Gray7;
-                                break;
-
                             case UserAction.SignOut:
                                 api.Logout();
                                 break;
@@ -363,10 +358,6 @@ namespace osu.Game.Overlays.Login
 
                 case UserStatus.DoNotDisturb:
                     dropdown.Current.Value = UserAction.DoNotDisturb;
-                    break;
-
-                case UserStatus.Offline:
-                    dropdown.Current.Value = UserAction.AppearOffline;
                     break;
             }
         }

@@ -32,6 +32,15 @@ namespace osu.Game.Overlays
             }, true);
         }
 
+        /// <summary>
+        /// scosu: opens the dashboard on its list of everyone online.
+        /// </summary>
+        public void ShowCurrentlyOnline()
+        {
+            Header.Current.Value = DashboardOverlayTabs.CurrentlyPlaying;
+            Show();
+        }
+
         protected override DashboardOverlayHeader CreateHeader() => new DashboardOverlayHeader();
 
         public override bool AcceptsFocus => false;

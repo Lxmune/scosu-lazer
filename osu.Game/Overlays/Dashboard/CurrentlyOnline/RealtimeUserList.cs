@@ -26,6 +26,13 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
         public readonly IBindable<UserSortCriteria> SortCriteria = new Bindable<UserSortCriteria>();
         public readonly IBindable<string> SearchText = new Bindable<string>();
 
+        /// <summary>
+        /// scosu: whether the players online when the list opened have been looked up and shown.
+        /// </summary>
+        public IBindable<bool> PlayersShown => playersShown;
+
+        private readonly BindableBool playersShown = new BindableBool();
+
         private readonly IBindableDictionary<int, UserPresence> onlineUserPresences = new BindableDictionary<int, UserPresence>();
         private readonly Dictionary<int, OnlineUserPanel> userPanels = new Dictionary<int, OnlineUserPanel>();
         private readonly OverlayPanelDisplayStyle style;
@@ -68,8 +75,6 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
             onlineUserPresences.BindCollectionChanged(onUserPresenceUpdated, true);
 
             SearchText.BindValueChanged(onSearchTextChanged, true);
-
-            Scheduler.AddDelayed(updateUsers, 2000, true);
         }
 
         private void onSearchTextChanged(ValueChangedEvent<string> search)
@@ -92,6 +97,9 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
 
                 case NotifyDictionaryChangedAction.Add:
                     pendingUsers.AddRange(e.NewItems!.Select(i => i.Key));
+                    // scosu: looked up on the next frame (all the players arriving in one frame together), not on a
+                    // 2 second timer, which left the list empty for seconds after opening it.
+                    Scheduler.AddOnce(updateUsers);
 
                     break;
 
@@ -109,15 +117,6 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
         }
 
         private readonly HashSet<int> pendingUsers = new HashSet<int>();
-
-        protected override void Update()
-        {
-            base.Update();
-
-            // ReSharper disable once InconsistentlySynchronizedField
-            if (pendingUsers.Count > 100)
-                updateUsers();
-        }
 
         private void updateUsers()
         {
@@ -146,8 +145,9 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                         if (presence == null)
                             continue;
 
+                        // scosu: `continue`, not `return`: the rest of the batch still needs its panels.
                         if (userPanels.TryGetValue(user.Id, out _))
-                            return;
+                            continue;
 
                         // This is quite dodgy – it affects the global `UserLookupCache`.
                         //
@@ -163,6 +163,8 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                         updateUserSpectateState(presence.Value, panel);
                         searchContainer.Add(userPanels[user.Id] = panel);
                     }
+
+                    playersShown.Value = true;
                 }));
             }
 

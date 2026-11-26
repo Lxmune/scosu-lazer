@@ -49,6 +49,9 @@ namespace osu.Game.Screens.Ranking.Statistics
 
         private readonly IDictionary<HitResult, int>[] bins;
         private double binSize;
+
+        [Resolved]
+        private OsuColour colours { get; set; } = null!;
         private double hitOffset;
 
         private Bar[]? barDrawables;
@@ -140,10 +143,19 @@ namespace osu.Game.Screens.Ranking.Statistics
                 {
                     new Drawable[]
                     {
-                        new GridContainer
+                        new Container
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Content = new[] { barDrawables }
+                            Children = new Drawable[]
+                            {
+                                // scosu: where each judgement's window ends, behind the bars.
+                                createWindowMarkers(),
+                                new GridContainer
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Content = new[] { barDrawables }
+                                },
+                            }
                         }
                     },
                     new Drawable[]
@@ -204,6 +216,49 @@ namespace osu.Game.Screens.Ranking.Statistics
                     Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE, weight: FontWeight.SemiBold)
                 });
             }
+        }
+
+        /// <summary>
+        /// scosu: a faint line on both sides where each judgement's hit window ends (the 300's, the 100's...), in its colour,
+        /// so how close the hits came to a worse judgement shows. Windows wider than the graph aren't drawn.
+        /// </summary>
+        private Drawable createWindowMarkers()
+        {
+            var markers = new Container { RelativeSizeAxes = Axes.Both };
+            var windows = hitEvents.Select(e => e.HitObject.HitWindows).FirstOrDefault();
+
+            if (windows == null)
+                return markers;
+
+            // The bars span the bins evenly, the centre one over 0.
+            double span = total_timing_distribution_bins * binSize;
+
+            foreach (var result in new[] { HitResult.Perfect, HitResult.Great, HitResult.Good, HitResult.Ok, HitResult.Meh })
+            {
+                if (!windows.IsHitResultAllowed(result))
+                    continue;
+
+                double window = windows.WindowFor(result);
+
+                if (window <= 0 || window >= span / 2)
+                    continue;
+
+                foreach (int side in new[] { -1, 1 })
+                {
+                    markers.Add(new Box
+                    {
+                        RelativePositionAxes = Axes.X,
+                        RelativeSizeAxes = Axes.Y,
+                        Origin = Anchor.TopCentre,
+                        X = (float)(0.5 + side * window / span),
+                        Width = 1,
+                        Colour = colours.ForHitResult(result),
+                        Alpha = 0.35f,
+                    });
+                }
+            }
+
+            return markers;
         }
 
         private partial class Bar : CompositeDrawable

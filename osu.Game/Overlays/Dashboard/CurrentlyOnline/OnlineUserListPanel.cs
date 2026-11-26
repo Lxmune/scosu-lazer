@@ -6,6 +6,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Localisation;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Resources.Localisation.Web;
 using osu.Game.Screens.OnlinePlay.Match.Components;
 using osu.Game.Users;
 
@@ -32,7 +33,8 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                     ColumnDimensions = new[]
                     {
                         new Dimension(),
-                        new Dimension(GridSizeMode.AutoSize)
+                        new Dimension(GridSizeMode.AutoSize),
+                        new Dimension(GridSizeMode.AutoSize),
                     },
                     RowDimensions = new[]
                     {
@@ -51,7 +53,18 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                                 Origin = Anchor.TopCentre,
                                 Action = BeginSpectating,
                                 Enabled = { BindTarget = CanSpectate },
-                            }
+                            },
+                            CanSendMessage
+                                ? new PurpleRoundedButton
+                                {
+                                    Width = 120,
+                                    Margin = new MarginPadding { Left = 2 },
+                                    Text = UsersStrings.CardSendMessage,
+                                    Anchor = Anchor.TopCentre,
+                                    Origin = Anchor.TopCentre,
+                                    Action = SendMessage,
+                                }
+                                : Empty(),
                         }
                     }
                 };

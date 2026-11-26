@@ -6,11 +6,10 @@ using osu.Framework.Extensions.LocalisationExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
+using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.API.Requests;
 using osu.Game.Online.API.Requests.Responses;
@@ -33,8 +32,10 @@ namespace osu.Game.Screens.Ranking.Statistics
         private IAPIProvider api { get; set; } = null!;
 
         private GetScoreBreakdownRequest? request;
+        [Resolved]
+        private OsuColour colours { get; set; } = null!;
+
         private FillFlowContainer rows = null!;
-        private Box bar = null!;
         private Drawable? card;
 
         public ScoreLostBreakdown(ScoreInfo score)
@@ -46,48 +47,14 @@ namespace osu.Game.Screens.Ranking.Statistics
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
+        private void load()
         {
-            InternalChildren = new Drawable[]
+            InternalChild = rows = new FillFlowContainer
             {
-                new FillFlowContainer
-                {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new osuTK.Vector2(0, 8),
-                    Children = new Drawable[]
-                    {
-                        new Container
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            Height = 6,
-                            Masking = true,
-                            CornerRadius = 3,
-                            Children = new Drawable[]
-                            {
-                                new Box
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = colours.Gray3,
-                                },
-                                bar = new Box
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Width = 0,
-                                    Colour = colours.Lime1,
-                                },
-                            }
-                        },
-                        rows = new FillFlowContainer
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                            Spacing = new osuTK.Vector2(0, 4),
-                        },
-                    }
-                },
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new osuTK.Vector2(0, 8),
             };
         }
 
@@ -104,7 +71,9 @@ namespace osu.Game.Screens.Ranking.Statistics
                 return;
 
             request = new GetScoreBreakdownRequest(score.OnlineID);
-            request.Success += breakdown => Schedule(() => show(breakdown));
+            // Not scheduled on this drawable: its card is hidden until now, and hidden drawables don't run their scheduler.
+            // The API already calls back on the update thread, and a request cancelled on disposal never calls back.
+            request.Success += show;
             api.Queue(request);
         }
 
@@ -115,18 +84,39 @@ namespace osu.Game.Screens.Ranking.Statistics
 
             rows.Clear();
 
-            rows.Add(new Row(ScosuResultsStrings.ShareOfMaximum, ScosuResultsStrings.PercentOfMaximum(breakdown.Fraction.ToLocalisableString(@"0.0%"))));
-            rows.Add(new Row(ScosuResultsStrings.ScoreMissing, breakdown.Missing.ToLocalisableString(@"N0")));
+            double share(long part) => (double)part / breakdown.MaxScore;
 
-            // The gap can't be told apart by cause for osu!mania and for plays imported from osu!stable.
+            var tiles = new ScosuTileGrid(2);
+            tiles.AddTile(new ScosuStatTile(ScosuResultsStrings.ShareOfMaximum, breakdown.Fraction.ToLocalisableString(@"0.0%"),
+                ScosuOutcomeStrings.ScoreOfMaximum(ScosuPlayOutcomeFormatter.Compact(breakdown.Score), ScosuPlayOutcomeFormatter.Compact(breakdown.MaxScore)))
+            {
+                ValueColour = colours.Lime1,
+            });
+            tiles.AddTile(new ScosuStatTile(ScosuOutcomeStrings.TileMissing, LocalisableString.Interpolate($@"−{ScosuPlayOutcomeFormatter.Compact(breakdown.Missing)}"),
+                breakdown.Missing.ToLocalisableString(@"N0"))
+            {
+                Muted = breakdown.Missing <= 0,
+            });
+            rows.Add(tiles);
+
+            // What the gap went to. The score earned and its bar are the panel's (the score, and the bar under it), so they aren't repeated here.
+            // The gap can't be told apart by cause for osu!mania and for plays imported from osu!stable: the "missing" tile says it all then.
             if (breakdown.Split is APIScoreBreakdown.ScoreSplit split)
             {
-                rows.Add(new Row(ScosuResultsStrings.LostToComboBreaks, formatLoss(split.ComboLoss, split.Exact)));
-                rows.Add(new Row(ScosuResultsStrings.LostToJudgements, split.JudgementLoss.ToLocalisableString(@"N0")));
+                rows.Add(new ScosuStatisticRow(ScosuResultsStrings.LostToComboBreaks, formatLoss(split.ComboLoss, split.Exact))
+                {
+                    DotColour = colours.Red1,
+                    Detail = share(split.ComboLoss).ToLocalisableString(@"0%"),
+                });
+                rows.Add(new ScosuStatisticRow(ScosuResultsStrings.LostToJudgements, split.JudgementLoss.ToLocalisableString(@"N0"))
+                {
+                    DotColour = colours.GrayA,
+                    Detail = share(split.JudgementLoss).ToLocalisableString(@"0%"),
+                });
             }
 
-            bar.ResizeWidthTo((float)breakdown.Fraction, 300, Easing.OutQuint);
             card?.FadeIn(250, Easing.OutQuint);
+            ScosuStatisticRow.Cascade(rows);
         }
 
         private static LocalisableString formatLoss(long loss, bool exact)
@@ -139,16 +129,6 @@ namespace osu.Game.Screens.Ranking.Statistics
         {
             base.Dispose(isDisposing);
             request?.Cancel();
-        }
-
-        private partial class Row : SimpleStatisticItem
-        {
-            public Row(LocalisableString name, LocalisableString value)
-                : base(name)
-            {
-                Value = value;
-                FontSize = StatisticItem.FONT_SIZE;
-            }
         }
     }
 }

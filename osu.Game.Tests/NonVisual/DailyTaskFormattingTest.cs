@@ -62,22 +62,35 @@ namespace osu.Game.Tests.NonVisual
                 RankedScore = new APIBriefing.ScoreChange { Before = 1_000_000, Now = 3_400_000 },
                 Snipes = new List<APIBriefing.Snipe>
                 {
-                    new APIBriefing.Snipe { Title = "Map A", By = new APIBriefing.PlayerRef { Id = 2, Username = "bob" } },
+                    new APIBriefing.Snipe { Title = "Map A", BeatmapId = 77, By = new APIBriefing.PlayerRef { Id = 2, Username = "bob" } },
                     new APIBriefing.Snipe { Title = "Map B" },
                 },
                 SnipeCount = 5,
-                UnreadMessages = 1,
             };
 
-            var lines = DailyTaskFormatting.ChangeLines(briefing).Select(l => l.ToString()).ToList();
+            var changes = DailyTaskFormatting.ChangeLines(briefing);
+            var lines = changes.Select(l => l.Text.ToString()).ToList();
 
-            Assert.That(lines, Has.Count.EqualTo(6));
+            Assert.That(lines, Has.Count.EqualTo(5));
             Assert.That(lines[0], Does.Contain("#15").And.Contain("+5"));
             Assert.That(lines[1], Does.Contain("+2.4M"));
             Assert.That(lines[2], Does.Contain("bob").And.Contain("Map A"));
             Assert.That(lines[3], Does.Contain("Map B"));
             Assert.That(lines[4], Does.Contain("3"));
-            Assert.That(lines[5], Is.EqualTo("1 unread message"));
+
+            // What each line is about: where clicking it on the briefing card goes.
+            Assert.That(changes.Select(c => c.Kind), Is.EqualTo(new[]
+            {
+                DailyTaskFormatting.BriefingChangeKind.GlobalRank,
+                DailyTaskFormatting.BriefingChangeKind.RankedScore,
+                DailyTaskFormatting.BriefingChangeKind.LostFirst,
+                DailyTaskFormatting.BriefingChangeKind.LostFirst,
+                DailyTaskFormatting.BriefingChangeKind.MoreLostFirsts,
+            }));
+            Assert.That(changes[0].Improved, Is.True);
+            Assert.That(changes[1].Improved, Is.True);
+            Assert.That(changes[2].Improved, Is.False);
+            Assert.That(changes[2].BeatmapId, Is.EqualTo(77));
         }
     }
 }

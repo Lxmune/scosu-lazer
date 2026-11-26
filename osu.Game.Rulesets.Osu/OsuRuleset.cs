@@ -15,6 +15,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Legacy;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Localisation;
 using osu.Game.Localisation.Osu;
 using osu.Game.Overlays.Settings;
@@ -352,11 +353,7 @@ namespace osu.Game.Rulesets.Osu
 
             return new[]
             {
-                new StatisticItem("Performance Breakdown", () => new PerformanceBreakdownChart(score)
-                {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y
-                }),
+                // scosu: no "Performance Breakdown": the servers rank by score, and it only ever showed 0 pp there.
                 new StatisticItem("Timing Distribution", () => new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
@@ -372,15 +369,66 @@ namespace osu.Game.Rulesets.Osu
                         new SimpleStatisticTable(1, new SimpleStatisticItem[]
                         {
                             new AverageHitError(timedHitEvents),
+                            // scosu: how much of the play leant that way.
+                            new EarlyLateShare(timedHitEvents),
                             new UnstableRate(timedHitEvents)
                         })
                     }
                 }, requiresHitEvents: true, fullWidth: false),
-                new StatisticItem("Accuracy Heatmap", () => new AccuracyHeatmap(score, playableBeatmap)
+                new StatisticItem("Accuracy Heatmap", () => createAccuracyHeatmap(score, playableBeatmap), requiresHitEvents: true, fullWidth: false),
+            };
+        }
+
+        /// <summary>
+        /// scosu: the heatmap with what it shows said under it, or why it can't show anything.
+        /// </summary>
+        private static Drawable createAccuracyHeatmap(ScoreInfo score, IBeatmap playableBeatmap)
+        {
+            const float height = 150 + 15 + StatisticItem.FONT_SIZE * 2;
+
+            bool placed = score.HitEvents.Any(e => e.HitObject is HitCircle && e.HitObject is not SliderTailCircle && e.Position != null && e.LastHitObject != null);
+
+            if (!placed)
+            {
+                return new Container
                 {
                     RelativeSizeAxes = Axes.X,
-                    Height = 150 + 15 + StatisticItem.FONT_SIZE * 2,
-                }, requiresHitEvents: true, fullWidth: false),
+                    Height = height,
+                    Child = new OsuTextFlowContainer(t => t.Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE))
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        TextAnchor = Anchor.TopCentre,
+                        Text = ScosuResultsStrings.HeatmapUnavailable,
+                        Alpha = 0.7f,
+                    },
+                };
+            }
+
+            return new FillFlowContainer
+            {
+                RelativeSizeAxes = Axes.X,
+                AutoSizeAxes = Axes.Y,
+                Direction = FillDirection.Vertical,
+                Spacing = new Vector2(8),
+                Children = new Drawable[]
+                {
+                    new AccuracyHeatmap(score, playableBeatmap)
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        Height = 150,
+                    },
+                    new OsuTextFlowContainer(t => t.Font = OsuFont.GetFont(size: StatisticItem.FONT_SIZE - 1))
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        TextAnchor = Anchor.TopCentre,
+                        Text = ScosuResultsStrings.HeatmapLegend,
+                        Alpha = 0.7f,
+                    },
+                }
             };
         }
 

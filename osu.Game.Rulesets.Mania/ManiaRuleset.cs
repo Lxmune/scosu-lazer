@@ -421,11 +421,7 @@ namespace osu.Game.Rulesets.Mania
 
         public override StatisticItem[] CreateStatisticsForScore(ScoreInfo score, IBeatmap playableBeatmap) => new[]
         {
-            new StatisticItem("Performance Breakdown", () => new PerformanceBreakdownChart(score)
-            {
-                RelativeSizeAxes = Axes.X,
-                AutoSizeAxes = Axes.Y
-            }),
+            // scosu: no "Performance Breakdown": the servers rank by score, and it only ever showed 0 pp there.
             new StatisticItem("Timing Distribution", () => new FillFlowContainer
             {
                 RelativeSizeAxes = Axes.X,
@@ -441,6 +437,8 @@ namespace osu.Game.Rulesets.Mania
                     new SimpleStatisticTable(1, new SimpleStatisticItem[]
                     {
                         new AverageHitError(score.HitEvents),
+                        // scosu: how much of the play leant that way.
+                        new EarlyLateShare(score.HitEvents),
                         new UnstableRate(score.HitEvents)
                     })
                 }

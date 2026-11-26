@@ -16,6 +16,7 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Online.Chat;
 using osu.Game.Overlays.Chat.Listing;
+using osu.Game.Screens.Menu;
 using osu.Game.Users.Drawables;
 using osuTK;
 using osuTK.Input;
@@ -42,6 +43,8 @@ namespace osu.Game.Overlays.Chat.ChannelList
 
         private DelayedLoadWrapper loadWrapper = null!;
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+
         [Resolved]
         private Bindable<Channel> selectedChannel { get; set; } = null!;
 
@@ -67,13 +70,11 @@ namespace osu.Game.Overlays.Chat.ChannelList
                     hoverBox = new Box
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = colourProvider.Background3,
                         Alpha = 0f,
                     },
                     selectBox = new Box
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Colour = colourProvider.Background4,
                         Alpha = 0f,
                     },
                     new GridContainer
@@ -125,6 +126,8 @@ namespace osu.Game.Overlays.Chat.ChannelList
 
             selectedChannel.BindValueChanged(_ => updateState(), true);
             Unread.BindValueChanged(_ => updateState(), true);
+            // scosu: follows the accent colour live, as the rest of the chat overlay does.
+            accentHue.BindValueChanged(_ => updateState());
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -200,6 +203,9 @@ namespace osu.Game.Overlays.Chat.ChannelList
                 return;
 
             bool selected = selectedChannel.Value == Channel;
+
+            hoverBox.Colour = colourProvider.Background3;
+            selectBox.Colour = colourProvider.Background4;
 
             hoverBox.FadeTo(IsHovered ? 1 : 0, IsHovered ? 300 : 200, Easing.OutQuint);
             close?.FadeTo(IsHovered ? 1 : 0, IsHovered ? 300 : 200, Easing.OutQuint);

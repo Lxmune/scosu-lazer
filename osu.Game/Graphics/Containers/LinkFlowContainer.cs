@@ -85,6 +85,12 @@ namespace osu.Game.Graphics.Containers
         public void AddUserLink(IUser user, Action<SpriteText> creationParameters = null)
             => createLink(CreateChunkFor(user.Username, true, CreateSpriteText, creationParameters), new LinkDetails(LinkAction.OpenUserProfile, user), ContextMenuStrings.ViewProfile);
 
+        /// <summary>
+        /// scosu: a beatmap's mapper (or nominator), linked to their profile on osu.ppy.sh (see <see cref="OsuWebsiteProfile"/>).
+        /// </summary>
+        public void AddOsuProfileLink(IUser user, Action<SpriteText> creationParameters = null)
+            => createLink(CreateChunkFor(user.Username, true, CreateSpriteText, creationParameters), OsuWebsiteProfile.LinkFor(user), ContextMenuStrings.ViewProfile);
+
         private void createLink(ITextPart textPart, LinkDetails link, LocalisableString tooltipText, Action action = null)
         {
             Action onClickAction = () =>

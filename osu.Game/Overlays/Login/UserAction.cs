@@ -15,9 +15,6 @@ namespace osu.Game.Overlays.Login
         [LocalisableDescription(typeof(LoginPanelStrings), nameof(LoginPanelStrings.DoNotDisturb))]
         DoNotDisturb,
 
-        [LocalisableDescription(typeof(LoginPanelStrings), nameof(LoginPanelStrings.AppearOffline))]
-        AppearOffline,
-
         [LocalisableDescription(typeof(LoginPanelStrings), nameof(LoginPanelStrings.SignOut))]
         SignOut,
     }

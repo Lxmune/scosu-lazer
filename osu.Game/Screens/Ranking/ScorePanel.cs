@@ -11,9 +11,12 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Audio;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Framework.Utils;
+using osu.Game.Localisation;
 using osu.Game.Scoring;
 using osu.Game.Screens.Ranking.Contracted;
 using osu.Game.Screens.Ranking.Expanded;
@@ -23,8 +26,13 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Ranking
 {
-    public partial class ScorePanel : CompositeDrawable, IStateful<PanelState>
+    public partial class ScorePanel : CompositeDrawable, IStateful<PanelState>, IHasTooltip
     {
+        /// <summary>
+        /// scosu: the expanded panel says that it opens the statistics (as the "analyse" button does).
+        /// </summary>
+        public LocalisableString TooltipText => State == PanelState.Expanded ? ScosuOutcomeStrings.PanelStatisticsHint : default;
+
         /// <summary>
         /// Width of the panel when contracted.
         /// </summary>
@@ -251,7 +259,17 @@ namespace osu.Game.Screens.Ranking
                     middleLayerBackground.FadeColour(expanded_middle_layer_colour, RESIZE_DURATION, Easing.OutQuint);
 
                     bool firstLoad = topLayerContent == null;
-                    topLayerContentContainer.Add(topLayerContent = new ExpandedPanelTopContent(Score.User, firstLoad) { Alpha = 0 });
+                    topLayerContentContainer.Add(topLayerContent = new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Alpha = 0,
+                        Children = new Drawable[]
+                        {
+                            new ExpandedPanelTopContent(Score.User, firstLoad),
+                            // scosu: whether the play counted, and its place on the beatmap, on either side of the avatar.
+                            new ScorePanelStatusBar(Score, displayWithFlair) { ScorePosition = { BindTarget = ScorePosition } },
+                        }
+                    });
                     middleLayerContentContainer.Add(middleLayerContent = new ExpandedPanelMiddleContent(Score, displayWithFlair) { Alpha = 0 });
 
                     // only the first expanded display should happen with flair.

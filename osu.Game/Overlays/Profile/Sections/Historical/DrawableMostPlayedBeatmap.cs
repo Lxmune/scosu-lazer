@@ -88,7 +88,7 @@ namespace osu.Game.Overlays.Profile.Sections.Historical
                                                     }.With(d =>
                                                     {
                                                         d.AddText("mapped by ");
-                                                        d.AddUserLink(mostPlayed.BeatmapSet.Author);
+                                                        d.AddOsuProfileLink(mostPlayed.BeatmapSet.Author);
                                                     }),
                                                 }
                                             },

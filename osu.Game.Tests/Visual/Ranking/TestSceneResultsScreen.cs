@@ -335,8 +335,12 @@ namespace osu.Game.Tests.Visual.Ranking
 
             AddStep("click to right of panel", () =>
             {
+                // scosu: between the panel and the statistics, which start at the top (a click on them doesn't close them).
                 var expandedPanel = this.ChildrenOfType<ScorePanel>().Single(p => p.State == PanelState.Expanded);
-                InputManager.MoveMouseTo(expandedPanel.ScreenSpaceDrawQuad.TopRight + new Vector2(50, 0));
+                var firstCard = this.ChildrenOfType<StatisticItemContainer>().FirstOrDefault();
+                float right = expandedPanel.ScreenSpaceDrawQuad.TopRight.X;
+                float gap = firstCard != null ? (right + firstCard.ScreenSpaceDrawQuad.TopLeft.X) / 2 : right + 50;
+                InputManager.MoveMouseTo(new Vector2(gap, expandedPanel.ScreenSpaceDrawQuad.Centre.Y));
                 InputManager.Click(MouseButton.Left);
             });
 

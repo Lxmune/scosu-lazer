@@ -183,10 +183,10 @@ namespace osu.Game.Screens.Menu
             {
                 IsPrimary = true, // scosu
             });
-            // scosu hides the daily challenge and ranked play, so "multi" leads straight to the lounge
-            // (its submenu would only have held the lounge).
+            // scosu hides ranked play, so "multi" leads straight to the lounge (its submenu would only have held the lounge).
             buttonsPlay.Add(new MainMenuButton(ButtonSystemStrings.Multi, @"button-default-select", OsuIcon.Online, new Color4(94, 63, 186, 255), onMultiplayer, Key.M));
             buttonsPlay.Add(new MainMenuButton(ButtonSystemStrings.Playlists, @"button-default-select", OsuIcon.Tournament, new Color4(94, 63, 186, 255), onPlaylists, Key.L));
+            buttonsPlay.Add(new DailyChallengeButton(@"button-daily-select", new Color4(94, 63, 186, 255), onDailyChallenge, Key.D));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsEdit.Add(new MainMenuButton(EditorStrings.BeatmapEditor.ToLower(), @"button-default-select", OsuIcon.Beatmap, new Color4(238, 170, 0, 255), (_, _) => OnEditBeatmap?.Invoke(), Key.B,

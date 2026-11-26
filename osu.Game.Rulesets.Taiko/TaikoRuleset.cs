@@ -279,11 +279,7 @@ namespace osu.Game.Rulesets.Taiko
 
             return new[]
             {
-                new StatisticItem("Performance Breakdown", () => new PerformanceBreakdownChart(score)
-                {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y
-                }),
+                // scosu: no "Performance Breakdown": the servers rank by score, and it only ever showed 0 pp there.
                 new StatisticItem("Timing Distribution", () => new FillFlowContainer
                 {
                     RelativeSizeAxes = Axes.X,
@@ -299,6 +295,8 @@ namespace osu.Game.Rulesets.Taiko
                         new SimpleStatisticTable(1, new SimpleStatisticItem[]
                         {
                             new AverageHitError(timedHitEvents),
+                            // scosu: how much of the play leant that way.
+                            new EarlyLateShare(timedHitEvents),
                             new UnstableRate(timedHitEvents)
                         })
                     }

@@ -6,6 +6,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Localisation;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Resources.Localisation.Web;
 using osu.Game.Screens.OnlinePlay.Match.Components;
 using osu.Game.Users;
 using osuTK;
@@ -39,14 +40,20 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre
                         },
-                        new PurpleRoundedButton
+                        new GridContainer
                         {
                             RelativeSizeAxes = Axes.X,
-                            Text = ContextMenuStrings.SpectatePlayer,
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Action = BeginSpectating,
-                            Enabled = { BindTarget = CanSpectate },
+                            AutoSizeAxes = Axes.Y,
+                            ColumnDimensions = CanSendMessage
+                                ? new[] { new Dimension(), new Dimension(GridSizeMode.Absolute, 2), new Dimension() }
+                                : new[] { new Dimension() },
+                            RowDimensions = new[] { new Dimension(GridSizeMode.AutoSize) },
+                            Content = new[]
+                            {
+                                CanSendMessage
+                                    ? new Drawable[] { createSpectateButton(), Empty(), createMessageButton() }
+                                    : new Drawable[] { createSpectateButton() }
+                            }
                         }
                     }
                 };
@@ -59,5 +66,20 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                 RelativeSizeAxes = Axes.Both,
             };
         }
+
+        private PurpleRoundedButton createSpectateButton() => new PurpleRoundedButton
+        {
+            RelativeSizeAxes = Axes.X,
+            Text = ContextMenuStrings.SpectatePlayer,
+            Action = BeginSpectating,
+            Enabled = { BindTarget = CanSpectate },
+        };
+
+        private PurpleRoundedButton createMessageButton() => new PurpleRoundedButton
+        {
+            RelativeSizeAxes = Axes.X,
+            Text = UsersStrings.CardSendMessage,
+            Action = SendMessage,
+        };
     }
 }

@@ -676,6 +676,8 @@ namespace osu.Game.Screens.Select
         {
             base.OnEntering(e);
 
+            backgroundAvailable = true;
+
             this.FadeIn();
             onArrivingAtScreen();
         }
@@ -852,7 +854,28 @@ namespace osu.Game.Screens.Select
             }
         }
 
-        private void updateBackgroundDim() => ApplyToBackground(backgroundModeBeatmap =>
+        /// <summary>
+        /// Whether this screen has been entered, and therefore owns a background which can be applied to.
+        /// A screen can report <see cref="ScreenExtensions.IsCurrentScreen"/> before this is the case
+        /// (e.g. the song select nested in the first run setup UI scale preview), where applying to the background throws.
+        /// </summary>
+        private bool backgroundAvailable;
+
+        /// <summary>
+        /// Whether this screen drives the global background (dim / blur / beatmap).
+        /// Disabled for song selects shown in isolation (e.g. the first run setup preview), which have no background of their own.
+        /// </summary>
+        protected virtual bool ControlsBackground => true;
+
+        private void updateBackgroundDim()
+        {
+            if (!ControlsBackground || !backgroundAvailable || !this.IsCurrentScreen())
+                return;
+
+            applyBackgroundDim();
+        }
+
+        private void applyBackgroundDim() => ApplyToBackground(backgroundModeBeatmap =>
         {
             backgroundModeBeatmap.Beatmap = Beatmap.Value;
             backgroundModeBeatmap.IgnoreUserSettings.Value = true;

@@ -133,9 +133,29 @@ namespace osu.Game.Localisation
         public static LocalisableString SinceLastTime => new TranslatableString(getKey(@"since_last_time"), @"Since last time");
 
         /// <summary>
-        /// "Welcome back"
+        /// "Last played {0}"
         /// </summary>
-        public static LocalisableString WelcomeBack => new TranslatableString(getKey(@"welcome_back"), @"Welcome back");
+        public static LocalisableString LastPlayed(string when) => new TranslatableString(getKey(@"last_played"), @"Last played {0}", when);
+
+        /// <summary>
+        /// "Show your profile"
+        /// </summary>
+        public static LocalisableString ShowYourProfile => new TranslatableString(getKey(@"show_your_profile"), @"Show your profile");
+
+        /// <summary>
+        /// "Show today's tasks"
+        /// </summary>
+        public static LocalisableString ShowTasks => new TranslatableString(getKey(@"show_tasks"), @"Show today's tasks");
+
+        /// <summary>
+        /// "Hide the tasks"
+        /// </summary>
+        public static LocalisableString HideTasks => new TranslatableString(getKey(@"hide_tasks"), @"Hide the tasks");
+
+        /// <summary>
+        /// "New tasks in {0}"
+        /// </summary>
+        public static LocalisableString NewTasksIn(string duration) => new TranslatableString(getKey(@"new_tasks_in"), @"New tasks in {0}", duration);
 
         /// <summary>
         /// "Global rank {0} ({1})"
@@ -166,12 +186,6 @@ namespace osu.Game.Localisation
         /// "and {0} more #1s lost"
         /// </summary>
         public static LocalisableString MoreSnipes(int count) => new TranslatableString(getKey(@"more_snipes"), @"and {0} more #1s lost", count);
-
-        /// <summary>
-        /// "{0} unread messages"
-        /// </summary>
-        public static LocalisableString UnreadMessages(int count)
-            => new TranslatableString(getKey(@"unread_messages"), count == 1 ? @"{0} unread message" : @"{0} unread messages", count);
 
         /// <summary>
         /// "Daily tasks: {0}/{1} done, day streak {2}"

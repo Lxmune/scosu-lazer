@@ -341,7 +341,7 @@ namespace osu.Game.Screens.OnlinePlay
                 if (!string.IsNullOrEmpty(beatmap?.Metadata.Author.Username))
                 {
                     authorText.AddText("mapped by ");
-                    authorText.AddUserLink(beatmap.Metadata.Author);
+                    authorText.AddOsuProfileLink(beatmap.Metadata.Author);
                 }
             }
 

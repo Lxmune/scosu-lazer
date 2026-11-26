@@ -105,6 +105,9 @@ namespace osu.Game.Overlays.FirstRunSetup
         {
             public override bool? ApplyModTrackAdjustments => false;
 
+            // this preview lives on its own stack and must never touch the real game's background.
+            protected override bool ControlsBackground => false;
+
             public NestedSongSelect()
             {
                 ControlGlobalMusic = false;
@@ -211,7 +214,8 @@ namespace osu.Game.Overlays.FirstRunSetup
 
             private readonly Type[] isolatedTypes =
             {
-                typeof(OsuGame)
+                typeof(OsuGame),
+                typeof(BackgroundScreenStack)
             };
 
             public DependencyIsolationContainer(IReadOnlyDependencyContainer parentDependencies)

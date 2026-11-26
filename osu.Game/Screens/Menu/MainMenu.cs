@@ -4,7 +4,6 @@
 #nullable disable
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
@@ -78,9 +77,6 @@ namespace osu.Game.Screens.Menu
         private SessionSummaryNotifier sessionSummary { get; set; }
 
         [Resolved]
-        private INotificationOverlay notifications { get; set; }
-
-        [Resolved]
         private MusicController musicController { get; set; }
 
         [Resolved]
@@ -106,14 +102,10 @@ namespace osu.Game.Screens.Menu
 
         protected override bool PlayExitSound => false;
 
-        private Bindable<double> holdDelay;
         private Bindable<bool> loginDisplayed;
         private Bindable<bool> showMobileDisclaimer;
 
-        private HoldToExitGameOverlay holdToExitGameOverlay;
-
         private bool exitConfirmedViaDialog;
-        private bool exitConfirmedViaHoldOrClick;
 
         /// <summary>
         /// How far the background moves up while the menu scrolls a whole screen down to the hub, for depth.
@@ -163,21 +155,8 @@ namespace osu.Game.Screens.Menu
         [BackgroundDependencyLoader(true)]
         private void load(BeatmapListingOverlay beatmapListing, SettingsOverlay settings, OsuConfigManager config, SessionStatics statics, AudioManager audio)
         {
-            holdDelay = config.GetBindable<double>(OsuSetting.UIHoldActivationDelay);
             loginDisplayed = statics.GetBindable<bool>(Static.LoginOverlayDisplayed);
             showMobileDisclaimer = config.GetBindable<bool>(OsuSetting.ShowMobileDisclaimer);
-
-            if (host.CanExit)
-            {
-                AddInternal(holdToExitGameOverlay = new HoldToExitGameOverlay
-                {
-                    Action = () =>
-                    {
-                        exitConfirmedViaHoldOrClick = holdDelay.Value > 0;
-                        this.Exit();
-                    }
-                });
-            }
 
             AddRangeInternal(new[]
             {
@@ -207,7 +186,7 @@ namespace osu.Game.Screens.Menu
                             OnRankedPlay = loadRankedPlay,
                             OnPlaylists = () => this.Push(new Playlists()),
                             OnDailyChallenge = openDailyChallenge,
-                            OnExit = e => exitMenu(e is MouseEvent),
+                            OnExit = _ => exitMenu(),
                             OnHub = () => setHub(!hubOpen),
                             OnBack = () =>
                             {
@@ -369,14 +348,13 @@ namespace osu.Game.Screens.Menu
                         {
                             new HubDock.Item(MenuHubStrings.BackUp, FontAwesome.Solid.ChevronUp, () => setHub(false)),
                             new HubDock.Item(ButtonSystemStrings.Settings, OsuIcon.Settings, () => settings?.ToggleVisibility()),
-                            new HubDock.Item(ButtonSystemStrings.Exit, OsuIcon.CrossCircle, () => exitMenu(true)),
+                            new HubDock.Item(ButtonSystemStrings.Exit, OsuIcon.CrossCircle, exitMenu),
                         })
                         {
                             OnLogo = () => setHub(false),
                         },
                     },
                 },
-                holdToExitGameOverlay?.CreateProxy() ?? Empty()
             });
 
             Buttons.StateChanged += state =>
@@ -518,11 +496,11 @@ namespace osu.Game.Screens.Menu
             this.Push(new EditorLoader());
         }
 
-        private void exitMenu(bool confirmedByClick)
-        {
-            exitConfirmedViaHoldOrClick = confirmedByClick;
-            this.Exit();
-        }
+        /// <summary>
+        /// The exit buttons (the band's and the hub's) and escape at the logo. scosu: asks "Are you sure you want to exit osu!?"
+        /// like osu!stable does, instead of lazer's hold-escape-to-exit (see <see cref="OnExiting"/>).
+        /// </summary>
+        private void exitMenu() => this.Exit();
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -710,9 +688,7 @@ namespace osu.Game.Screens.Menu
                 // we need to have a dialog overlay to confirm in the first place.
                 dialogOverlay != null
                 // if the dialog has already displayed and been accepted by the user, we are good.
-                && !exitConfirmedViaDialog
-                // Only require confirmation if there is either an ongoing operation or the user exited via a non-hold escape press.
-                && (notifications.HasOngoingOperations || !exitConfirmedViaHoldOrClick);
+                && !exitConfirmedViaDialog;
 
             if (requiresConfirmation)
             {
@@ -729,11 +705,7 @@ namespace osu.Game.Screens.Menu
                     {
                         exitConfirmedViaDialog = true;
                         this.Exit();
-                    }, () =>
-                    {
-                        holdToExitGameOverlay.Abort();
-                        Game.CancelRestartOnExit();
-                    }));
+                    }, () => Game.CancelRestartOnExit()));
                 }
 
                 return true;
@@ -775,11 +747,15 @@ namespace osu.Game.Screens.Menu
 
             switch (e.Action)
             {
+                // Reached once the band is back at the logo (see ButtonSystem.goBack()).
                 case GlobalAction.Back:
-                    // In the case of a host being able to exit, the back action is handled by ExitConfirmOverlay.
-                    Debug.Assert(!host.CanExit);
+                    if (!host.CanExit)
+                        return host.SuspendToBackground();
 
-                    return host.SuspendToBackground();
+                    if (this.IsCurrentScreen())
+                        exitMenu();
+
+                    return true;
             }
 
             return false;

@@ -7,7 +7,9 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Localisation;
 using osu.Framework.Screens;
+using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
+using osu.Game.Online.Chat;
 using osu.Game.Screens;
 using osu.Game.Screens.Play;
 
@@ -22,6 +24,15 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
         [Resolved]
         private IPerformFromScreenRunner? performer { get; set; }
 
+        [Resolved]
+        private IAPIProvider api { get; set; } = null!;
+
+        [Resolved]
+        private ChannelManager? channelManager { get; set; }
+
+        [Resolved]
+        private ChatOverlay? chatOverlay { get; set; }
+
         protected OnlineUserPanel(APIUser user)
         {
             User = user;
@@ -31,6 +42,20 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
         protected void BeginSpectating()
         {
             performer?.PerformFromScreen(s => s.Push(new SoloSpectatorScreen(User)));
+        }
+
+        /// <summary>
+        /// scosu: whether the panel offers to message the player (not oneself).
+        /// </summary>
+        protected bool CanSendMessage => !User.Equals(api.LocalUser.Value);
+
+        /// <summary>
+        /// scosu: opens a private chat with the player, as the panel's context menu does.
+        /// </summary>
+        protected void SendMessage()
+        {
+            channelManager?.OpenPrivateChannel(User);
+            chatOverlay?.Show();
         }
 
         public IEnumerable<LocalisableString> FilterTerms { get; }

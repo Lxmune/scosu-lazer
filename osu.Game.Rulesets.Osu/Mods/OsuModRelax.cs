@@ -39,7 +39,7 @@ namespace osu.Game.Rulesets.Osu.Mods
         private double lastStateChangeTime;
 
         private DrawableOsuRuleset ruleset = null!;
-        private IPressHandler pressHandler = null!;
+        private IPressHandler? pressHandler;
 
         private bool hasReplay;
         private bool legacyReplay;
@@ -54,6 +54,21 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         public void ApplyToPlayer(Player player)
         {
+            ensurePressHandler();
+
+            if (!hasReplay)
+                osuInputManager.AllowGameplayInputs = false;
+        }
+
+        /// <summary>
+        /// scosu: also called on the first update, as a playfield can run without a <see cref="Player"/>
+        /// (the results screen's replay analysis), so <see cref="ApplyToPlayer"/> is never called.
+        /// </summary>
+        private void ensurePressHandler()
+        {
+            if (pressHandler != null)
+                return;
+
             if (osuInputManager.ReplayInputHandler != null)
             {
                 hasReplay = true;
@@ -62,16 +77,16 @@ namespace osu.Game.Rulesets.Osu.Mods
                 legacyReplay = ruleset.ReplayScore.ScoreInfo.IsLegacyScore;
 
                 pressHandler = legacyReplay ? new LegacyReplayPressHandler(this) : new PressHandler(this);
-
                 return;
             }
 
             pressHandler = new PressHandler(this);
-            osuInputManager.AllowGameplayInputs = false;
         }
 
         public void Update(Playfield playfield)
         {
+            ensurePressHandler();
+
             if (hasReplay && !legacyReplay)
                 return;
 
@@ -142,6 +157,8 @@ namespace osu.Game.Rulesets.Osu.Mods
                 {
                     PressedActions = new List<OsuAction>()
                 };
+
+                Debug.Assert(pressHandler != null);
 
                 if (down)
                 {

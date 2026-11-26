@@ -267,14 +267,14 @@ namespace osu.Game.Overlays.BeatmapSet
 
                     case 1:
                         infoContainer.AddText(BeatmapsetsStrings.ShowDetailsMappedBy(string.Empty));
-                        infoContainer.AddUserLink(users[0]);
+                        infoContainer.AddOsuProfileLink(users[0]);
                         break;
 
                     case 2:
                         infoContainer.AddText(BeatmapsetsStrings.ShowDetailsMappedBy(string.Empty));
-                        infoContainer.AddUserLink(users[0]);
+                        infoContainer.AddOsuProfileLink(users[0]);
                         infoContainer.AddText(CommonStrings.ArrayAndTwoWordsConnector);
-                        infoContainer.AddUserLink(users[1]);
+                        infoContainer.AddOsuProfileLink(users[1]);
                         break;
 
                     default:
@@ -283,7 +283,7 @@ namespace osu.Game.Overlays.BeatmapSet
 
                         for (int i = 0; i < count; i++)
                         {
-                            infoContainer.AddUserLink(users[i]);
+                            infoContainer.AddOsuProfileLink(users[i]);
 
                             if (i < count - 2)
                                 infoContainer.AddText(CommonStrings.ArrayAndWordsConnector);

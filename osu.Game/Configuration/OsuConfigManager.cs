@@ -41,6 +41,10 @@ namespace osu.Game.Configuration
 
             // scosu: the score display mode isn't a setting here, so a "Classic" saved before it was removed doesn't stay.
             SetValue(OsuSetting.ScoreDisplayMode, ScoringMode.Standardised);
+
+            // scosu: there is no "appear offline", so an offline status saved before it was removed doesn't stay.
+            if (Get<UserStatus>(OsuSetting.UserOnlineStatus) == UserStatus.Offline)
+                SetValue(OsuSetting.UserOnlineStatus, UserStatus.Online);
         }
 
         protected override void InitialiseDefaults()
@@ -66,7 +70,8 @@ namespace osu.Game.Configuration
 
             SetDefault(OsuSetting.RandomSelectAlgorithm, RandomSelectAlgorithm.RandomPermutation);
             SetDefault(OsuSetting.ModSelectHotkeyStyle, ModSelectHotkeyStyle.Sequential);
-            SetDefault(OsuSetting.ModSelectTextSearchStartsActive, true);
+            // scosu: mod hotkeys work as soon as mod select opens (the search box would take the keys).
+            SetDefault(OsuSetting.ModSelectTextSearchStartsActive, false);
 
             SetDefault(OsuSetting.ChatDisplayHeight, ChatOverlay.DEFAULT_HEIGHT, 0.2f, 1f, 0.01f);
 

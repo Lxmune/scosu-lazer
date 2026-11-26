@@ -5,11 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.Chat;
+using osu.Game.Screens.Menu;
 
 namespace osu.Game.Overlays.Chat.Listing
 {
@@ -29,15 +31,25 @@ namespace osu.Game.Overlays.Chat.Listing
         [Resolved]
         private OverlayColourProvider colourProvider { get; set; } = null!;
 
+        private readonly IBindable<int> accentHue = ScosuMenuStyle.AccentHue.GetBoundCopy();
+        private Box background = null!;
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            // scosu: follows the accent colour live, as the rest of the chat overlay does.
+            accentHue.BindValueChanged(_ => background.Colour = colourProvider.Background4, true);
+        }
+
         [BackgroundDependencyLoader]
         private void load()
         {
             Children = new Drawable[]
             {
-                new Box
+                background = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = colourProvider.Background4,
                 },
                 new OsuScrollContainer
                 {

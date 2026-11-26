@@ -228,6 +228,11 @@ namespace osu.Game.Screens.Ranking
 
             // scosu: copies the score's link, which shows its picture card wherever it is pasted.
             buttons.Add(new ShareScoreButton { Score = { BindTarget = SelectedScore } });
+            buttons.Add(new AnalyseScoreButton
+            {
+                Score = { BindTarget = SelectedScore },
+                Action = () => StatisticsPanel.Show(),
+            });
 
             if (Score?.BeatmapInfo != null)
                 buttons.Add(new CollectionButton(Score.BeatmapInfo));

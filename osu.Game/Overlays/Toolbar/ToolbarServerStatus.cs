@@ -277,7 +277,7 @@ namespace osu.Game.Overlays.Toolbar
             flashBackground.FadeOutFromOne(800, Easing.OutQuint);
 
             if (apiState.Value == APIState.Online)
-                dashboard?.Show();
+                dashboard?.ShowCurrentlyOnline();
             else
                 login?.Show();
 

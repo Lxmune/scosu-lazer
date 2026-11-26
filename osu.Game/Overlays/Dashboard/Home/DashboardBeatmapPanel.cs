@@ -121,7 +121,7 @@ namespace osu.Game.Overlays.Dashboard.Home
                                             }.With(c =>
                                             {
                                                 c.AddText("by");
-                                                c.AddUserLink(BeatmapSet.Author);
+                                                c.AddOsuProfileLink(BeatmapSet.Author);
                                                 c.AddArbitraryDrawable(CreateInfo());
                                             })
                                         }

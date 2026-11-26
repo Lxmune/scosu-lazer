@@ -110,10 +110,6 @@ namespace osu.Game.Online.API
 
             configSupporter.Value = me.IsSupporter;
 
-            // `last_visit` is assumed to be `null` if and only if the web-side "hide online presence toggle" is enabled
-            if (me.LastVisit == null)
-                configStatus.Value = UserStatus.Offline;
-
             configPMFriendsOnly.Value = me.PMFriendsOnly;
 
             populatingSettings = false;

@@ -23,7 +23,6 @@ using osu.Game.Online.API;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Online.Metadata;
 using osu.Game.Overlays;
-using osu.Game.Overlays.Dashboard;
 using osu.Game.Users;
 using osuTK;
 using osuTK.Graphics;
@@ -364,14 +363,7 @@ namespace osu.Game.Screens.Menu
             setExpanded(false);
         }
 
-        private void showAll()
-        {
-            if (dashboard == null)
-                return;
-
-            dashboard.Header.Current.Value = DashboardOverlayTabs.CurrentlyPlaying;
-            dashboard.Show();
-        }
+        private void showAll() => dashboard?.ShowCurrentlyOnline();
 
         protected override void PopIn() => this.FadeIn(transition_duration, Easing.OutQuint);
 

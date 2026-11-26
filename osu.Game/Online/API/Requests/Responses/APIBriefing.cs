@@ -39,9 +39,6 @@ namespace osu.Game.Online.API.Requests.Responses
         [JsonProperty("snipe_count")]
         public int SnipeCount { get; set; }
 
-        [JsonProperty("unread_messages")]
-        public int UnreadMessages { get; set; }
-
         [JsonProperty("daily_tasks")]
         public TasksSummary? DailyTasks { get; set; }
 

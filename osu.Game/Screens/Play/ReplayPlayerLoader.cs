@@ -11,8 +11,10 @@ namespace osu.Game.Screens.Play
     {
         public readonly ScoreInfo Score;
 
-        public ReplayPlayerLoader(Score score)
-            : base(() => new ReplayPlayer(score))
+        /// <param name="score">The score to watch.</param>
+        /// <param name="startAt">scosu: where to start watching, or <see langword="null"/> for the beginning.</param>
+        public ReplayPlayerLoader(Score score, double? startAt = null)
+            : base(() => new ReplayPlayer(score) { StartAt = startAt })
         {
             if (score.Replay == null)
                 throw new ArgumentException($"{nameof(score)} must have a non-null {nameof(score.Replay)}.", nameof(score));

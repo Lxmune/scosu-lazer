@@ -38,6 +38,9 @@ namespace osu.Game.Overlays.Toolbar
         public ToolbarUserButton()
         {
             ButtonContent.AutoSizeAxes = Axes.X;
+
+            // scosu: the same 10px each side as the server status and clock next to it (buttons' 20px left uneven gaps).
+            Flow.Padding = new MarginPadding { Horizontal = 10 };
         }
 
         [BackgroundDependencyLoader]

@@ -45,6 +45,10 @@ namespace osu.Game.Overlays.Profile
             Direction = FillDirection.Vertical,
             Children = new Drawable[]
             {
+                new ProfileRestrictedBanner
+                {
+                    User = { BindTarget = User },
+                },
                 topHeaderContainer = new TopHeaderContainer
                 {
                     RelativeSizeAxes = Axes.X,

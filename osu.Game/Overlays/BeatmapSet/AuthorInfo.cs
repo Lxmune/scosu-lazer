@@ -160,7 +160,7 @@ namespace osu.Game.Overlays.BeatmapSet
                     {
                         d.AutoSizeAxes = Axes.Both;
                         d.AddText($"{first} ");
-                        d.AddUserLink(second, s => s.Font = secondFont.With(size: 11));
+                        d.AddOsuProfileLink(second, s => s.Font = secondFont.With(size: 11));
                     }),
                 };
             }

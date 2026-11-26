@@ -64,6 +64,21 @@ namespace osu.Game.Tests.Visual.Online
         }
 
         [Test]
+        public void TestRestrictedBanner()
+        {
+            AddStep("Show restricted user", () => header.User.Value = new UserProfileData(new APIUser
+            {
+                Id = 1001,
+                Username = "Cheater",
+                IsRestricted = true,
+            }, new OsuRuleset().RulesetInfo));
+            AddUntilStep("Banner shown", () => header.ChildrenOfType<ProfileRestrictedBanner>().Single().Alpha, () => Is.EqualTo(1));
+
+            AddStep("Show example user", () => header.User.Value = new UserProfileData(TestSceneUserProfileOverlay.TEST_USER, new OsuRuleset().RulesetInfo));
+            AddUntilStep("Banner hidden", () => header.ChildrenOfType<ProfileRestrictedBanner>().Single().Alpha, () => Is.EqualTo(0));
+        }
+
+        [Test]
         public void TestProfileCoverExpanded()
         {
             AddStep("Set cover to expanded", () => configManager.SetValue(OsuSetting.ProfileCoverExpanded, true));

@@ -38,6 +38,11 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
         private BasicSearchTextBox searchTextBox = null!;
 
         private CancellationTokenSource? listLoadCancellation;
+
+        /// <summary>
+        /// The list on display, once loaded.
+        /// </summary>
+        private RealtimeUserList? shownList;
         private IDisposable? userPresenceWatchToken;
 
         public CurrentlyOnlineDisplay()
@@ -131,7 +136,11 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
             base.LoadComplete();
 
             isConnected.BindTo(metadataClient.IsConnected);
-            isConnected.BindValueChanged(_ => updateUserPresenceState());
+            isConnected.BindValueChanged(_ =>
+            {
+                updateUserPresenceState();
+                updateLoading();
+            });
 
             OverlayState.BindValueChanged(_ => updateUserPresenceState(), true);
 
@@ -150,12 +159,14 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                 SearchText = { BindTarget = searchTextBox.Current }
             };
 
-            loading.Value = true;
+            shownList = null;
+            updateLoading();
             LoadComponentAsync(newList, finishLoad, cancellationSource.Token);
 
             void finishLoad(RealtimeUserList list)
             {
-                loading.Value = false;
+                shownList = list;
+                list.PlayersShown.BindValueChanged(_ => updateLoading(), true);
 
                 if (currentList != null)
                 {
@@ -167,6 +178,12 @@ namespace osu.Game.Overlays.Dashboard.CurrentlyOnline
                 newList.FadeInFromZero(250, Easing.OutQuint);
             }
         }
+
+        /// <summary>
+        /// scosu: the loading spinner stays until the players online are shown, not just until the (empty) list is
+        /// ready, which left a blank page while they were looked up. Without a connection there is nothing to wait for.
+        /// </summary>
+        private void updateLoading() => loading.Value = shownList == null || (isConnected.Value && !shownList.PlayersShown.Value);
 
         private void updateUserPresenceState()
         {

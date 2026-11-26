@@ -71,6 +71,13 @@ namespace osu.Game.Online.Rooms
         public bool Ranked { get; set; }
 
         /// <summary>
+        /// scosu: in the answer to a solo submission, what the play did (whether it counted, the ranked score it added, the places it reached).
+        /// </summary>
+        [JsonProperty("scosu_outcome")]
+        [CanBeNull]
+        public APIPlayOutcome ScosuOutcome { get; set; }
+
+        /// <summary>
         /// Any scores in the room around this score.
         /// </summary>
         [JsonProperty("scores_around")]

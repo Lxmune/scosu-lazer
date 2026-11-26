@@ -19,6 +19,27 @@ namespace osu.Game.Screens.Ranking.Statistics
     internal partial class StatisticItemContainer : CompositeDrawable
     {
         /// <summary>
+        /// scosu: the height of the card's own content, its header and padding included.
+        /// </summary>
+        public float ContentHeight => content.DrawHeight;
+
+        /// <summary>
+        /// scosu: the least height of the card, so it lines up with the cards next to it.
+        /// </summary>
+        public float MinimumHeight
+        {
+            set => minimumHeight.Height = value;
+        }
+
+        /// <summary>
+        /// scosu: whether the card takes the panel's whole width, rather than one of its two columns.
+        /// </summary>
+        public readonly bool FullWidth;
+
+        private readonly Container content;
+        private readonly Container minimumHeight;
+
+        /// <summary>
         /// Creates a new <see cref="StatisticItemContainer"/>.
         /// </summary>
         /// <param name="item">The <see cref="StatisticItem"/> to display.</param>
@@ -29,6 +50,7 @@ namespace osu.Game.Screens.Ranking.Statistics
 
             Padding = new MarginPadding(5);
             Width = item.FullWidth ? 1 : 0.5f;
+            FullWidth = item.FullWidth;
 
             InternalChild = new Container
             {
@@ -47,7 +69,12 @@ namespace osu.Game.Screens.Ranking.Statistics
                         ),
                         RelativeSizeAxes = Axes.Both,
                     },
-                    new Container
+                    // scosu: an empty space as tall as the card must be (the content takes the rest).
+                    minimumHeight = new Container
+                    {
+                        RelativeSizeAxes = Axes.X,
+                    },
+                    content = new Container
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,

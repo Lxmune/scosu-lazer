@@ -396,6 +396,20 @@ namespace osu.Game.Scoring
         }
 
         /// <summary>
+        /// The judgement of a code in the order sent to the server (see <see cref="EncodeJudgement"/>), or <c>null</c> for an unknown code.
+        /// </summary>
+        public static HitResult? DecodeJudgement(char code)
+        {
+            foreach (var (judgementCode, judgement) in judgement_codes)
+            {
+                if (judgementCode == code)
+                    return judgement;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Every judgement that changes the combo (<see cref="HitResultExtensions.AffectsCombo"/>), by code. Shared with the server.
         /// </summary>
         private static readonly (char Code, HitResult Result)[] judgement_codes =
@@ -414,6 +428,12 @@ namespace osu.Game.Scoring
 #pragma warning restore CS0618
             ('b', HitResult.ComboBreak),
         };
+
+        /// <summary>
+        /// Whether <paramref name="order"/> holds exactly the play's judgements that change the combo, with <paramref name="maxCombo"/> as its longest combo:
+        /// only then does <see cref="Calculate"/> use it, rather than estimating the combo bonus.
+        /// </summary>
+        public static bool IsValidOrder(string order, IReadOnlyDictionary<HitResult, int> statistics, int maxCombo) => parseOrder(order, statistics, maxCombo) != null;
 
         /// <summary>
         /// The judgements of <paramref name="order"/>, or <c>null</c> unless it holds exactly the play's judgements

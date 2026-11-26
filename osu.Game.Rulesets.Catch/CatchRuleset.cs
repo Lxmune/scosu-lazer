@@ -288,14 +288,8 @@ namespace osu.Game.Rulesets.Catch
 
         public override StatisticItem[] CreateStatisticsForScore(ScoreInfo score, IBeatmap playableBeatmap)
         {
-            return new[]
-            {
-                new StatisticItem("Performance Breakdown", () => new PerformanceBreakdownChart(score)
-                {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y
-                }),
-            };
+            // scosu: no "Performance Breakdown": the servers rank by score, and it only ever showed 0 pp there.
+            return Array.Empty<StatisticItem>();
         }
 
         /// <seealso cref="CatchHitObject.ApplyDefaultsToSelf"/>

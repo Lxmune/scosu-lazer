@@ -69,6 +69,10 @@ namespace osu.Game.Online
         /// </summary>
         public void MenuResumed()
         {
+            // OsuGame caches this before its (async) load injects the dependencies below.
+            if (!IsLoaded)
+                return;
+
             if (request != null || api.State.Value != APIState.Online || !api.Endpoints.RanksByStableScore)
                 return;
 
